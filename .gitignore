@@ -1,0 +1,9 @@
+# ОС и редакторы
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Секреты и бэкенд — никогда не публикуем
+backend/
+*.env

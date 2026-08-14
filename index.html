@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WARDOGS — миномётный калькулятор</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div class="app">
+
+        <aside class="panel">
+            <h1 data-i18n="title">Миномётный калькулятор</h1>
+
+            <section>
+                <h2 data-i18n="posA">Огневая позиция (A)</h2>
+                <div class="coord-row">
+                    <label>X <input type="number" id="ax" placeholder="0.00" step="0.01"></label>
+                    <label>Y <input type="number" id="ay" placeholder="0.00" step="0.01"></label>
+                    <button class="clear" id="clearA" title="✕">✕</button>
+                </div>
+            </section>
+
+            <section>
+                <h2 data-i18n="posB">Цель (B)</h2>
+                <div class="coord-row">
+                    <label>X <input type="number" id="bx" placeholder="0.00" step="0.01"></label>
+                    <label>Y <input type="number" id="by" placeholder="0.00" step="0.01"></label>
+                    <button class="clear" id="clearB" title="✕">✕</button>
+                </div>
+            </section>
+
+            <section class="result">
+                <div><span data-i18n="dist">Дистанция</span><b id="dist">—</b></div>
+                <div><span data-i18n="az">Азимут</span><b id="azimuth">—</b></div>
+                <div><span data-i18n="el">Угол возвышения</span><b id="elevation">—</b></div>
+                <div><span data-i18n="time">Время подлёта</span><b id="flightTime">—</b></div>
+            </section>
+
+            <p class="hint" data-i18n="hint">
+                ПКМ по карте — поставить или удалить точку.<br>
+                ЛКМ — двигать карту (или саму точку).<br>
+                Колесо мыши — масштаб.
+            </p>
+
+            <div class="contact">
+                <span class="contact-label" data-i18n="contactLabel">✉️ Связь</span>
+                <a href="mailto:egor.silaev@yandex.ru" class="contact-email">egor.silaev@yandex.ru</a>
+            </div>
+
+            <div class="translate-widget">
+                <label for="langSelect" data-i18n="langLabel">Язык интерфейса</label>
+                <select id="langSelect">
+                    <option value="ru">Русский</option>
+                    <option value="en">English</option>
+                    <option value="de">Deutsch</option>
+                    <option value="fr">Français</option>
+                    <option value="es">Español</option>
+                    <option value="pl">Polski</option>
+                    <option value="uk">Українська</option>
+                    <option value="tr">Türkçe</option>
+                    <option value="zh">中文</option>
+                </select>
+            </div>
+        </aside>
+
+        <main class="map-wrap">
+            <canvas id="map"></canvas>
+            <button class="view-reset" id="resetView" data-i18n="reset">Сбросить вид</button>
+
+            <div id="ctxMenu" class="ctx-menu hidden">
+                <button data-action="setA" data-i18n="menuA">📍 Позиция миномёта (A)</button>
+                <button data-action="setB" data-i18n="menuB">🎯 Цель (B)</button>
+                <button data-action="delete" id="menuDelete" class="danger hidden" data-i18n="menuDel">✕ Удалить
+                    точку</button>
+            </div>
+        </main>
+
+    </div>
+
+    <script src="js/i18n.js"></script>
+    <script src="js/index.js"></script>
+</body>
+
+</html>
