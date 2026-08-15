@@ -17,7 +17,6 @@ const TOWERS = [
 ];
 let showTowers = localStorage.getItem('wardogs_towers') !== '0';
 let selectedTower = null;
-let potentialTowerClick = null;
 
 /* Предзагрузка иконки башни */
 const towerIcon = new Image();
@@ -25,27 +24,41 @@ towerIcon.src = 'icons/tower.webp';
 towerIcon.onload = () => draw();
 
 /* ===== БАЛЛИСТИКА =====
+   Миномёт стреляет НАВЕСНОЙ траекторией: из двух решений
+   баллистического уравнения берём крутой угол (корень с «+»).
    TODO: после релиза заменить на реальные значения игры */
 const MORTAR = { v0: 240, g: 9.8 };
 
-/* ===== ТАЙЛЫ КАРТЫ ===== */
+/* ===== ТАЙЛЫ КАРТЫ =====
+   Папки тайлов: tiles/zoom_0 … tiles/zoom_5 (zoom_6 не существует) */
 const TILES = {
     maxZoom: 5,
     size: 256,
     path: (z, x, y) => `tiles/zoom_${z}/${x}_${y}.webp`,
 };
+
+/* LRU-кэш тайлов: держим не больше TILE_CACHE_MAX загруженных картинок */
+const TILE_CACHE_MAX = 500;
 const tileCache = new Map();
 
 function getTile(z, x, y) {
     const key = `${z}/${x}_${y}`;
     let t = tileCache.get(key);
-    if (!t) {
-        const img = new Image();
-        t = { img, loaded: false, error: false };
-        img.onload = () => { t.loaded = true; draw(); };
-        img.onerror = () => { t.error = true; };
-        img.src = TILES.path(z, x, y);
+    if (t) {
+        // отметим как недавно использованный (конец LRU-списка)
+        tileCache.delete(key);
         tileCache.set(key, t);
+        return t;
+    }
+    const img = new Image();
+    t = { img, loaded: false, error: false };
+    img.onload = () => { t.loaded = true; draw(); };
+    img.onerror = () => { t.error = true; };
+    img.src = TILES.path(z, x, y);
+    tileCache.set(key, t);
+    if (tileCache.size > TILE_CACHE_MAX) {
+        const oldest = tileCache.keys().next().value;
+        tileCache.delete(oldest);
     }
     return t;
 }
@@ -121,17 +134,18 @@ const I18N_STRINGS = {
     tower5: 'Башня 5',
     helpTitle: 'Как пользоваться калькулятором',
     helpP1: '<b>Установка точек.</b> Миномётный калькулятор WARDOGS предназначен для быстрого расчёта данных стрельбы. Укажите свою позицию (точка A) и цель (точка B) — калькулятор рассчитает дистанцию, азимут, угол возвышения и время подлёта снаряда.',
-    helpP2: '<b>Работа с картой.</b> Правый клик по карте открывает меню, где можно поставить позицию миномёта или цель. Левая кнопка мыши перемещает карту и уже установленные точки. Колесо мыши изменяет масштаб. Клик по вышке показывает её название.',
+    helpP2: '<b>Работа с картой.</b> Правый клик по карте открывает меню, где можно поставить позицию миномёта или цель. Левая кнопка мыши перемещает карту и уже установленные точки. Колесо мыши изменяет масштаб. На сенсорных экранах: один палец — перемещение карты, два пальца — масштаб, долгое нажатие — контекстное меню. Клик по вышке показывает её название.',
     helpP3: '<b>Координаты.</b> Координаты вводятся в процентах карты: например 51.59 по X и 44.61 по Y. Значения можно ввести вручную в поля левой панели — точки появятся на карте автоматически.',
-    helpP4: '<b>Результаты расчёта.</b> Дистанция — расстояние до цели. Азимут — направление на цель в градусах от севера. Угол возвышения — угол для миномёта. Время подлёта — время от выстрела до попадания. Если цель слишком далеко, калькулятор покажет «вне досягаемости».',
+    helpP4: '<b>Результаты расчёта.</b> Дистанция — расстояние до цели. Азимут — направление на цель в градусах от севера. Угол возвышения — угол для миномёта (навесная траектория). Время подлёта — время от выстрела до попадания. Если цель слишком далеко, калькулятор покажет «вне досягаемости».',
     helpP5: '<b>Сохранение.</b> Все данные — точки, вид карты, тема, язык и отображение вышек — сохраняются автоматически и восстанавливаются после перезагрузки страницы.',
     oor: 'вне досягаемости',
+    zero: 'точки совпадают',
     u_m: 'м',
     u_km: 'км',
     u_s: 'с',
 };
 const DYNAMIC_KEYS = [
-    'oor', 'u_m', 'u_km', 'u_s',
+    'oor', 'zero', 'u_m', 'u_km', 'u_s',
     'tower1', 'tower2', 'tower3', 'tower4', 'tower5',
     'helpTitle', 'helpP1', 'helpP2', 'helpP3', 'helpP4', 'helpP5',
 ];
@@ -277,6 +291,16 @@ function fmtCoord(meters, step) {
 
 function fmtDist(d) {
     return d >= 1000 ? (d / 1000).toFixed(2) + ' ' + STR.u_km : Math.round(d) + ' ' + STR.u_m;
+}
+
+/* ===== ПОИСК ТОЧКИ A/B ПОД КУРСОРОМ ===== */
+function hitPoint(sx, sy) {
+    for (const [key, p] of [['A', pointA], ['B', pointB]]) {
+        if (!p) continue;
+        const s = worldToScreen(p.x, p.y);
+        if (Math.hypot(s.x - sx, s.y - sy) <= 10) return key;
+    }
+    return null;
 }
 
 /* ===== ПОИСК БАШНИ ПОД КУРСОРОМ ===== */
@@ -513,103 +537,231 @@ function recalc() {
     out.dist.textContent = fmtDist(dist);
     out.az.textContent = az.toFixed(1) + '°';
 
+    if (dist === 0) {
+        out.el.textContent = STR.zero;
+        out.time.textContent = '—';
+        return;
+    }
+
     const { v0, g } = MORTAR;
     const v2 = v0 * v0;
     const disc = v2 * v2 - g * g * dist * dist;
-    if (dist === 0 || disc < 0) {
+    if (disc < 0) {
         out.el.textContent = STR.oor;
         out.time.textContent = '—';
         return;
     }
-    const el = Math.atan((v2 - Math.sqrt(disc)) / (g * dist));
+    // навесная траектория: берём «+» корень (крутой угол, как у миномёта)
+    const el = Math.atan((v2 + Math.sqrt(disc)) / (g * dist));
     out.el.textContent = (el * 180 / Math.PI).toFixed(1) + '°';
     out.time.textContent = (dist / (v0 * Math.cos(el))).toFixed(1) + ' ' + STR.u_s;
 }
 
-/* ===== МЫШЬ ===== */
-function hitPoint(sx, sy) {
-    for (const [key, p] of [['A', pointA], ['B', pointB]]) {
-        if (!p) continue;
-        const s = worldToScreen(p.x, p.y);
-        if (Math.hypot(s.x - sx, s.y - sy) <= 10) return key;
-    }
-    return null;
+/* ===== МЫШЬ + СЕНСОР (Pointer Events) =====
+   Мышь:  ЛКМ — пан/точки, ПКМ — меню, колесо — зум, ховер — курсоры.
+   Тач:   1 палец — пан/точки, 2 пальца — pinch-zoom,
+          долгое нажатие (500 мс) — контекстное меню.
+   Клик по вышке: смещение < TAP_THRESHOLD — клик по башне, иначе пан. */
+const pointers = new Map();      // pointerId -> {x, y}
+let pinch = null;                // состояние pinch-жеста
+let longPressTimer = null;
+let longPressFired = false;
+let lastTouchTs = 0;             // для отличия contextmenu от тача и от мыши
+const TAP_THRESHOLD = 5;         // px
+const LONG_PRESS_MS = 500;
+
+function canvasPos(e) {
+    const r = canvas.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
 }
 
-canvas.addEventListener('mousedown', e => {
-    if (e.button !== 0) return;
+/* --- контекстное меню: показ в точке --- */
+function openMenuAt(sx, sy) {
+    menuWorld = screenToWorld(sx, sy);
+    menuPointKey = hitPoint(sx, sy);
+    document.getElementById('menuDelete').classList.toggle('hidden', !menuPointKey);
+    menu.classList.remove('hidden');
+    const wrap = canvas.parentElement.getBoundingClientRect();
+    let left = sx, top = sy;
+    if (left + menu.offsetWidth > wrap.width) left -= menu.offsetWidth;
+    if (top + menu.offsetHeight > wrap.height) top -= menu.offsetHeight;
+    menu.style.left = left + 'px';
+    menu.style.top = top + 'px';
+}
+
+/* --- long-press для сенсорных экранов --- */
+function startLongPress(sx, sy) {
+    clearTimeout(longPressTimer);
+    longPressFired = false;
+    longPressTimer = setTimeout(() => {
+        longPressFired = true;
+        dragging = null;
+        canvas.style.cursor = 'crosshair';
+        openMenuAt(sx, sy);
+    }, LONG_PRESS_MS);
+}
+function stopLongPress() { clearTimeout(longPressTimer); }
+
+canvas.addEventListener('pointerdown', e => {
+    const p = canvasPos(e);
+    if (e.pointerType !== 'mouse') lastTouchTs = performance.now();
+
+    // capture гарантирует pointerup даже вне окна/при уходе в фон
+    try { canvas.setPointerCapture(e.pointerId); } catch (_) { }
+    pointers.set(e.pointerId, p);
+
+    if (e.button !== 0) return; // ПКМ/средняя — не драг, их ведёт contextmenu
+
     hideMenu();
 
-    const r = canvas.getBoundingClientRect();
-    const sx = e.clientX - r.left, sy = e.clientY - r.top;
+    // второй палец — начинаем pinch
+    if (pointers.size === 2) {
+        stopLongPress();
+        dragging = null;
+        const [p1, p2] = [...pointers.values()];
+        const mid = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
+        pinch = {
+            dist: Math.hypot(p1.x - p2.x, p1.y - p2.y) || 1,
+            scale: view.scale,
+            anchor: screenToWorld(mid.x, mid.y),
+        };
+        return;
+    }
+    if (pointers.size > 2) return;
+
+    // один указатель
+    if (e.pointerType !== 'mouse') startLongPress(p.x, p.y);
 
     // 1) схватили точку (A/B) — тащим точку, даже если она стоит на башне
-    const hit = hitPoint(sx, sy);
+    const hit = hitPoint(p.x, p.y);
     if (hit) {
-        potentialTowerClick = null;
         dragging = { mode: 'point', key: hit };
         canvas.style.cursor = 'grabbing';
         return;
     }
 
-    // 2) клик по башне — запоминаем потенциальный клик, НЕ начинаем pan
-    const towerHit = findTowerAt(sx, sy);
+    // 2) нажали на башню — либо клик по ней, либо пан (решит порог движения)
+    const towerHit = findTowerAt(p.x, p.y);
     if (towerHit) {
-        potentialTowerClick = towerHit;
+        dragging = {
+            mode: 'tower-or-pan', tower: towerHit,
+            startX: p.x, startY: p.y, ox: view.ox, oy: view.oy,
+        };
         return;
     }
 
     // 3) иначе — пан карты
-    potentialTowerClick = null;
-    dragging = { mode: 'pan', startX: sx, startY: sy, ox: view.ox, oy: view.oy };
+    dragging = { mode: 'pan', startX: p.x, startY: p.y, ox: view.ox, oy: view.oy };
     canvas.style.cursor = 'grabbing';
 });
 
-window.addEventListener('mousemove', e => {
-    const r = canvas.getBoundingClientRect();
-    const sx = e.clientX - r.left, sy = e.clientY - r.top;
+window.addEventListener('pointermove', e => {
+    const p = canvasPos(e);
+    const tracked = pointers.has(e.pointerId);
+    if (tracked) {
+        pointers.set(e.pointerId, p);
+        if (e.pointerType !== 'mouse') lastTouchTs = performance.now();
+    }
 
-    if (!dragging) {
-        const overPoint = hitPoint(sx, sy);
-        const overTower = !overPoint && findTowerAt(sx, sy);
-        canvas.style.cursor = overPoint ? 'grab' : (overTower ? 'pointer' : 'crosshair');
+    // pinch-zoom + пан двумя пальцами
+    if (pinch && pointers.size >= 2) {
+        const [p1, p2] = [...pointers.values()];
+        const mid = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
+        const dist = Math.hypot(p1.x - p2.x, p1.y - p2.y) || 1;
+        const newScale = Math.min(1, Math.max(0.005, pinch.scale * dist / pinch.dist));
+        view.scale = newScale;
+        view.ox = mid.x - pinch.anchor.x * newScale;
+        view.oy = mid.y + pinch.anchor.y * newScale;
+        draw();
+        debouncedSaveView();
+        return;
+    }
 
-        if (potentialTowerClick && !overTower) {
-            potentialTowerClick = null;
+    // ховер без нажатия — только курсоры (мыши)
+    if (!tracked) {
+        if (e.pointerType === 'mouse' && !dragging) {
+            const overPoint = hitPoint(p.x, p.y);
+            const overTower = !overPoint && findTowerAt(p.x, p.y);
+            canvas.style.cursor = overPoint ? 'grab' : (overTower ? 'pointer' : 'crosshair');
         }
+        return;
     }
 
     if (!dragging) return;
 
+    // порог движения: двинулись — пан, не двинулись — клик по башне
+    if (dragging.mode === 'tower-or-pan') {
+        const moved = Math.hypot(p.x - dragging.startX, p.y - dragging.startY) > TAP_THRESHOLD;
+        if (!moved) return; // пока это потенциальный клик по вышке
+        stopLongPress();
+        dragging = { mode: 'pan', startX: dragging.startX, startY: dragging.startY, ox: dragging.ox, oy: dragging.oy };
+        canvas.style.cursor = 'grabbing';
+    }
+
     if (dragging.mode === 'pan') {
-        view.ox = dragging.ox + (sx - dragging.startX);
-        view.oy = dragging.oy + (sy - dragging.startY);
+        stopLongPress();
+        view.ox = dragging.ox + (p.x - dragging.startX);
+        view.oy = dragging.oy + (p.y - dragging.startY);
         draw();
         debouncedSaveView();
-    } else {
-        const wpt = screenToWorld(sx, sy);
-        const px = metersToPercent(wpt.x);
-        const py = metersToPercent(wpt.y);
-        setPoint(dragging.key, percentToMeters(Math.round(px * 100) / 100), percentToMeters(Math.round(py * 100) / 100));
+    } else if (dragging.mode === 'point') {
+        stopLongPress();
+        const wpt = screenToWorld(p.x, p.y);
+        const px = Math.round(metersToPercent(wpt.x) * 100) / 100;
+        const py = Math.round(metersToPercent(wpt.y) * 100) / 100;
+        setPoint(dragging.key, percentToMeters(px), percentToMeters(py));
     }
 });
 
-window.addEventListener('mouseup', e => {
-    if (potentialTowerClick) {
-        const r = canvas.getBoundingClientRect();
-        const sx = e.clientX - r.left, sy = e.clientY - r.top;
-        const stillOver = findTowerAt(sx, sy);
-        if (stillOver === potentialTowerClick) {
-            selectedTower = (selectedTower === potentialTowerClick) ? null : potentialTowerClick;
-            draw();
+function onPointerUp(e) {
+    if (!pointers.has(e.pointerId)) return;
+    pointers.delete(e.pointerId);
+    try { canvas.releasePointerCapture(e.pointerId); } catch (_) { }
+
+    stopLongPress();
+
+    // вышел из pinch: оставшийся палец становится паном
+    if (pinch) {
+        if (pointers.size >= 2) return;
+        pinch = null;
+        if (pointers.size === 1) {
+            const [rest] = [...pointers.values()];
+            dragging = { mode: 'pan', startX: rest.x, startY: rest.y, ox: view.ox, oy: view.oy };
+        } else {
+            dragging = null;
         }
-        potentialTowerClick = null;
+        return;
     }
 
+    // тап по башне (не сдвинулись и не было long-press)
+    if (dragging && dragging.mode === 'tower-or-pan' && !longPressFired && e.button === 0) {
+        const p = canvasPos(e);
+        if (findTowerAt(p.x, p.y) === dragging.tower) {
+            selectedTower = (selectedTower === dragging.tower) ? null : dragging.tower;
+            draw();
+        }
+    }
+    longPressFired = false;
+
+    if (pointers.size === 0) {
+        dragging = null;
+        canvas.style.cursor = 'crosshair';
+    }
+}
+window.addEventListener('pointerup', onPointerUp);
+window.addEventListener('pointercancel', onPointerUp);
+
+// страховка: окно потеряло фокус — сбрасываем все жесты
+window.addEventListener('blur', () => {
+    pointers.clear();
+    pinch = null;
     dragging = null;
+    stopLongPress();
+    longPressFired = false;
     canvas.style.cursor = 'crosshair';
 });
 
+/* --- колесо мыши (десктоп) --- */
 canvas.addEventListener('wheel', e => {
     e.preventDefault();
     const factor = Math.exp(-e.deltaY * 0.0015);
@@ -622,21 +774,15 @@ canvas.addEventListener('wheel', e => {
     debouncedSaveView();
 }, { passive: false });
 
-/* ===== КОНТЕКСТНОЕ МЕНЮ (ПКМ) ===== */
+/* ===== КОНТЕКСТНОЕ МЕНЮ (ПКМ / long-press) ===== */
 canvas.addEventListener('contextmenu', e => {
     e.preventDefault();
-    const r = canvas.getBoundingClientRect();
-    const sx = e.clientX - r.left, sy = e.clientY - r.top;
-    menuWorld = screenToWorld(sx, sy);
-    menuPointKey = hitPoint(sx, sy);
-    document.getElementById('menuDelete').classList.toggle('hidden', !menuPointKey);
-    menu.classList.remove('hidden');
-    const wrap = canvas.parentElement.getBoundingClientRect();
-    let left = e.clientX - wrap.left, top = e.clientY - wrap.top;
-    if (left + menu.offsetWidth > wrap.width) left -= menu.offsetWidth;
-    if (top + menu.offsetHeight > wrap.height) top -= menu.offsetHeight;
-    menu.style.left = left + 'px';
-    menu.style.top = top + 'px';
+    const fromTouch = performance.now() - lastTouchTs < 1000;
+    // на таче меню уже открыл long-press — не дублируем
+    if (fromTouch && longPressFired) return;
+    stopLongPress();
+    const p = canvasPos(e);
+    openMenuAt(p.x, p.y);
 });
 
 menu.addEventListener('click', e => {
@@ -649,7 +795,7 @@ menu.addEventListener('click', e => {
 });
 
 function hideMenu() { menu.classList.add('hidden'); }
-window.addEventListener('mousedown', e => { if (!menu.contains(e.target)) hideMenu(); });
+window.addEventListener('pointerdown', e => { if (!menu.contains(e.target)) hideMenu(); });
 window.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
         hideMenu();

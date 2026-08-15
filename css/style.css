@@ -7,6 +7,8 @@
 html,
 body {
     height: 100%;
+    overscroll-behavior: none;
+    /* без pull-to-refresh поверх карты */
 }
 
 /* ===== ТЁМНАЯ ТЕМА (по умолчанию) ===== */
@@ -51,11 +53,14 @@ body {
     font-family: "Segoe UI", system-ui, sans-serif;
     background: var(--bg);
     color: var(--text);
+    -webkit-tap-highlight-color: transparent;
 }
 
 .app {
     display: flex;
     height: 100vh;
+    height: 100dvh;
+    /* корректная высота на мобильных с учётом адресной строки */
 }
 
 .panel {
@@ -188,32 +193,6 @@ input[type="number"]:focus {
     text-decoration: underline;
 }
 
-/* ===== Гайд (размеченная статья для контент-аналитики) ===== */
-.guide {
-    background: var(--field);
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    padding: 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    font-size: 12px;
-    color: var(--dim);
-    line-height: 1.5;
-}
-
-.guide h2 {
-    margin-bottom: 0;
-}
-
-.guide p {
-    margin: 0;
-}
-
-.guide b {
-    color: var(--muted);
-}
-
 /* ===== Карта ===== */
 .map-wrap {
     flex: 1;
@@ -226,6 +205,11 @@ canvas {
     width: 100%;
     height: 100%;
     cursor: crosshair;
+    /* сенсорные жесты обрабатываем сами, браузеру не мешаем */
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
 }
 
 .map-controls {
