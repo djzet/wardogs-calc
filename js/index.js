@@ -4,18 +4,34 @@
    256 км² = квадрат 16 × 16 км */
 const MAP = { size: 16000 }; // размер в метрах
 
-/* Зона контроля — круг Ø 2 км (радиус 1 км) в центре */
-const ZONE = { cx: 8000, cy: 8000, r: 1000 };
+/* Зона контроля — круг Ø 2 км (радиус 1 км) */
+const ZONE = { cx: 8240, cy: 7330, r: 1000 };
+
+/* ===== ВЫШКИ НА КАРТЕ ===== */
+const TOWERS = [
+    { x: 51.59, y: 44.61, name: 'tower1' },
+    { x: 47.86, y: 44.77, name: 'tower2' },
+    { x: 47.86, y: 48.62, name: 'tower3' },
+    { x: 55.07, y: 48.00, name: 'tower4' },
+    { x: 53.50, y: 43.01, name: 'tower5' },
+];
+let showTowers = localStorage.getItem('wardogs_towers') !== '0';
+let selectedTower = null;
+let potentialTowerClick = null;
+
+/* Предзагрузка иконки башни */
+const towerIcon = new Image();
+towerIcon.src = 'icons/tower.webp';
+towerIcon.onload = () => draw();
 
 /* ===== БАЛЛИСТИКА =====
    TODO: после релиза заменить на реальные значения игры */
 const MORTAR = { v0: 240, g: 9.8 };
 
-/* ===== ТАЙЛЫ КАРТЫ (скачаны с metaforge.app) =====
-   Пирамида: zoom_N содержит 2^N × 2^N тайлов размером size×size */
+/* ===== ТАЙЛЫ КАРТЫ ===== */
 const TILES = {
     maxZoom: 5,
-    size: 256, // если тайлы 512×512 — поставьте 512
+    size: 256,
     path: (z, x, y) => `tiles/zoom_${z}/${x}_${y}.webp`,
 };
 const tileCache = new Map();
@@ -34,21 +50,17 @@ function getTile(z, x, y) {
     return t;
 }
 
-/* Отрисовка видимых тайлов, стык в стык, с автоподбором уровня зума */
 function drawTiles() {
     const w = canvas.clientWidth, h = canvas.clientHeight;
 
-    // уровень пирамиды, ближайший к текущему масштабу экрана
     const z = Math.max(0, Math.min(TILES.maxZoom,
         Math.round(Math.log2((view.scale * MAP.size) / TILES.size))));
-    const tps = 2 ** z;                                  // тайлов на сторону
-    const tileScale = (tps * TILES.size) / MAP.size;     // px на метр у этого зума
+    const tps = 2 ** z;
+    const tileScale = (tps * TILES.size) / MAP.size;
     const drawSize = TILES.size * (view.scale / tileScale);
 
-    // видимая область в мировых координатах
     const a = screenToWorld(0, 0), b = screenToWorld(w, h);
 
-    // индексы тайлов (y в именах файлов идёт сверху вниз: ty=0 — верх карты)
     const x0 = Math.max(0, Math.floor((a.x / MAP.size) * tps));
     const x1 = Math.min(tps - 1, Math.floor((b.x / MAP.size) * tps));
     const y0 = Math.max(0, Math.floor(((MAP.size - a.y) / MAP.size) * tps));
@@ -56,16 +68,14 @@ function drawTiles() {
 
     for (let ty = y0; ty <= y1; ty++) {
         for (let tx = x0; tx <= x1; tx++) {
-            // мировой левый-верхний угол тайла
             const wx0 = (tx / tps) * MAP.size;
             const wy0 = MAP.size - (ty / tps) * MAP.size;
             const s = worldToScreen(wx0, wy0);
             const t = getTile(z, tx, ty);
             if (t.loaded) {
-                // +0.5 px — убирает волосяные щели между тайлами
                 ctx.drawImage(t.img, s.x, s.y, drawSize + 0.5, drawSize + 0.5);
             } else if (!t.error) {
-                ctx.fillStyle = '#161d25'; // заглушка, пока грузится
+                ctx.fillStyle = CT().mapBg;
                 ctx.fillRect(s.x, s.y, drawSize, drawSize);
             }
         }
@@ -86,9 +96,7 @@ const out = {
     el: document.getElementById('elevation'), time: document.getElementById('flightTime'),
 };
 
-/* ===== ПЕРЕВОД ИНТЕРФЕЙСА (I18N) =====
-   Эти строки — дефолтные на русском. Они же являются fallback
-   на случай если словарь не найден. */
+/* ===== ПЕРЕВОД ИНТЕРФЕЙСА (I18N) ===== */
 const I18N_STRINGS = {
     title: 'Миномётный калькулятор',
     posA: 'Огневая позиция (A)',
@@ -104,18 +112,28 @@ const I18N_STRINGS = {
     menuDel: '✕ Удалить точку',
     langLabel: 'Язык интерфейса',
     contactLabel: '✉️ Связь',
+    extra: 'Дополнительно',
+    towers: 'Иконки вышек',
+    tower1: 'Башня 1',
+    tower2: 'Башня 2',
+    tower3: 'Башня 3',
+    tower4: 'Башня 4',
+    tower5: 'Башня 5',
     oor: 'вне досягаемости',
     u_m: 'м',
     u_km: 'км',
     u_s: 'с',
 };
-const DYNAMIC_KEYS = ['oor', 'u_m', 'u_km', 'u_s'];
-const STR = { ...I18N_STRINGS }; // активные строки текущего языка
+const DYNAMIC_KEYS = [
+    'oor', 'u_m', 'u_km', 'u_s',
+    'tower1', 'tower2', 'tower3', 'tower4', 'tower5',
+];
+const STR = { ...I18N_STRINGS };
 
 /* ===== СОСТОЯНИЕ ===== */
 const view = { scale: 0.05, ox: 0, oy: 0 };
-let pointA = null; // в метрах
-let pointB = null; // в метрах
+let pointA = null;
+let pointB = null;
 let menuWorld = null;
 let menuPointKey = null;
 let dragging = null;
@@ -127,7 +145,7 @@ function debouncedSaveView() {
     saveViewTimer = setTimeout(saveState, 200);
 }
 
-/* ===== ПЕРЕКОНВЕРТАЦИЯ: проценты (0-100) ↔ метры ===== */
+/* ===== ПЕРЕКОНВЕРТАЦИЯ ===== */
 function percentToMeters(percent) {
     return (percent * MAP.size) / 100;
 }
@@ -143,6 +161,30 @@ function formatPercent(v) {
 /* ===== КООРДИНАТНЫЕ СИСТЕМЫ ===== */
 function worldToScreen(wx, wy) { return { x: wx * view.scale + view.ox, y: -wy * view.scale + view.oy }; }
 function screenToWorld(sx, sy) { return { x: (sx - view.ox) / view.scale, y: (view.oy - sy) / view.scale }; }
+
+/* ===== ТЕМЫ ===== */
+const CANVAS_THEMES = {
+    dark: {
+        bg: '#10151b', mapBg: '#161d25',
+        gridMinor: 'rgba(255, 255, 255, 0.08)',
+        gridMajor: 'rgba(255, 255, 255, 0.18)',
+        axes: 'rgba(255, 255, 255, 0.35)',
+        dim: 'rgba(6, 8, 12, 0.55)',
+        border: '#46536b', labels: '#5c6875',
+        line: '#e8c35a',
+    },
+    light: {
+        bg: '#dfe5ec', mapBg: '#f2f5f8',
+        gridMinor: 'rgba(15, 25, 40, 0.10)',
+        gridMajor: 'rgba(15, 25, 40, 0.22)',
+        axes: 'rgba(15, 25, 40, 0.40)',
+        dim: 'rgba(255, 255, 255, 0.6)',
+        border: '#7d8896', labels: '#5c6875',
+        line: '#8a6d00',
+    },
+};
+let theme = localStorage.getItem('wardogs_theme') || 'dark';
+function CT() { return CANVAS_THEMES[theme] || CANVAS_THEMES.dark; }
 
 /* ===== CANVAS ===== */
 function resize() {
@@ -164,6 +206,40 @@ function resetView() {
 }
 document.getElementById('resetView').onclick = resetView;
 
+/* ===== ВЫЕЗЖАЮЩАЯ ВКЛАДКА ===== */
+const drawer = document.getElementById('drawer');
+const drawerBackdrop = document.getElementById('drawerBackdrop');
+
+function openDrawer(state) {
+    drawer.classList.toggle('open', state);
+    drawerBackdrop.classList.toggle('hidden', !state);
+}
+document.getElementById('drawerToggle').onclick = () => openDrawer(true);
+document.getElementById('drawerClose').onclick = () => openDrawer(false);
+drawerBackdrop.onclick = () => openDrawer(false);
+
+/* ===== ПЕРЕКЛЮЧАТЕЛЬ ВЫШЕК ===== */
+const towersToggle = document.getElementById('towersToggle');
+towersToggle.checked = showTowers;
+towersToggle.addEventListener('change', () => {
+    showTowers = towersToggle.checked;
+    localStorage.setItem('wardogs_towers', showTowers ? '1' : '0');
+    if (!showTowers) selectedTower = null;
+    draw();
+});
+
+/* ===== ПЕРЕКЛЮЧЕНИЕ ТЕМЫ ===== */
+const themeToggle = document.getElementById('themeToggle');
+function applyTheme() {
+    document.body.classList.toggle('light', theme === 'light');
+    draw();
+}
+themeToggle.onclick = () => {
+    theme = (theme === 'dark') ? 'light' : 'dark';
+    localStorage.setItem('wardogs_theme', theme);
+    applyTheme();
+};
+
 /* ===== ФОРМАТИРОВАНИЕ ===== */
 function niceStep() {
     const raw = 70 / view.scale;
@@ -184,19 +260,31 @@ function fmtDist(d) {
     return d >= 1000 ? (d / 1000).toFixed(2) + ' ' + STR.u_km : Math.round(d) + ' ' + STR.u_m;
 }
 
+/* ===== ПОИСК БАШНИ ПОД КУРСОРОМ ===== */
+function findTowerAt(sx, sy) {
+    if (!showTowers) return null;
+    const halfSize = getTowerIconSize() / 2;
+    for (const p of TOWERS) {
+        const s = worldToScreen(percentToMeters(p.x), percentToMeters(p.y));
+        if (Math.abs(s.x - sx) <= halfSize && Math.abs(s.y - sy) <= halfSize) {
+            return p;
+        }
+    }
+    return null;
+}
+
 /* ===== ОТРИСОВКА ===== */
 function draw() {
+    const c = CT();
     const w = canvas.clientWidth, h = canvas.clientHeight;
-    ctx.fillStyle = '#10151b';
+    ctx.fillStyle = c.bg;
     ctx.fillRect(0, 0, w, h);
 
-    // квадрат карты 16 × 16 км (фон)
     const m0 = worldToScreen(0, 0);
     const m1 = worldToScreen(MAP.size, MAP.size);
-    ctx.fillStyle = '#161d25';
+    ctx.fillStyle = c.mapBg;
     ctx.fillRect(m0.x, m1.y, m1.x - m0.x, m0.y - m1.y);
 
-    // тайлы карты (под сеткой)
     drawTiles();
 
     const step = niceStep(), minor = step / 5;
@@ -204,9 +292,8 @@ function draw() {
     const minX = a.x, maxX = b.x, minY = b.y, maxY = a.y;
     ctx.lineWidth = 1;
 
-    // мелкая сетка
     if (minor * view.scale >= 9) {
-        ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
+        ctx.strokeStyle = c.gridMinor;
         ctx.beginPath();
         for (let gx = Math.ceil(minX / minor) * minor; gx <= maxX; gx += minor) {
             const s = worldToScreen(gx, 0);
@@ -219,8 +306,7 @@ function draw() {
         ctx.stroke();
     }
 
-    // основная сетка
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
+    ctx.strokeStyle = c.gridMajor;
     ctx.beginPath();
     for (let gx = Math.ceil(minX / step) * step; gx <= maxX; gx += step) {
         const s = worldToScreen(gx, 0);
@@ -232,58 +318,54 @@ function draw() {
     }
     ctx.stroke();
 
-    // оси X=0 и Y=0
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
+    ctx.strokeStyle = c.axes;
     ctx.beginPath();
     const zero = worldToScreen(0, 0);
     ctx.moveTo(zero.x + .5, 0); ctx.lineTo(zero.x + .5, h);
     ctx.moveTo(0, zero.y + .5); ctx.lineTo(w, zero.y + .5);
     ctx.stroke();
 
-    // затемнение за пределами карты
-    ctx.fillStyle = 'rgba(6, 8, 12, 0.55)';
+    ctx.fillStyle = c.dim;
     ctx.fillRect(0, 0, w, m1.y);
     ctx.fillRect(0, m0.y, w, h - m0.y);
     ctx.fillRect(0, m1.y, m0.x, m0.y - m1.y);
     ctx.fillRect(m1.x, m1.y, w - m1.x, m0.y - m1.y);
 
-    // граница карты
-    ctx.strokeStyle = '#46536b';
+    ctx.strokeStyle = c.border;
     ctx.lineWidth = 1.5;
     ctx.strokeRect(m0.x, m1.y, m1.x - m0.x, m0.y - m1.y);
     ctx.lineWidth = 1;
 
-    // зона контроля — круг Ø 2 км
     const zc = worldToScreen(ZONE.cx, ZONE.cy);
     ctx.beginPath();
     ctx.arc(zc.x, zc.y, ZONE.r * view.scale, 0, Math.PI * 2);
     ctx.fillStyle = 'rgba(159, 211, 86, 0.05)';
     ctx.fill();
-    ctx.strokeStyle = 'rgba(159, 211, 86, 0.55)';
+    ctx.strokeStyle = 'rgba(124, 180, 60, 0.55)';
     ctx.setLineDash([10, 6]);
     ctx.lineWidth = 1.5;
     ctx.stroke();
     ctx.setLineDash([]);
     ctx.lineWidth = 1;
 
-    // подписи координат
-    ctx.fillStyle = '#5c6875';
+    if (showTowers) TOWERS.forEach(drawTower);
+
+    ctx.fillStyle = c.labels;
     ctx.font = '11px monospace';
     for (let gx = Math.ceil(minX / step) * step; gx <= maxX; gx += step)
         ctx.fillText(fmtCoord(gx, step), worldToScreen(gx, 0).x + 4, h - 6);
     for (let gy = Math.ceil(minY / step) * step; gy <= maxY; gy += step)
         ctx.fillText(fmtCoord(gy, step), 4, worldToScreen(0, gy).y - 4);
 
-    // линия A → B
     if (pointA && pointB) {
         const sa = worldToScreen(pointA.x, pointA.y);
         const sb = worldToScreen(pointB.x, pointB.y);
-        ctx.strokeStyle = '#e8c35a';
+        ctx.strokeStyle = c.line;
         ctx.setLineDash([6, 6]);
         ctx.beginPath(); ctx.moveTo(sa.x, sa.y); ctx.lineTo(sb.x, sb.y); ctx.stroke();
         ctx.setLineDash([]);
         const d = Math.hypot(pointB.x - pointA.x, pointB.y - pointA.y);
-        ctx.fillStyle = '#e8c35a';
+        ctx.fillStyle = c.line;
         ctx.font = '12px monospace';
         ctx.fillText(fmtDist(d), (sa.x + sb.x) / 2 + 8, (sa.y + sb.y) / 2 - 8);
     }
@@ -300,6 +382,66 @@ function drawPoint(p, color, label) {
     ctx.fillStyle = color;
     ctx.font = 'bold 13px sans-serif';
     ctx.fillText(label, s.x + 11, s.y - 9);
+}
+
+function getTowerIconSize() {
+    return Math.max(16, Math.min(30, 22 * view.scale * 80));
+}
+
+function drawTower(p) {
+    const wx = percentToMeters(p.x), wy = percentToMeters(p.y);
+    const s = worldToScreen(wx, wy);
+    const iconSize = getTowerIconSize();
+
+    if (towerIcon.complete && towerIcon.naturalWidth > 0) {
+        ctx.drawImage(towerIcon,
+            s.x - iconSize / 2,
+            s.y - iconSize / 2,
+            iconSize, iconSize);
+
+        if (selectedTower === p) {
+            drawTowerTooltip(p, s);
+        }
+    } else {
+        ctx.fillStyle = '#ff9d5c';
+        ctx.beginPath();
+        ctx.arc(s.x, s.y, 6, 0, Math.PI * 2);
+        ctx.fill();
+    }
+}
+
+function drawTowerTooltip(p, s) {
+    const label = STR[p.name] || p.name;
+    ctx.font = 'bold 12px sans-serif';
+    const textWidth = ctx.measureText(label).width;
+    const padX = 8, padY = 4;
+    const w = textWidth + padX * 2;
+    const h = 22;
+    const x = s.x - w / 2;
+    const y = s.y - getTowerIconSize() / 2 - 28;
+
+    ctx.fillStyle = 'rgba(0, 0, 0, 0.3)';
+    ctx.fillRect(x + 2, y + 2, w, h);
+    ctx.fillStyle = '#1a1f27';
+    ctx.fillRect(x, y, w, h);
+    ctx.strokeStyle = '#9fd356';
+    ctx.lineWidth = 1;
+    ctx.strokeRect(x, y, w, h);
+    ctx.beginPath();
+    ctx.moveTo(s.x - 6, y + h);
+    ctx.lineTo(s.x + 6, y + h);
+    ctx.lineTo(s.x, y + h + 6);
+    ctx.closePath();
+    ctx.fillStyle = '#1a1f27';
+    ctx.fill();
+    ctx.strokeStyle = '#9fd356';
+    ctx.stroke();
+    ctx.fillStyle = '#e6e6e6';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(label, s.x, y + h / 2);
+    ctx.textAlign = 'start';
+    ctx.textBaseline = 'alphabetic';
 }
 
 /* ===== ТОЧКИ И ФОРМА ===== */
@@ -378,17 +520,48 @@ function hitPoint(sx, sy) {
 canvas.addEventListener('mousedown', e => {
     if (e.button !== 0) return;
     hideMenu();
-    const hit = hitPoint(e.offsetX, e.offsetY);
-    dragging = hit
-        ? { mode: 'point', key: hit }
-        : { mode: 'pan', startX: e.offsetX, startY: e.offsetY, ox: view.ox, oy: view.oy };
+
+    const r = canvas.getBoundingClientRect();
+    const sx = e.clientX - r.left, sy = e.clientY - r.top;
+
+    // 1) схватили точку (A/B) — тащим точку, даже если она стоит на башне
+    const hit = hitPoint(sx, sy);
+    if (hit) {
+        potentialTowerClick = null;
+        dragging = { mode: 'point', key: hit };
+        canvas.style.cursor = 'grabbing';
+        return;
+    }
+
+    // 2) клик по башне — запоминаем потенциальный клик, НЕ начинаем pan
+    const towerHit = findTowerAt(sx, sy);
+    if (towerHit) {
+        potentialTowerClick = towerHit;
+        return;
+    }
+
+    // 3) иначе — пан карты
+    potentialTowerClick = null;
+    dragging = { mode: 'pan', startX: sx, startY: sy, ox: view.ox, oy: view.oy };
     canvas.style.cursor = 'grabbing';
 });
 
 window.addEventListener('mousemove', e => {
-    if (!dragging) return;
     const r = canvas.getBoundingClientRect();
     const sx = e.clientX - r.left, sy = e.clientY - r.top;
+
+    if (!dragging) {
+        const overPoint = hitPoint(sx, sy);
+        const overTower = !overPoint && findTowerAt(sx, sy);
+        canvas.style.cursor = overPoint ? 'grab' : (overTower ? 'pointer' : 'crosshair');
+
+        if (potentialTowerClick && !overTower) {
+            potentialTowerClick = null;
+        }
+    }
+
+    if (!dragging) return;
+
     if (dragging.mode === 'pan') {
         view.ox = dragging.ox + (sx - dragging.startX);
         view.oy = dragging.oy + (sy - dragging.startY);
@@ -402,12 +575,25 @@ window.addEventListener('mousemove', e => {
     }
 });
 
-window.addEventListener('mouseup', () => { dragging = null; canvas.style.cursor = 'crosshair'; });
+window.addEventListener('mouseup', e => {
+    if (potentialTowerClick) {
+        const r = canvas.getBoundingClientRect();
+        const sx = e.clientX - r.left, sy = e.clientY - r.top;
+        const stillOver = findTowerAt(sx, sy);
+        if (stillOver === potentialTowerClick) {
+            selectedTower = (selectedTower === potentialTowerClick) ? null : potentialTowerClick;
+            draw();
+        }
+        potentialTowerClick = null;
+    }
+
+    dragging = null;
+    canvas.style.cursor = 'crosshair';
+});
 
 canvas.addEventListener('wheel', e => {
     e.preventDefault();
     const factor = Math.exp(-e.deltaY * 0.0015);
-    // ограничиваем зум сверху: 1 px/м — максимальный детальный уровень тайлов
     const newScale = Math.min(1, Math.max(0.005, view.scale * factor));
     const wpt = screenToWorld(e.offsetX, e.offsetY);
     view.scale = newScale;
@@ -493,9 +679,7 @@ function applyDict(dict) {
     draw();
 }
 
-/* ===== ПЕРЕКЛЮЧЕНИЕ ЯЗЫКА =====
-   Переводы лежат в js/i18n.js (объект I18N).
-   Работает без сервера — даже при открытии двойным кликом. */
+/* ===== ПЕРЕКЛЮЧЕНИЕ ЯЗЫКА ===== */
 function translateUI(lang) {
     const dict = (typeof I18N !== 'undefined' && I18N[lang]) ? I18N[lang] : I18N_STRINGS;
     applyDict(dict);
@@ -518,4 +702,5 @@ resize();
 const loaded = loadState();
 if (!loaded) resetView();
 draw();
+applyTheme();
 initLang();

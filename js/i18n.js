@@ -23,7 +23,14 @@ const I18N = {
         oor: 'вне досягаемости',
         u_m: 'м',
         u_km: 'км',
-        u_s: 'с'
+        u_s: 'с',
+        extra: 'Дополнительно',
+        towers: 'Иконки вышек',
+        tower1: 'Башня 1',
+        tower2: 'Башня 2',
+        tower3: 'Башня 3',
+        tower4: 'Башня 4',
+        tower5: 'Башня 5',
     },
 
     en: {
@@ -44,7 +51,14 @@ const I18N = {
         oor: 'out of range',
         u_m: 'm',
         u_km: 'km',
-        u_s: 's'
+        u_s: 's',
+        extra: 'Extra',
+        towers: 'Tower icons',
+        tower1: 'Tower 1',
+        tower2: 'Tower 2',
+        tower3: 'Tower 3',
+        tower4: 'Tower 4',
+        tower5: 'Tower 5',
     },
 
     de: {
@@ -65,7 +79,14 @@ const I18N = {
         oor: 'außer Reichweite',
         u_m: 'm',
         u_km: 'km',
-        u_s: 's'
+        u_s: 's',
+        extra: 'Extras',
+        towers: 'Turm-Symbole',
+        tower1: 'Turm 1',
+        tower2: 'Turm 2',
+        tower3: 'Turm 3',
+        tower4: 'Turm 4',
+        tower5: 'Turm 5',
     },
 
     fr: {
@@ -86,7 +107,14 @@ const I18N = {
         oor: 'hors de portée',
         u_m: 'm',
         u_km: 'km',
-        u_s: 's'
+        u_s: 's',
+        extra: 'Options',
+        towers: 'Icônes des tours',
+        tower1: 'Tour 1',
+        tower2: 'Tour 2',
+        tower3: 'Tour 3',
+        tower4: 'Tour 4',
+        tower5: 'Tour 5',
     },
 
     es: {
@@ -107,7 +135,14 @@ const I18N = {
         oor: 'fuera de alcance',
         u_m: 'm',
         u_km: 'km',
-        u_s: 's'
+        u_s: 's',
+        extra: 'Extra',
+        towers: 'Iconos de torres',
+        tower1: 'Torre 1',
+        tower2: 'Torre 2',
+        tower3: 'Torre 3',
+        tower4: 'Torre 4',
+        tower5: 'Torre 5',
     },
 
     pl: {
@@ -128,7 +163,14 @@ const I18N = {
         oor: 'poza zasięgiem',
         u_m: 'm',
         u_km: 'km',
-        u_s: 's'
+        u_s: 's',
+        extra: 'Dodatkowe',
+        towers: 'Ikony wież',
+        tower1: 'Wieża 1',
+        tower2: 'Wieża 2',
+        tower3: 'Wieża 3',
+        tower4: 'Wieża 4',
+        tower5: 'Wieża 5',
     },
 
     uk: {
@@ -149,7 +191,14 @@ const I18N = {
         oor: 'поза досяжністю',
         u_m: 'м',
         u_km: 'км',
-        u_s: 'с'
+        u_s: 'с',
+        extra: 'Додатково',
+        towers: 'Іконки веж',
+        tower1: 'Вежа 1',
+        tower2: 'Вежа 2',
+        tower3: 'Вежа 3',
+        tower4: 'Вежа 4',
+        tower5: 'Вежа 5',
     },
 
     tr: {
@@ -170,7 +219,14 @@ const I18N = {
         oor: 'menzil dışı',
         u_m: 'm',
         u_km: 'km',
-        u_s: 's'
+        u_s: 's',
+        extra: 'Ekstra',
+        towers: 'Kule simgeleri',
+        tower1: 'Kule 1',
+        tower2: 'Kule 2',
+        tower3: 'Kule 3',
+        tower4: 'Kule 4',
+        tower5: 'Kule 5',
     },
 
     zh: {
@@ -191,6 +247,13 @@ const I18N = {
         oor: '超出射程',
         u_m: '米',
         u_km: '公里',
-        u_s: '秒'
+        u_s: '秒',
+        extra: '额外',
+        towers: '塔图标',
+        tower1: '塔 1',
+        tower2: '塔 2',
+        tower3: '塔 3',
+        tower4: '塔 4',
+        tower5: '塔 5',
     }
 };

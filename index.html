@@ -5,6 +5,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WARDOGS — миномётный калькулятор</title>
+    <!-- Фавикон: прицел с миномётом в фирменном зелёном -->
+    <link rel="icon" type="image/svg+xml"
+        href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%231a1f27'/><circle cx='32' cy='32' r='22' fill='none' stroke='%239fd356' stroke-width='3'/><circle cx='32' cy='32' r='3' fill='%239fd356'/><line x1='32' y1='4' x2='32' y2='18' stroke='%239fd356' stroke-width='3' stroke-linecap='round'/><line x1='32' y1='46' x2='32' y2='60' stroke='%239fd356' stroke-width='3' stroke-linecap='round'/><line x1='4' y1='32' x2='18' y2='32' stroke='%239fd356' stroke-width='3' stroke-linecap='round'/><line x1='46' y1='32' x2='60' y2='32' stroke='%239fd356' stroke-width='3' stroke-linecap='round'/><path d='M20 44 L44 20' stroke='%23e8c35a' stroke-width='2.5' stroke-linecap='round'/></svg>">
+    <!-- Для iPhone/iPad при добавлении на главный экран -->
+    <link rel="apple-touch-icon"
+        href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='36' fill='%231a1f27'/><circle cx='90' cy='90' r='62' fill='none' stroke='%239fd356' stroke-width='8'/><circle cx='90' cy='90' r='8' fill='%239fd356'/><line x1='90' y1='10' x2='90' y2='48' stroke='%239fd356' stroke-width='8' stroke-linecap='round'/><line x1='90' y1='132' x2='90' y2='170' stroke='%239fd356' stroke-width='8' stroke-linecap='round'/><line x1='10' y1='90' x2='48' y2='90' stroke='%239fd356' stroke-width='8' stroke-linecap='round'/><line x1='132' y1='90' x2='170' y2='90' stroke='%239fd356' stroke-width='8' stroke-linecap='round'/><path d='M56 124 L124 56' stroke='%23e8c35a' stroke-width='7' stroke-linecap='round'/></svg>">
     <link rel="stylesheet" href="css/style.css">
     <!-- Yandex.Metrika counter -->
     <script type="text/javascript">
@@ -27,7 +33,17 @@
     <div class="app">
 
         <aside class="panel">
-            <h1 data-i18n="title">Миномётный калькулятор</h1>
+            <div class="panel-header">
+                <h1 data-i18n="title">Миномётный калькулятор</h1>
+                <button class="menu-toggle" id="drawerToggle" title="Дополнительно">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round">
+                        <line x1="4" y1="7" x2="20" y2="7" />
+                        <line x1="4" y1="12" x2="20" y2="12" />
+                        <line x1="4" y1="17" x2="20" y2="17" />
+                    </svg>
+                </button>
+            </div>
 
             <section>
                 <h2 data-i18n="posA">Огневая позиция (A)</h2>
@@ -83,7 +99,27 @@
 
         <main class="map-wrap">
             <canvas id="map"></canvas>
-            <button class="view-reset" id="resetView" data-i18n="reset">Сбросить вид</button>
+            <div class="map-controls">
+                <button class="view-reset theme-toggle" id="themeToggle" title="Тема">
+                    <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round">
+                        <circle cx="12" cy="12" r="4" />
+                        <line x1="12" y1="2" x2="12" y2="5" />
+                        <line x1="12" y1="19" x2="12" y2="22" />
+                        <line x1="2" y1="12" x2="5" y2="12" />
+                        <line x1="19" y1="12" x2="22" y2="12" />
+                        <line x1="4.9" y1="4.9" x2="7" y2="7" />
+                        <line x1="17" y1="17" x2="19.1" y2="19.1" />
+                        <line x1="4.9" y1="19.1" x2="7" y2="17" />
+                        <line x1="17" y1="7" x2="19.1" y2="4.9" />
+                    </svg>
+                    <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
+                    </svg>
+                </button>
+                <button class="view-reset" id="resetView" data-i18n="reset">Сбросить вид</button>
+            </div>
 
             <div id="ctxMenu" class="ctx-menu hidden">
                 <button data-action="setA" data-i18n="menuA">📍 Позиция миномёта (A)</button>
@@ -92,6 +128,21 @@
                     точку</button>
             </div>
         </main>
+
+        <!-- выезжающая вкладка -->
+        <aside class="drawer" id="drawer">
+            <div class="drawer-header">
+                <h2 data-i18n="extra">Дополнительно</h2>
+                <button class="clear" id="drawerClose" title="✕">✕</button>
+            </div>
+
+            <label class="switch-row">
+                <span data-i18n="towers">Иконки вышек</span>
+                <input type="checkbox" id="towersToggle" checked>
+                <span class="switch"></span>
+            </label>
+        </aside>
+        <div class="drawer-backdrop hidden" id="drawerBackdrop"></div>
 
     </div>
 

@@ -9,10 +9,48 @@ body {
     height: 100%;
 }
 
+/* ===== ТЁМНАЯ ТЕМА (по умолчанию) ===== */
+:root {
+    --bg: #12151a;
+    --panel: #1a1f27;
+    --border: #2c3440;
+    --field: #0f1319;
+    --text: #e6e6e6;
+    --muted: #8a94a3;
+    --dim: #5c6875;
+    --accent: #9fd356;
+    --accent-hover: #b8e877;
+    --danger: #e05656;
+    --menu: #1e242e;
+    --menu-border: #39424f;
+    --hover: #2c3440;
+    --btn-bg: rgba(30, 36, 46, .85);
+    --btn-text: #cfd6df;
+}
+
+/* ===== СВЕТЛАЯ ТЕМА ===== */
+body.light {
+    --bg: #eef1f5;
+    --panel: #ffffff;
+    --border: #d7dde5;
+    --field: #f6f8fa;
+    --text: #1d2530;
+    --muted: #5c6875;
+    --dim: #6b7684;
+    --accent: #4e8f1d;
+    --accent-hover: #3f7517;
+    --danger: #c23b3b;
+    --menu: #ffffff;
+    --menu-border: #c9d1db;
+    --hover: #e8edf3;
+    --btn-bg: rgba(255, 255, 255, .92);
+    --btn-text: #333c47;
+}
+
 body {
     font-family: "Segoe UI", system-ui, sans-serif;
-    background: #12151a;
-    color: #e6e6e6;
+    background: var(--bg);
+    color: var(--text);
 }
 
 .app {
@@ -23,8 +61,8 @@ body {
 .panel {
     width: 320px;
     flex-shrink: 0;
-    background: #1a1f27;
-    border-right: 1px solid #2c3440;
+    background: var(--panel);
+    border-right: 1px solid var(--border);
     padding: 20px;
     display: flex;
     flex-direction: column;
@@ -34,14 +72,14 @@ body {
 
 h1 {
     font-size: 18px;
-    color: #9fd356;
+    color: var(--accent);
 }
 
 h2 {
     font-size: 12px;
     text-transform: uppercase;
     letter-spacing: .06em;
-    color: #8a94a3;
+    color: var(--muted);
     margin-bottom: 8px;
 }
 
@@ -57,14 +95,14 @@ h2 {
     flex-direction: column;
     gap: 4px;
     font-size: 13px;
-    color: #8a94a3;
+    color: var(--muted);
 }
 
 input[type="number"] {
     width: 100%;
-    background: #0f1319;
-    border: 1px solid #2c3440;
-    color: #fff;
+    background: var(--field);
+    border: 1px solid var(--border);
+    color: var(--text);
     padding: 8px 10px;
     border-radius: 6px;
     font-size: 15px;
@@ -72,25 +110,25 @@ input[type="number"] {
 
 input[type="number"]:focus {
     outline: none;
-    border-color: #9fd356;
+    border-color: var(--accent);
 }
 
 .clear {
     background: none;
     border: none;
-    color: #5c6875;
+    color: var(--dim);
     font-size: 16px;
     cursor: pointer;
     padding: 8px 2px;
 }
 
 .clear:hover {
-    color: #e05656;
+    color: var(--danger);
 }
 
 .result {
-    background: #0f1319;
-    border: 1px solid #2c3440;
+    background: var(--field);
+    border: 1px solid var(--border);
     border-radius: 8px;
     padding: 14px;
     display: grid;
@@ -104,20 +142,53 @@ input[type="number"]:focus {
 }
 
 .result span {
-    color: #8a94a3;
+    color: var(--muted);
 }
 
 .result b {
-    color: #9fd356;
+    color: var(--accent);
     font-variant-numeric: tabular-nums;
 }
 
 .hint {
     font-size: 12px;
-    color: #5c6875;
+    color: var(--dim);
     line-height: 1.6;
 }
 
+/* ===== Блок контактов ===== */
+.contact {
+    background: var(--field);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.contact-label {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--muted);
+}
+
+.contact-email {
+    color: var(--accent);
+    text-decoration: none;
+    font-size: 13px;
+    font-family: monospace;
+    word-break: break-all;
+    transition: color .15s ease;
+}
+
+.contact-email:hover {
+    color: var(--accent-hover);
+    text-decoration: underline;
+}
+
+/* ===== Карта ===== */
 .map-wrap {
     flex: 1;
     position: relative;
@@ -131,13 +202,18 @@ canvas {
     cursor: crosshair;
 }
 
-.view-reset {
+.map-controls {
     position: absolute;
     top: 12px;
     right: 12px;
-    background: rgba(30, 36, 46, .85);
-    border: 1px solid #39424f;
-    color: #cfd6df;
+    display: flex;
+    gap: 8px;
+}
+
+.view-reset {
+    background: var(--btn-bg);
+    border: 1px solid var(--menu-border);
+    color: var(--btn-text);
     padding: 6px 12px;
     border-radius: 6px;
     cursor: pointer;
@@ -145,18 +221,44 @@ canvas {
 }
 
 .view-reset:hover {
-    background: #2c3440;
+    background: var(--hover);
 }
 
+/* ===== Кнопка темы ===== */
+.theme-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    padding: 6px 0;
+}
+
+.theme-toggle .icon-sun {
+    display: block;
+}
+
+.theme-toggle .icon-moon {
+    display: none;
+}
+
+body.light .theme-toggle .icon-sun {
+    display: none;
+}
+
+body.light .theme-toggle .icon-moon {
+    display: block;
+}
+
+/* ===== Контекстное меню ===== */
 .ctx-menu {
     position: absolute;
     z-index: 10;
     min-width: 210px;
     padding: 4px;
-    background: #1e242e;
-    border: 1px solid #39424f;
+    background: var(--menu);
+    border: 1px solid var(--menu-border);
     border-radius: 8px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, .5);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .25);
 }
 
 .ctx-menu button {
@@ -165,7 +267,7 @@ canvas {
     text-align: left;
     background: none;
     border: none;
-    color: #e6e6e6;
+    color: var(--text);
     padding: 8px 12px;
     font-size: 14px;
     cursor: pointer;
@@ -173,11 +275,11 @@ canvas {
 }
 
 .ctx-menu button:hover {
-    background: #2c3440;
+    background: var(--hover);
 }
 
 .ctx-menu button.danger {
-    color: #e05656;
+    color: var(--danger);
 }
 
 .hidden {
@@ -188,7 +290,7 @@ canvas {
 .translate-widget {
     margin-top: auto;
     padding-top: 16px;
-    border-top: 1px solid #2c3440;
+    border-top: 1px solid var(--border);
     display: flex;
     flex-direction: column;
     gap: 6px;
@@ -198,13 +300,13 @@ canvas {
     font-size: 12px;
     text-transform: uppercase;
     letter-spacing: .06em;
-    color: #8a94a3;
+    color: var(--muted);
 }
 
 .translate-widget select {
-    background: #0f1319;
-    border: 1px solid #2c3440;
-    color: #fff;
+    background: var(--field);
+    border: 1px solid var(--border);
+    color: var(--text);
     padding: 8px 10px;
     border-radius: 6px;
     font-size: 14px;
@@ -213,43 +315,7 @@ canvas {
 
 .translate-widget select:focus {
     outline: none;
-    border-color: #9fd356;
-}
-
-/* ===== Блок контактов ===== */
-.contact {
-    background: #0f1319;
-    border: 1px solid #2c3440;
-    border-radius: 8px;
-    padding: 10px 12px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-
-.contact-label {
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: .06em;
-    color: #8a94a3;
-}
-
-.contact-email {
-    color: #9fd356;
-    text-decoration: none;
-    font-size: 13px;
-    font-family: monospace;
-    word-break: break-all;
-    transition: color .15s ease;
-}
-
-.contact-email:hover {
-    color: #b8e877;
-    text-decoration: underline;
-}
-
-.contact-email:active {
-    color: #7bc95e;
+    border-color: var(--accent);
 }
 
 /* ===== Адаптивность ===== */
@@ -261,11 +327,123 @@ canvas {
     .panel {
         width: 100%;
         border-right: none;
-        border-bottom: 1px solid #2c3440;
+        border-bottom: 1px solid var(--border);
     }
 
     .map-wrap {
         flex: 1;
         min-height: 50vh;
     }
+}
+
+/* ===== Шапка панели + кнопка меню ===== */
+.panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+}
+
+.menu-toggle {
+    background: none;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    width: 32px;
+    height: 32px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+}
+
+.menu-toggle:hover {
+    background: var(--hover);
+}
+
+/* ===== Выезжающая вкладка ===== */
+.drawer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 260px;
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    box-shadow: 8px 0 24px rgba(0, 0, 0, .25);
+    z-index: 30;
+    transform: translateX(-100%);
+    transition: transform .25s ease;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.drawer.open {
+    transform: translateX(0);
+}
+
+.drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.drawer-header h2 {
+    margin-bottom: 0;
+}
+
+.drawer-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .35);
+    z-index: 25;
+}
+
+/* ===== Переключатель (switch) ===== */
+.switch-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text);
+}
+
+.switch-row input {
+    display: none;
+}
+
+.switch {
+    width: 38px;
+    height: 20px;
+    flex-shrink: 0;
+    background: var(--border);
+    border-radius: 10px;
+    position: relative;
+    transition: .2s;
+}
+
+.switch::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--text);
+    transition: .2s;
+}
+
+.switch-row input:checked+.switch {
+    background: var(--accent);
+}
+
+.switch-row input:checked+.switch::after {
+    left: 20px;
+    background: #fff;
 }
