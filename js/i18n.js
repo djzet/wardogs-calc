@@ -1,8 +1,6 @@
 'use strict';
 
-/* ===== СЛОВАРИ ПЕРЕВОДОВ =====
-   Чтобы добавить язык: добавьте сюда объект с тем же кодом
-   и <option value="код"> в index.html */
+/* ===== СЛОВАРИ ПЕРЕВОДОВ ===== */
 const I18N = {
 
     ru: {
@@ -40,6 +38,7 @@ const I18N = {
         helpP3: '<b>Координаты.</b> Координаты вводятся в процентах карты: например 51.59 по X и 44.61 по Y. Значения можно ввести вручную в поля левой панели — точки появятся на карте автоматически.',
         helpP4: '<b>Результаты расчёта.</b> Дистанция — расстояние до цели. Азимут — направление на цель в градусах от севера. Угол возвышения — угол для миномёта (навесная траектория). Время подлёта — время от выстрела до попадания. Если цель слишком далеко, калькулятор покажет «вне досягаемости».',
         helpP5: '<b>Сохранение.</b> Все данные — точки, вид карты, тема, язык и отображение вышек — сохраняются автоматически и восстанавливаются после перезагрузки страницы.',
+        helpP6: '<b>О калькуляторе.</b> Фан-инструмент для миномётных расчётов в тактическом шутере WARDOGS. Работает на интерактивной карте 16×16 км с тайлами, поддерживает 9 языков интерфейса, сохраняет состояние между сессиями и не требует установки. Неофициальный проект, не аффилирован с разработчиками игры.',
     },
 
     en: {
@@ -77,6 +76,7 @@ const I18N = {
         helpP3: '<b>Coordinates.</b> Coordinates are entered as map percentages, e.g. 51.59 for X and 44.61 for Y. Values can also be typed into the fields on the left panel — the points will appear on the map automatically.',
         helpP4: '<b>Calculation results.</b> Distance — distance to the target. Azimuth — direction to the target in degrees from north. Elevation — angle for the mortar (high-arcing trajectory). Flight time — time from firing to impact. If the target is too far, the calculator shows “out of range”.',
         helpP5: '<b>Saving.</b> All data — points, map view, theme, language and tower visibility — is saved automatically and restored after page reload.',
+        helpP6: '<b>About.</b> A fan-made tool for mortar calculations in the tactical shooter WARDOGS. Runs on an interactive 16×16 km tiled map, supports 9 interface languages, persists state between sessions and needs no installation. Unofficial project, not affiliated with the game developers.',
     },
 
     de: {
@@ -114,6 +114,7 @@ const I18N = {
         helpP3: '<b>Koordinaten.</b> Koordinaten werden in Kartenprozenten eingegeben, z. B. 51,59 für X und 44,61 für Y. Werte können auch in die Felder links eingegeben werden — die Punkte erscheinen dann automatisch auf der Karte.',
         helpP4: '<b>Berechnungsergebnisse.</b> Entfernung — Distanz zum Ziel. Azimut — Richtung zum Ziel in Grad ab Nord. Erhöhungswinkel — Winkel für den Mörser (steile Flugbahn). Flugzeit — Zeit vom Schuss bis zum Einschlag. Ist das Ziel zu weit, zeigt der Rechner „außer Reichweite“.',
         helpP5: '<b>Speichern.</b> Alle Daten — Punkte, Kartenansicht, Design, Sprache und Turmsichtbarkeit — werden automatisch gespeichert und nach einem Neuladen wiederhergestellt.',
+        helpP6: '<b>Über den Rechner.</b> Ein Fan-Tool für Mörserberechnungen im Taktik-Shooter WARDOGS. Läuft auf einer interaktiven Kachelkarte von 16×16 km, unterstützt 9 Benutzeroberflächensprachen, speichert den Zustand zwischen Sitzungen und benötigt keine Installation. Inoffizielles Projekt, nicht mit den Spieleentwicklern verbunden.',
     },
 
     fr: {
@@ -151,6 +152,7 @@ const I18N = {
         helpP3: '<b>Coordonnées.</b> Les coordonnées sont saisies en pourcentage de la carte, par exemple 51,59 pour X et 44,61 pour Y. Les valeurs peuvent aussi être saisies dans les champs du panneau de gauche — les points apparaîtront automatiquement sur la carte.',
         helpP4: "<b>Résultats du calcul.</b> Distance — distance jusqu'à la cible. Azimut — direction de la cible en degrés depuis le nord. Angle d'élévation — angle pour le mortier (trajectoire plongeante). Temps de vol — temps du tir à l'impact. Si la cible est trop loin, le calculateur affiche « hors de portée ».",
         helpP5: '<b>Sauvegarde.</b> Toutes les données — points, vue de la carte, thème, langue et affichage des tours — sont enregistrées automatiquement et restaurées après le rechargement de la page.',
+        helpP6: '<b>À propos.</b> Un outil communautaire pour les calculs de mortier dans le jeu de tir tactique WARDOGS. Fonctionne sur une carte interactive tuilée de 16×16 km, prend en charge 9 langues d\'interface, conserve l\'état entre les sessions et ne nécessite aucune installation. Projet non officiel, sans lien avec les développeurs du jeu.',
     },
 
     es: {
@@ -188,6 +190,7 @@ const I18N = {
         helpP3: '<b>Coordenadas.</b> Las coordenadas se introducen como porcentajes del mapa, por ejemplo 51,59 para X y 44,61 para Y. También se pueden escribir en los campos del panel izquierdo — los puntos aparecerán automáticamente en el mapa.',
         helpP4: '<b>Resultados del cálculo.</b> Distancia — distancia al objetivo. Azimut — dirección al objetivo en grados desde el norte. Ángulo de elevación — ángulo para el mortero (trayectoria alta). Tiempo de vuelo — tiempo desde el disparo hasta el impacto. Si el objetivo está demasiado lejos, la calculadora mostrará «fuera de alcance».',
         helpP5: '<b>Guardado.</b> Todos los datos — puntos, vista del mapa, tema, idioma y visibilidad de torres — se guardan automáticamente y se restauran al recargar la página.',
+        helpP6: '<b>Acerca de.</b> Una herramienta hecha por fans para cálculos de mortero en el shooter táctico WARDOGS. Funciona sobre un mapa interactivo de 16×16 km con teselas, admite 9 idiomas de interfaz, guarda el estado entre sesiones y no requiere instalación. Proyecto no oficial, sin relación con los desarrolladores del juego.',
     },
 
     pl: {
@@ -225,6 +228,7 @@ const I18N = {
         helpP3: '<b>Współrzędne.</b> Współrzędne wprowadza się w procentach mapy, np. 51,59 dla X i 44,61 dla Y. Wartości można też wpisać w pola lewego panelu — punkty pojawią się na mapie automatycznie.',
         helpP4: '<b>Wyniki obliczeń.</b> Odległość — dystans do celu. Azymut — kierunek do celu w stopniach od północy. Kąt podniesienia — kąt dla moździerza (trajektoria stroma). Czas lotu — czas od strzału do uderzenia. Jeśli cel jest zbyt daleko, kalkulator pokaże „poza zasięgiem”.',
         helpP5: '<b>Zapis.</b> Wszystkie dane — punkty, widok mapy, motyw, język i widoczność wież — są zapisywane automatycznie i przywracane po odświeżeniu strony.',
+        helpP6: '<b>O kalkulatorze.</b> Fanowskie narzędzie do obliczeń moździerzowych w taktycznej strzelance WARDOGS. Działa na interaktywnej mapie kafelkowej 16×16 km, obsługuje 9 języków interfejsu, zachowuje stan między sesjami i nie wymaga instalacji. Projekt nieoficjalny, niepowiązany z twórcami gry.',
     },
 
     uk: {
@@ -262,6 +266,7 @@ const I18N = {
         helpP3: '<b>Координати.</b> Координати вводяться у відсотках карти, наприклад 51,59 для X і 44,61 для Y. Значення можна ввести вручну в поля лівої панелі — точки з\'являться на карті автоматично.',
         helpP4: '<b>Результати розрахунку.</b> Дистанція — відстань до цілі. Азимут — напрямок на ціль у градусах від півночі. Кут піднесення — кут для міномета (навісна траєкторія). Час польоту — час від пострілу до влучання. Якщо ціль надто далеко, калькулятор покаже «поза досяжністю».',
         helpP5: '<b>Збереження.</b> Усі дані — точки, вигляд карти, тема, мова та відображення веж — зберігаються автоматично і відновлюються після перезавантаження сторінки.',
+        helpP6: '<b>Про калькулятор.</b> Фан-інструмент для мінометних розрахунків у тактичному шутері WARDOGS. Працює на інтерактивній карті 16×16 км із тайлами, підтримує 9 мов інтерфейсу, зберігає стан між сесіями та не потребує встановлення. Неофіційний проєкт, не афілійований з розробниками гри.',
     },
 
     tr: {
@@ -299,6 +304,7 @@ const I18N = {
         helpP3: '<b>Koordinatlar.</b> Koordinatlar harita yüzdesi olarak girilir, örn. X için 51,59 ve Y için 44,61. Değerler sol paneldeki alanlara da yazılabilir — noktalar haritada otomatik olarak görünür.',
         helpP4: '<b>Hesaplama sonuçları.</b> Mesafe — hedefe olan uzaklık. Azimut — kuzeyden derece cinsinden hedef yönü. Yükseliş açısı — havan için açı (yüksek yörünge). Uçuş süresi — ateşlemeden isabata geçen süre. Hedef çok uzaksa hesaplayıcı “menzil dışı” gösterir.',
         helpP5: '<b>Kaydetme.</b> Tüm veriler — noktalar, harita görünümü, tema, dil ve kule görünürlüğü — otomatik olarak kaydedilir ve sayfa yeniden yüklendiğinde geri yüklenir.',
+        helpP6: '<b>Hesaplayıcı hakkında.</b> Taktik nişancı oyunu WARDOGS için topluluk tarafından hazırlanmış bir havan hesaplama aracı. 16×16 km\'lik döşemeli etkileşimli harita üzerinde çalışır, 9 arayüz dilini destekler, oturumlar arasında durumu korur ve kurulum gerektirmez. Oyunun geliştiricileriyle bağlantısı olmayan resmi olmayan bir projedir.',
     },
 
     zh: {
@@ -336,5 +342,6 @@ const I18N = {
         helpP3: '<b>坐标。</b>坐标以地图百分比形式输入，例如 X 为 51.59，Y 为 44.61。数值也可以输入到左侧面板的字段中 — 点位将自动出现在地图上。',
         helpP4: '<b>计算结果。</b>距离 — 到目标的距离。方位角 — 从北方算起到目标的方向（度）。仰角 — 迫击炮的角度（高抛弹道）。飞行时间 — 从开火到命中的时间。如果目标太远，计算器会显示“超出射程”。',
         helpP5: '<b>保存。</b>所有数据 — 点位、地图视图、主题、语言和塔的显示 — 自动保存并在页面重新加载后恢复。',
+        helpP6: '<b>关于计算器。</b>为战术射击游戏 WARDOGS 制作的粉丝版迫击炮计算工具。运行在 16×16 公里的交互式瓦片地图上，支持 9 种界面语言，在会话之间保存状态，无需安装。非官方项目，与游戏开发商无关。',
     }
 };
