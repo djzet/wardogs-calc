@@ -11,6 +11,67 @@ const ZONE = { cx: 8000, cy: 8000, r: 1000 };
    TODO: после релиза заменить на реальные значения игры */
 const MORTAR = { v0: 240, g: 9.8 };
 
+/* ===== ТАЙЛЫ КАРТЫ (скачаны с metaforge.app) =====
+   Пирамида: zoom_N содержит 2^N × 2^N тайлов размером size×size */
+const TILES = {
+    maxZoom: 5,
+    size: 256, // если тайлы 512×512 — поставьте 512
+    path: (z, x, y) => `tiles/zoom_${z}/${x}_${y}.webp`,
+};
+const tileCache = new Map();
+
+function getTile(z, x, y) {
+    const key = `${z}/${x}_${y}`;
+    let t = tileCache.get(key);
+    if (!t) {
+        const img = new Image();
+        t = { img, loaded: false, error: false };
+        img.onload = () => { t.loaded = true; draw(); };
+        img.onerror = () => { t.error = true; };
+        img.src = TILES.path(z, x, y);
+        tileCache.set(key, t);
+    }
+    return t;
+}
+
+/* Отрисовка видимых тайлов, стык в стык, с автоподбором уровня зума */
+function drawTiles() {
+    const w = canvas.clientWidth, h = canvas.clientHeight;
+
+    // уровень пирамиды, ближайший к текущему масштабу экрана
+    const z = Math.max(0, Math.min(TILES.maxZoom,
+        Math.round(Math.log2((view.scale * MAP.size) / TILES.size))));
+    const tps = 2 ** z;                                  // тайлов на сторону
+    const tileScale = (tps * TILES.size) / MAP.size;     // px на метр у этого зума
+    const drawSize = TILES.size * (view.scale / tileScale);
+
+    // видимая область в мировых координатах
+    const a = screenToWorld(0, 0), b = screenToWorld(w, h);
+
+    // индексы тайлов (y в именах файлов идёт сверху вниз: ty=0 — верх карты)
+    const x0 = Math.max(0, Math.floor((a.x / MAP.size) * tps));
+    const x1 = Math.min(tps - 1, Math.floor((b.x / MAP.size) * tps));
+    const y0 = Math.max(0, Math.floor(((MAP.size - a.y) / MAP.size) * tps));
+    const y1 = Math.min(tps - 1, Math.floor(((MAP.size - b.y) / MAP.size) * tps));
+
+    for (let ty = y0; ty <= y1; ty++) {
+        for (let tx = x0; tx <= x1; tx++) {
+            // мировой левый-верхний угол тайла
+            const wx0 = (tx / tps) * MAP.size;
+            const wy0 = MAP.size - (ty / tps) * MAP.size;
+            const s = worldToScreen(wx0, wy0);
+            const t = getTile(z, tx, ty);
+            if (t.loaded) {
+                // +0.5 px — убирает волосяные щели между тайлами
+                ctx.drawImage(t.img, s.x, s.y, drawSize + 0.5, drawSize + 0.5);
+            } else if (!t.error) {
+                ctx.fillStyle = '#161d25'; // заглушка, пока грузится
+                ctx.fillRect(s.x, s.y, drawSize, drawSize);
+            }
+        }
+    }
+}
+
 /* ===== DOM ===== */
 const canvas = document.getElementById('map');
 const ctx = canvas.getContext('2d');
@@ -27,7 +88,7 @@ const out = {
 
 /* ===== ПЕРЕВОД ИНТЕРФЕЙСА (I18N) =====
    Эти строки — дефолтные на русском. Они же являются fallback
-   на случай если JSON не загрузился. */
+   на случай если словарь не найден. */
 const I18N_STRINGS = {
     title: 'Миномётный калькулятор',
     posA: 'Огневая позиция (A)',
@@ -42,6 +103,7 @@ const I18N_STRINGS = {
     menuB: '🎯 Цель (B)',
     menuDel: '✕ Удалить точку',
     langLabel: 'Язык интерфейса',
+    contactLabel: '✉️ Связь',
     oor: 'вне досягаемости',
     u_m: 'м',
     u_km: 'км',
@@ -128,11 +190,14 @@ function draw() {
     ctx.fillStyle = '#10151b';
     ctx.fillRect(0, 0, w, h);
 
-    // квадрат карты 16 × 16 км
+    // квадрат карты 16 × 16 км (фон)
     const m0 = worldToScreen(0, 0);
     const m1 = worldToScreen(MAP.size, MAP.size);
     ctx.fillStyle = '#161d25';
     ctx.fillRect(m0.x, m1.y, m1.x - m0.x, m0.y - m1.y);
+
+    // тайлы карты (под сеткой)
+    drawTiles();
 
     const step = niceStep(), minor = step / 5;
     const a = screenToWorld(0, 0), b = screenToWorld(w, h);
@@ -141,7 +206,7 @@ function draw() {
 
     // мелкая сетка
     if (minor * view.scale >= 9) {
-        ctx.strokeStyle = '#1c232c';
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
         ctx.beginPath();
         for (let gx = Math.ceil(minX / minor) * minor; gx <= maxX; gx += minor) {
             const s = worldToScreen(gx, 0);
@@ -155,7 +220,7 @@ function draw() {
     }
 
     // основная сетка
-    ctx.strokeStyle = '#2a3441';
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.18)';
     ctx.beginPath();
     for (let gx = Math.ceil(minX / step) * step; gx <= maxX; gx += step) {
         const s = worldToScreen(gx, 0);
@@ -168,7 +233,7 @@ function draw() {
     ctx.stroke();
 
     // оси X=0 и Y=0
-    ctx.strokeStyle = '#46536b';
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
     ctx.beginPath();
     const zero = worldToScreen(0, 0);
     ctx.moveTo(zero.x + .5, 0); ctx.lineTo(zero.x + .5, h);
@@ -342,7 +407,8 @@ window.addEventListener('mouseup', () => { dragging = null; canvas.style.cursor 
 canvas.addEventListener('wheel', e => {
     e.preventDefault();
     const factor = Math.exp(-e.deltaY * 0.0015);
-    const newScale = Math.min(500, Math.max(0.005, view.scale * factor));
+    // ограничиваем зум сверху: 1 px/м — максимальный детальный уровень тайлов
+    const newScale = Math.min(1, Math.max(0.005, view.scale * factor));
     const wpt = screenToWorld(e.offsetX, e.offsetY);
     view.scale = newScale;
     view.ox = e.offsetX - wpt.x * view.scale;
