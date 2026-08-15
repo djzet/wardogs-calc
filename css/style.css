@@ -689,3 +689,34 @@ select:focus-visible {
     outline: 2px solid var(--accent);
     outline-offset: 2px;
 }
+
+.toast {
+    position: absolute;
+    top: 56px;
+    right: 12px;
+    background: var(--btn-bg);
+    border: 1px solid var(--menu-border);
+    color: var(--btn-text);
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .2);
+    opacity: 0;
+    transform: translateY(-10px);
+    pointer-events: none;
+    transition: opacity .25s ease, transform .25s ease;
+    z-index: 20;
+    max-width: 280px;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.toast.success {
+    border-color: var(--accent);
+    color: var(--accent);
+}

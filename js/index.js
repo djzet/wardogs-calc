@@ -249,6 +249,12 @@ const I18N_STRINGS = {
     menuDel: '✕ Удалить точку',
     langLabel: 'Язык интерфейса',
     contactLabel: '✉️ Связь',
+    oor: 'вне досягаемости',
+    zero: 'точки совпадают',
+    u_m: 'м',
+    u_km: 'км',
+    u_s: 'с',
+    u_mil: 'mil',
     extra: 'Дополнительно',
     towers: 'Иконки вышек',
     discordTitle: 'Discord',
@@ -266,17 +272,15 @@ const I18N_STRINGS = {
     helpP4: '<b>Результаты.</b> Дистанция, азимут от севера, угол ствола в mils, время подлёта. Если цель вне досягаемости — соответствующее сообщение.',
     helpP5: '<b>Сохранение.</b> Все данные автоматически сохраняются и восстанавливаются после перезагрузки страницы.',
     helpP6: '<b>О калькуляторе.</b> Фан-инструмент для игры WARDOGS. Неофициальный проект, не аффилирован с разработчиками игры.',
-    oor: 'вне досягаемости',
-    zero: 'точки совпадают',
-    u_m: 'м',
-    u_km: 'км',
-    u_s: 'с',
-    u_mil: 'mil',
+    share: 'Поделиться',
+    shareCopied: 'Ссылка скопирована!',
+    shareApplied: 'Координаты применены из ссылки',
 };
 
 const DYNAMIC_KEYS = [
     'oor', 'zero', 'u_m', 'u_km', 'u_s', 'u_mil',
     'tower1', 'tower2', 'tower3', 'tower4', 'tower5',
+    'share', 'shareCopied', 'shareApplied'
 ];
 
 const STR = { ...I18N_STRINGS };
@@ -983,6 +987,110 @@ document.getElementById('discordBtn').addEventListener('click', () => {
     sendDiscordEvent('Discord Button');
 });
 
+let toastTimer = null;
+
+function showToast(message, type = 'success') {
+    let toast = document.getElementById('toast');
+    if (!toast) {
+        toast = document.createElement('div');
+        toast.id = 'toast';
+        toast.className = 'toast';
+        document.querySelector('.map-wrap').appendChild(toast);
+    }
+    toast.textContent = message;
+    toast.className = 'toast ' + type;
+    void toast.offsetWidth;
+    toast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(() => {
+        toast.classList.remove('show');
+    }, 2500);
+}
+
+function generateShareUrl() {
+    const params = new URLSearchParams();
+    if (pointA) {
+        params.set('ax', metersToPercent(pointA.x).toFixed(2));
+        params.set('ay', metersToPercent(pointA.y).toFixed(2));
+    }
+    if (pointB) {
+        params.set('bx', metersToPercent(pointB.x).toFixed(2));
+        params.set('by', metersToPercent(pointB.y).toFixed(2));
+    }
+    params.set('w', currentWeapon);
+    return location.origin + location.pathname + '?' + params.toString();
+}
+
+async function copyShareLink() {
+    const url = generateShareUrl();
+    try {
+        await navigator.clipboard.writeText(url);
+        showToast(STR.shareCopied, 'success');
+    } catch (e) {
+        const input = document.createElement('input');
+        input.value = url;
+        input.style.position = 'fixed';
+        input.style.opacity = '0';
+        document.body.appendChild(input);
+        input.select();
+        document.execCommand('copy');
+        document.body.removeChild(input);
+        showToast(STR.shareCopied, 'success');
+    }
+}
+
+function applySharedParams() {
+    const params = new URLSearchParams(location.search);
+    let applied = false;
+
+    if (params.has('ax') && params.has('ay')) {
+        const ax = parseFloat(params.get('ax'));
+        const ay = parseFloat(params.get('ay'));
+        if (!isNaN(ax) && !isNaN(ay)) {
+            pointA = {
+                x: percentToMeters(clamp(ax, 0, 100)),
+                y: percentToMeters(clamp(ay, 0, 100))
+            };
+            applied = true;
+        }
+    }
+
+    if (params.has('bx') && params.has('by')) {
+        const bx = parseFloat(params.get('bx'));
+        const by = parseFloat(params.get('by'));
+        if (!isNaN(bx) && !isNaN(by)) {
+            pointB = {
+                x: percentToMeters(clamp(bx, 0, 100)),
+                y: percentToMeters(clamp(by, 0, 100))
+            };
+            applied = true;
+        }
+    }
+
+    if (params.has('w')) {
+        const w = params.get('w');
+        if (w === 'mortar' || w === 'artillery') {
+            currentWeapon = w;
+            localStorage.setItem('wardogs_weapon', w);
+            document.querySelectorAll('input[name="weapon"]').forEach(r => {
+                r.checked = r.value === w;
+            });
+            applied = true;
+        }
+    }
+
+    if (applied) {
+        syncInputs();
+        recalc();
+        draw();
+        saveState();
+        setTimeout(() => showToast(STR.shareApplied, 'success'), 400);
+        history.replaceState({}, '', location.pathname);
+    }
+}
+
+document.getElementById('shareBtn').addEventListener('click', copyShareLink);
+
 function saveState() {
     const state = {
         pointA: pointA ? {
@@ -1052,6 +1160,7 @@ function initLang() {
 
 resize();
 const loaded = loadState();
+applySharedParams();
 if (!loaded) resetView();
 draw();
 applyTheme();

@@ -1,7 +1,6 @@
 'use strict';
 
 const I18N = {
-
     ru: {
         title: 'Миномётный калькулятор',
         posA: 'Огневая позиция (A)',
@@ -44,6 +43,9 @@ const I18N = {
         helpP4: '<b>Результаты.</b> Дистанция, азимут от севера, угол ствола в mils, время подлёта. Если цель вне досягаемости — соответствующее сообщение.',
         helpP5: '<b>Сохранение.</b> Все данные автоматически сохраняются и восстанавливаются после перезагрузки страницы.',
         helpP6: '<b>О калькуляторе.</b> Фан-инструмент для игры WARDOGS. Неофициальный проект, не аффилирован с разработчиками игры.',
+        share: 'Поделиться',
+        shareCopied: 'Ссылка скопирована!',
+        shareApplied: 'Координаты применены из ссылки',
     },
 
     en: {
@@ -88,6 +90,9 @@ const I18N = {
         helpP4: '<b>Results.</b> Distance, azimuth from north, barrel angle in mils, flight time. If target is out of range — corresponding message.',
         helpP5: '<b>Saving.</b> All data is saved automatically and restored after page reload.',
         helpP6: '<b>About.</b> A fan-made tool for the tactical shooter WARDOGS. Unofficial project, not affiliated with the game developers.',
+        share: 'Share',
+        shareCopied: 'Link copied!',
+        shareApplied: 'Coordinates applied from link',
     },
 
     de: {
@@ -132,6 +137,9 @@ const I18N = {
         helpP4: '<b>Ergebnisse.</b> Entfernung, Azimut von Nord, Rohrwinkel in mils, Flugzeit. Ist das Ziel zu weit, zeigt der Rechner „außer Reichweite".',
         helpP5: '<b>Speichern.</b> Alle Daten werden automatisch gespeichert und nach einem Neuladen wiederhergestellt.',
         helpP6: '<b>Über den Rechner.</b> Ein Fan-Tool für den Taktik-Shooter WARDOGS. Inoffizielles Projekt, nicht mit den Spieleentwicklern verbunden.',
+        share: 'Teilen',
+        shareCopied: 'Link kopiert!',
+        shareApplied: 'Koordinaten aus Link übernommen',
     },
 
     fr: {
@@ -176,6 +184,9 @@ const I18N = {
         helpP4: "<b>Résultats.</b> Distance, azimut depuis le nord, angle en mils, temps de vol. Si la cible est hors de portée — message correspondant.",
         helpP5: '<b>Sauvegarde.</b> Toutes les données sont enregistrées automatiquement et restaurées après rechargement.',
         helpP6: "<b>À propos.</b> Un outil communautaire pour WARDOGS. Projet non officiel, sans lien avec les développeurs du jeu.",
+        share: 'Partager',
+        shareCopied: 'Lien copié !',
+        shareApplied: 'Coordonnées appliquées depuis le lien',
     },
 
     es: {
@@ -220,6 +231,9 @@ const I18N = {
         helpP4: '<b>Resultados.</b> Distancia, azimut desde el norte, ángulo en mils, tiempo de vuelo. Si el objetivo está fuera de alcance — mensaje correspondiente.',
         helpP5: '<b>Guardado.</b> Todos los datos se guardan automáticamente y se restauran al recargar.',
         helpP6: '<b>Acerca de.</b> Una herramienta hecha por fans para WARDOGS. Proyecto no oficial, sin relación con los desarrolladores del juego.',
+        share: 'Compartir',
+        shareCopied: '¡Enlace copiado!',
+        shareApplied: 'Coordenadas aplicadas desde el enlace',
     },
 
     pl: {
@@ -264,6 +278,9 @@ const I18N = {
         helpP4: '<b>Wyniki obliczeń.</b> Odległość, azymut od północy, kąt w mils, czas lotu. Jeśli cel jest poza zasięgiem — odpowiedni komunikat.',
         helpP5: '<b>Zapis.</b> Wszystkie dane są zapisywane automatycznie i przywracane po odświeżeniu strony.',
         helpP6: '<b>O kalkulatorze.</b> Fanowskie narzędzie do WARDOGS. Projekt nieoficjalny, niepowiązany z twórcami gry.',
+        share: 'Udostępnij',
+        shareCopied: 'Link skopiowany!',
+        shareApplied: 'Współrzędne zastosowane z linku',
     },
 
     uk: {
@@ -308,6 +325,9 @@ const I18N = {
         helpP4: '<b>Результати розрахунку.</b> Дистанція, азимут від півночі, кут у mils, час польоту. Якщо ціль поза досяжністю — відповідне повідомлення.',
         helpP5: '<b>Збереження.</b> Усі дані зберігаються автоматично і відновлюються після перезавантаження сторінки.',
         helpP6: '<b>Про калькулятор.</b> Фан-інструмент для WARDOGS. Неофіційний проєкт, не афілійований з розробниками гри.',
+        share: 'Поділитися',
+        shareCopied: 'Посилання скопійовано!',
+        shareApplied: 'Координати застосовано з посилання',
     },
 
     tr: {
@@ -351,7 +371,10 @@ const I18N = {
         helpP3: '<b>Koordinatlar.</b> X ve Y harita yüzdesi olarak girilir (0–100). Değerler manuel olarak girilebilir veya doğrudan haritaya yerleştirilebilir.',
         helpP4: '<b>Hesaplama sonuçları.</b> Mesafe, kuzeyden azimut, mils cinsinden açı, uçuş süresi. Hedef menzil dışındaysa — ilgili mesaj.',
         helpP5: '<b>Kaydetme.</b> Tüm veriler otomatik kaydedilir ve sayfa yeniden yüklendiğinde geri yüklenir.',
-        helpP6: "<b>Hesaplayıcı hakkında.</b> WARDOGS için topluluk tarafından hazırlanmış araç. Oyunun geliştiricileriyle bağlantısı olmayan resmi olmayan proje.",
+        helpP6: "<b>Hesaplayıcı hakkında.</b> WARDOGS için topluluk tarafından hazırlanmış araç. Oyunun разработчиков ile bağlantısı olmayan resmi olmayan proje.",
+        share: 'Paylaş',
+        shareCopied: 'Bağlantı kopyalandı!',
+        shareApplied: 'Koordinatlar bağlantıdan uygulandı',
     },
 
     zh: {
@@ -396,5 +419,8 @@ const I18N = {
         helpP4: '<b>计算结果。</b>距离、从北算起的方位角、以 mils 为单位的角度、飞行时间。如果目标超出射程——显示相应消息。',
         helpP5: '<b>保存。</b>所有数据自动保存并在页面重新加载后恢复。',
         helpP6: '<b>关于计算器。</b>为 WARDOGS 制作的粉丝工具。非官方项目，与游戏开发商无关。',
+        share: '分享',
+        shareCopied: '链接已复制！',
+        shareApplied: '已从链接应用坐标',
     }
 };
