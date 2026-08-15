@@ -10,4 +10,4 @@
 
 Неофициальный фан-инструмент, не аффилирован с разработчиками WARDOGS.
 
-📧 Связь: egor.silaev@yandex.ru
+📧 Связь: egor.silaev2003@yandex.ru
