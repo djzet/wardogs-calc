@@ -1,13 +1,8 @@
 'use strict';
 
-/* ===== КАРТА WARDOGS =====
-   256 км² = квадрат 16 × 16 км */
-const MAP = { size: 16000 }; // размер в метрах
-
-/* Зона контроля — круг Ø 2 км (радиус 1 км) */
+const MAP = { size: 16000 };
 const ZONE = { cx: 8240, cy: 7330, r: 1000 };
 
-/* ===== ВЫШКИ НА КАРТЕ ===== */
 const TOWERS = [
     { x: 51.59, y: 44.61, name: 'tower1' },
     { x: 47.86, y: 44.77, name: 'tower2' },
@@ -15,37 +10,150 @@ const TOWERS = [
     { x: 55.07, y: 48.00, name: 'tower4' },
     { x: 53.50, y: 43.01, name: 'tower5' },
 ];
-let showTowers = localStorage.getItem('wardogs_towers') !== '0';
-let selectedTower = null;
 
-/* Предзагрузка иконки башни */
-const towerIcon = new Image();
-towerIcon.src = 'icons/tower.webp';
-towerIcon.onload = () => draw();
+const NBSP = '\u00A0';
 
-/* ===== БАЛЛИСТИКА =====
-   Миномёт стреляет НАВЕСНОЙ траекторией: из двух решений
-   баллистического уравнения берём крутой угол (корень с «+»).
-   TODO: после релиза заменить на реальные значения игры */
-const MORTAR = { v0: 240, g: 9.8 };
+const MORTAR_TABLE = [
+    { mils: 290, dist: 700 },
+    { mils: 340, dist: 650 },
+    { mils: 390, dist: 600 },
+    { mils: 440, dist: 550 },
+    { mils: 490, dist: 500 },
+    { mils: 540, dist: 450 },
+    { mils: 590, dist: 400 },
+    { mils: 640, dist: 350 },
+    { mils: 690, dist: 300 },
+    { mils: 700, dist: 290 },
+    { mils: 750, dist: 240 },
+    { mils: 800, dist: 187 },
+    { mils: 850, dist: 132 },
+    { mils: 900, dist: 110 },
+];
 
-/* ===== ТАЙЛЫ КАРТЫ =====
-   Папки тайлов: tiles/zoom_0 … tiles/zoom_5 (zoom_6 не существует) */
+const ARTILLERY_TABLE = [
+    { mils: 290, dist: 2500 },
+    { mils: 900, dist: 2352 },
+    { mils: 910, dist: 2331 },
+    { mils: 920, dist: 2310 },
+    { mils: 930, dist: 2289 },
+    { mils: 940, dist: 2268 },
+    { mils: 950, dist: 2247 },
+    { mils: 960, dist: 2226 },
+    { mils: 970, dist: 2204 },
+    { mils: 980, dist: 2182 },
+    { mils: 990, dist: 2160 },
+    { mils: 1000, dist: 2138 },
+];
+
+const WEAPONS = {
+    mortar: {
+        milsTable: MORTAR_TABLE,
+        step: 50,
+        v0: 290 / (22 * Math.cos(700 / 1000)),
+        maxRange: 700,
+        rangeColor: '#5ba8d3'
+    },
+    artillery: {
+        milsTable: ARTILLERY_TABLE,
+        step: 10,
+        v0: 2500 / (12 * Math.cos(290 / 1000)),
+        maxRange: 2500,
+        rangeColor: '#5ba8d3'
+    }
+};
+
 const TILES = {
     maxZoom: 5,
     size: 256,
     path: (z, x, y) => `tiles/zoom_${z}/${x}_${y}.webp`,
 };
 
-/* LRU-кэш тайлов: держим не больше TILE_CACHE_MAX загруженных картинок */
 const TILE_CACHE_MAX = 500;
 const tileCache = new Map();
+
+const INPUT_DEBOUNCE_MS = 80;
+const TAP_THRESHOLD = 5;
+const LONG_PRESS_MS = 500;
+
+const canvas = document.getElementById('map');
+const ctx = canvas.getContext('2d');
+const menu = document.getElementById('ctxMenu');
+const langSelect = document.getElementById('langSelect');
+
+const inputs = {
+    ax: document.getElementById('ax'),
+    ay: document.getElementById('ay'),
+    bx: document.getElementById('bx'),
+    by: document.getElementById('by'),
+};
+
+const out = {
+    dist: document.getElementById('dist'),
+    az: document.getElementById('azimuth'),
+    el: document.getElementById('elevation'),
+    time: document.getElementById('flightTime'),
+};
+
+let showTowers = localStorage.getItem('wardogs_towers') !== '0';
+let selectedTower = null;
+let currentWeapon = localStorage.getItem('wardogs_weapon') || 'mortar';
+let theme = localStorage.getItem('wardogs_theme') || 'dark';
+
+const view = { scale: 0.05, ox: 0, oy: 0 };
+let pointA = null;
+let pointB = null;
+let menuWorld = null;
+let menuPointKey = null;
+let dragging = null;
+let inputTimer = null;
+
+const towerIcon = new Image();
+towerIcon.src = 'icons/tower.webp';
+towerIcon.onload = () => draw();
+
+const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
+
+function percentToMeters(percent) {
+    return (percent * MAP.size) / 100;
+}
+
+function metersToPercent(meters) {
+    return (meters * 100) / MAP.size;
+}
+
+function formatPercent(v) {
+    return v.toFixed(2);
+}
+
+function worldToScreen(wx, wy) {
+    return { x: wx * view.scale + view.ox, y: -wy * view.scale + view.oy };
+}
+
+function screenToWorld(sx, sy) {
+    return { x: (sx - view.ox) / view.scale, y: (view.oy - sy) / view.scale };
+}
+
+function fmtWithNbsp(num) {
+    return String(Math.round(num)).replace(/\B(?=(\d{3})+(?!\d))/g, NBSP);
+}
+
+function fmtCoord(meters, step) {
+    if (step >= 1000) {
+        const km = meters / 1000;
+        const v = Number.isInteger(km) ? String(km) : km.toFixed(1);
+        return v + NBSP + STR.u_km;
+    }
+    return Math.round(meters) + NBSP + STR.u_m;
+}
+
+function fmtDist(d) {
+    return fmtWithNbsp(d) + NBSP + STR.u_m;
+}
 
 function getTile(z, x, y) {
     const key = `${z}/${x}_${y}`;
     let t = tileCache.get(key);
     if (t) {
-        // отметим как недавно использованный (конец LRU-списка)
         tileCache.delete(key);
         tileCache.set(key, t);
         return t;
@@ -56,16 +164,22 @@ function getTile(z, x, y) {
     img.onerror = () => { t.error = true; };
     img.src = TILES.path(z, x, y);
     tileCache.set(key, t);
+
     if (tileCache.size > TILE_CACHE_MAX) {
-        const oldest = tileCache.keys().next().value;
-        tileCache.delete(oldest);
+        const oldestKey = tileCache.keys().next().value;
+        const oldest = tileCache.get(oldestKey);
+        if (oldest && oldest.img) {
+            oldest.img.src = '';
+            oldest.img.onload = null;
+            oldest.img.onerror = null;
+        }
+        tileCache.delete(oldestKey);
     }
     return t;
 }
 
 function drawTiles() {
     const w = canvas.clientWidth, h = canvas.clientHeight;
-
     const z = Math.max(0, Math.min(TILES.maxZoom,
         Math.round(Math.log2((view.scale * MAP.size) / TILES.size))));
     const tps = 2 ** z;
@@ -73,7 +187,6 @@ function drawTiles() {
     const drawSize = TILES.size * (view.scale / tileScale);
 
     const a = screenToWorld(0, 0), b = screenToWorld(w, h);
-
     const x0 = Math.max(0, Math.floor((a.x / MAP.size) * tps));
     const x1 = Math.min(tps - 1, Math.floor((b.x / MAP.size) * tps));
     const y0 = Math.max(0, Math.floor(((MAP.size - a.y) / MAP.size) * tps));
@@ -95,98 +208,6 @@ function drawTiles() {
     }
 }
 
-/* ===== DOM ===== */
-const canvas = document.getElementById('map');
-const ctx = canvas.getContext('2d');
-const menu = document.getElementById('ctxMenu');
-const langSelect = document.getElementById('langSelect');
-const inputs = {
-    ax: document.getElementById('ax'), ay: document.getElementById('ay'),
-    bx: document.getElementById('bx'), by: document.getElementById('by'),
-};
-const out = {
-    dist: document.getElementById('dist'), az: document.getElementById('azimuth'),
-    el: document.getElementById('elevation'), time: document.getElementById('flightTime'),
-};
-
-/* ===== ПЕРЕВОД ИНТЕРФЕЙСА (I18N) ===== */
-const I18N_STRINGS = {
-    title: 'Миномётный калькулятор',
-    posA: 'Огневая позиция (A)',
-    posB: 'Цель (B)',
-    dist: 'Дистанция',
-    az: 'Азимут',
-    el: 'Угол возвышения',
-    time: 'Время подлёта',
-    hint: 'ПКМ по карте — поставить или удалить точку.<br>ЛКМ — двигать карту (или саму точку).<br>Колесо мыши — масштаб.',
-    reset: 'Сбросить вид',
-    menuA: '📍 Позиция миномёта (A)',
-    menuB: '🎯 Цель (B)',
-    menuDel: '✕ Удалить точку',
-    langLabel: 'Язык интерфейса',
-    contactLabel: '✉️ Связь',
-    extra: 'Дополнительно',
-    towers: 'Иконки вышек',
-    discordTitle: 'Discord',
-    discord: 'Wardogs СНГ / CIS',
-    tower1: 'Башня 1',
-    tower2: 'Башня 2',
-    tower3: 'Башня 3',
-    tower4: 'Башня 4',
-    tower5: 'Башня 5',
-    helpTitle: 'Как пользоваться калькулятором',
-    helpP1: '<b>Установка точек.</b> Миномётный калькулятор WARDOGS предназначен для быстрого расчёта данных стрельбы. Укажите свою позицию (точка A) и цель (точка B) — калькулятор рассчитает дистанцию, азимут, угол возвышения и время подлёта снаряда.',
-    helpP2: '<b>Работа с картой.</b> Правый клик по карте открывает меню, где можно поставить позицию миномёта или цель. Левая кнопка мыши перемещает карту и уже установленные точки. Колесо мыши изменяет масштаб. На сенсорных экранах: один палец — перемещение карты, два пальца — масштаб, долгое нажатие — контекстное меню. Клик по вышке показывает её название.',
-    helpP3: '<b>Координаты.</b> Координаты вводятся в процентах карты: например 51.59 по X и 44.61 по Y. Значения можно ввести вручную в поля левой панели — точки появятся на карте автоматически.',
-    helpP4: '<b>Результаты расчёта.</b> Дистанция — расстояние до цели. Азимут — направление на цель в градусах от севера. Угол возвышения — угол для миномёта (навесная траектория). Время подлёта — время от выстрела до попадания. Если цель слишком далеко, калькулятор покажет «вне досягаемости».',
-    helpP5: '<b>Сохранение.</b> Все данные — точки, вид карты, тема, язык и отображение вышек — сохраняются автоматически и восстанавливаются после перезагрузки страницы.',
-    helpP6: '<b>О калькуляторе.</b> Фан-инструмент для миномётных расчётов в тактическом шутере WARDOGS. Работает на интерактивной карте 16×16 км с тайлами, поддерживает 9 языков интерфейса, сохраняет состояние между сессиями и не требует установки. Неофициальный проект, не аффилирован с разработчиками игры.',
-    oor: 'вне досягаемости',
-    zero: 'точки совпадают',
-    u_m: 'м',
-    u_km: 'км',
-    u_s: 'с',
-};
-const DYNAMIC_KEYS = [
-    'oor', 'zero', 'u_m', 'u_km', 'u_s',
-    'tower1', 'tower2', 'tower3', 'tower4', 'tower5',
-    'helpTitle', 'helpP1', 'helpP2', 'helpP3', 'helpP4', 'helpP5',
-];
-const STR = { ...I18N_STRINGS };
-
-/* ===== СОСТОЯНИЕ ===== */
-const view = { scale: 0.05, ox: 0, oy: 0 };
-let pointA = null;
-let pointB = null;
-let menuWorld = null;
-let menuPointKey = null;
-let dragging = null;
-
-/* ===== ДЕБАУНС СОХРАНЕНИЯ ===== */
-let saveViewTimer = null;
-function debouncedSaveView() {
-    clearTimeout(saveViewTimer);
-    saveViewTimer = setTimeout(saveState, 200);
-}
-
-/* ===== ПЕРЕКОНВЕРТАЦИЯ ===== */
-function percentToMeters(percent) {
-    return (percent * MAP.size) / 100;
-}
-
-function metersToPercent(meters) {
-    return (meters * 100) / MAP.size;
-}
-
-function formatPercent(v) {
-    return v.toFixed(2);
-}
-
-/* ===== КООРДИНАТНЫЕ СИСТЕМЫ ===== */
-function worldToScreen(wx, wy) { return { x: wx * view.scale + view.ox, y: -wy * view.scale + view.oy }; }
-function screenToWorld(sx, sy) { return { x: (sx - view.ox) / view.scale, y: (view.oy - sy) / view.scale }; }
-
-/* ===== ТЕМЫ ===== */
 const CANVAS_THEMES = {
     dark: {
         bg: '#10151b', mapBg: '#161d25',
@@ -207,10 +228,96 @@ const CANVAS_THEMES = {
         line: '#8a6d00',
     },
 };
-let theme = localStorage.getItem('wardogs_theme') || 'dark';
 function CT() { return CANVAS_THEMES[theme] || CANVAS_THEMES.dark; }
 
-/* ===== CANVAS ===== */
+const I18N_STRINGS = {
+    title: 'Миномётный калькулятор',
+    posA: 'Огневая позиция (A)',
+    posB: 'Цель (B)',
+    dist: 'Дистанция',
+    az: 'Азимут',
+    el: 'Угол возвышения',
+    time: 'Время подлёта',
+    controlsTitle: 'Настройки',
+    weaponType: 'Тип орудия',
+    weaponMortar: 'Миномёт (700 м)',
+    weaponArtillery: 'Артиллерия (>2 км)',
+    hint: 'ПКМ по карте — поставить или удалить точку.<br>ЛКМ — двигать карту (или саму точку).<br>Колесо мыши — масштаб.',
+    reset: 'Сбросить вид',
+    menuA: '📍 Позиция миномёта (A)',
+    menuB: '🎯 Цель (B)',
+    menuDel: '✕ Удалить точку',
+    langLabel: 'Язык интерфейса',
+    contactLabel: '✉️ Связь',
+    extra: 'Дополнительно',
+    towers: 'Иконки вышек',
+    discordTitle: 'Discord',
+    discord: 'Wardogs СНГ / CIS',
+    discordBtn: 'Перейти в Discord',
+    tower1: 'Башня 1',
+    tower2: 'Башня 2',
+    tower3: 'Башня 3',
+    tower4: 'Башня 4',
+    tower5: 'Башня 5',
+    helpTitle: 'Как пользоваться калькулятором',
+    helpP1: '<b>Установка точек.</b> Укажите свою позицию (точка A) и цель (точка B) — калькулятор рассчитает дистанцию, азимут, угол возвышения и время подлёта снаряда.',
+    helpP2: '<b>Работа с картой.</b> Правый клик по карте открывает меню. Левая кнопка мыши перемещает карту. Колесо мыши изменяет масштаб. На сенсорных экранах: один палец — перемещение, два пальца — масштаб, долгое нажатие — контекстное меню.',
+    helpP3: '<b>Координаты.</b> X и Y вводятся в процентах карты (0–100). Значения можно ввести вручную или поставить точки прямо на карте.',
+    helpP4: '<b>Результаты.</b> Дистанция, азимут от севера, угол ствола в mils, время подлёта. Если цель вне досягаемости — соответствующее сообщение.',
+    helpP5: '<b>Сохранение.</b> Все данные автоматически сохраняются и восстанавливаются после перезагрузки страницы.',
+    helpP6: '<b>О калькуляторе.</b> Фан-инструмент для игры WARDOGS. Неофициальный проект, не аффилирован с разработчиками игры.',
+    oor: 'вне досягаемости',
+    zero: 'точки совпадают',
+    u_m: 'м',
+    u_km: 'км',
+    u_s: 'с',
+    u_mil: 'mil',
+};
+
+const DYNAMIC_KEYS = [
+    'oor', 'zero', 'u_m', 'u_km', 'u_s', 'u_mil',
+    'tower1', 'tower2', 'tower3', 'tower4', 'tower5',
+];
+
+const STR = { ...I18N_STRINGS };
+
+const HTML_KEYS = new Set([
+    'hint',
+    'helpP1', 'helpP2', 'helpP3', 'helpP4', 'helpP5', 'helpP6'
+]);
+
+function applyDict(dict) {
+    document.querySelectorAll('[data-i18n]').forEach(el => {
+        const key = el.dataset.i18n;
+        if (dict[key] === undefined) return;
+        if (HTML_KEYS.has(key)) {
+            el.innerHTML = dict[key];
+        } else {
+            el.textContent = dict[key];
+        }
+    });
+    DYNAMIC_KEYS.forEach(k => { if (dict[k]) STR[k] = dict[k]; });
+    recalc();
+    draw();
+}
+
+function translateUI(lang) {
+    const dict = (typeof I18N !== 'undefined' && I18N[lang]) ? I18N[lang] : I18N_STRINGS;
+    applyDict(dict);
+}
+
+langSelect.addEventListener('change', () => {
+    const lang = langSelect.value;
+    localStorage.setItem('wardogs_lang', lang);
+    translateUI(lang);
+});
+
+let saveViewTimer = null;
+function debouncedSaveView() {
+    clearTimeout(saveViewTimer);
+    saveViewTimer = setTimeout(saveState, 200);
+}
+
 function resize() {
     const dpr = window.devicePixelRatio || 1;
     canvas.width = canvas.clientWidth * dpr;
@@ -230,7 +337,6 @@ function resetView() {
 }
 document.getElementById('resetView').onclick = resetView;
 
-/* ===== ВЫЕЗЖАЮЩАЯ ВКЛАДКА ===== */
 const drawer = document.getElementById('drawer');
 const drawerBackdrop = document.getElementById('drawerBackdrop');
 
@@ -242,7 +348,6 @@ document.getElementById('drawerToggle').onclick = () => openDrawer(true);
 document.getElementById('drawerClose').onclick = () => openDrawer(false);
 drawerBackdrop.onclick = () => openDrawer(false);
 
-/* ===== МОДАЛЬНОЕ ОКНО СПРАВКИ ===== */
 const helpModal = document.getElementById('helpModal');
 
 function openHelp(state) {
@@ -251,10 +356,9 @@ function openHelp(state) {
 document.getElementById('helpToggle').onclick = () => openHelp(true);
 document.getElementById('helpClose').onclick = () => openHelp(false);
 helpModal.addEventListener('mousedown', e => {
-    if (e.target === helpModal) openHelp(false); // клик по подложке закрывает
+    if (e.target === helpModal) openHelp(false);
 });
 
-/* ===== ПЕРЕКЛЮЧАТЕЛЬ ВЫШЕК ===== */
 const towersToggle = document.getElementById('towersToggle');
 towersToggle.checked = showTowers;
 towersToggle.addEventListener('change', () => {
@@ -264,7 +368,6 @@ towersToggle.addEventListener('change', () => {
     draw();
 });
 
-/* ===== ПЕРЕКЛЮЧЕНИЕ ТЕМЫ ===== */
 const themeToggle = document.getElementById('themeToggle');
 function applyTheme() {
     document.body.classList.toggle('light', theme === 'light');
@@ -276,7 +379,6 @@ themeToggle.onclick = () => {
     applyTheme();
 };
 
-/* ===== ФОРМАТИРОВАНИЕ ===== */
 function niceStep() {
     const raw = 70 / view.scale;
     const pow = Math.pow(10, Math.floor(Math.log10(raw)));
@@ -284,29 +386,15 @@ function niceStep() {
     return 10 * pow;
 }
 
-function fmtCoord(meters, step) {
-    if (step >= 1000) {
-        const km = meters / 1000;
-        return (Number.isInteger(km) ? String(km) : km.toFixed(1)) + ' ' + STR.u_km;
-    }
-    return Math.round(meters) + ' ' + STR.u_m;
-}
-
-function fmtDist(d) {
-    return d >= 1000 ? (d / 1000).toFixed(2) + ' ' + STR.u_km : Math.round(d) + ' ' + STR.u_m;
-}
-
-/* ===== ПОИСК ТОЧКИ A/B ПОД КУРСОРОМ ===== */
 function hitPoint(sx, sy) {
     for (const [key, p] of [['A', pointA], ['B', pointB]]) {
         if (!p) continue;
         const s = worldToScreen(p.x, p.y);
-        if (Math.hypot(s.x - sx, s.y - sy) <= 10) return key;
+        if (Math.hypot(s.x - sx, s.y - sy) <= 12) return key;
     }
     return null;
 }
 
-/* ===== ПОИСК БАШНИ ПОД КУРСОРОМ ===== */
 function findTowerAt(sx, sy) {
     if (!showTowers) return null;
     const halfSize = getTowerIconSize() / 2;
@@ -319,7 +407,40 @@ function findTowerAt(sx, sy) {
     return null;
 }
 
-/* ===== ОТРИСОВКА ===== */
+function drawRangeCircle() {
+    if (!pointA) return;
+
+    const weapon = WEAPONS[currentWeapon];
+    if (!weapon || !weapon.maxRange) return;
+
+    const sa = worldToScreen(pointA.x, pointA.y);
+    const radiusPx = weapon.maxRange * view.scale;
+    const color = weapon.rangeColor || '#9fd356';
+
+    ctx.beginPath();
+    ctx.arc(sa.x, sa.y, radiusPx, 0, Math.PI * 2);
+    ctx.fillStyle = color + '14';
+    ctx.fill();
+
+    ctx.strokeStyle = color + '99';
+    ctx.setLineDash([10, 6]);
+    ctx.lineWidth = 1.5;
+    ctx.stroke();
+    ctx.setLineDash([]);
+    ctx.lineWidth = 1;
+
+    const label = currentWeapon === 'mortar'
+        ? '700' + NBSP + STR.u_m
+        : '2.5' + NBSP + STR.u_km;
+    ctx.fillStyle = color;
+    ctx.font = 'bold 11px sans-serif';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'bottom';
+    ctx.fillText(label, sa.x, sa.y - radiusPx - 4);
+    ctx.textAlign = 'start';
+    ctx.textBaseline = 'alphabetic';
+}
+
 function draw() {
     const c = CT();
     const w = canvas.clientWidth, h = canvas.clientHeight;
@@ -398,6 +519,8 @@ function draw() {
 
     ctx.fillStyle = c.labels;
     ctx.font = '11px monospace';
+    ctx.textAlign = 'start';
+    ctx.textBaseline = 'alphabetic';
     for (let gx = Math.ceil(minX / step) * step; gx <= maxX; gx += step)
         ctx.fillText(fmtCoord(gx, step), worldToScreen(gx, 0).x + 4, h - 6);
     for (let gy = Math.ceil(minY / step) * step; gy <= maxY; gy += step)
@@ -416,6 +539,8 @@ function draw() {
         ctx.fillText(fmtDist(d), (sa.x + sb.x) / 2 + 8, (sa.y + sb.y) / 2 - 8);
     }
 
+    drawRangeCircle();
+
     if (pointA) drawPoint(pointA, '#7bc95e', 'A');
     if (pointB) drawPoint(pointB, '#e05656', 'B');
 }
@@ -427,6 +552,8 @@ function drawPoint(p, color, label) {
     ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
     ctx.fillStyle = color;
     ctx.font = 'bold 13px sans-serif';
+    ctx.textAlign = 'start';
+    ctx.textBaseline = 'alphabetic';
     ctx.fillText(label, s.x + 11, s.y - 9);
 }
 
@@ -490,9 +617,14 @@ function drawTowerTooltip(p, s) {
     ctx.textBaseline = 'alphabetic';
 }
 
-/* ===== ТОЧКИ И ФОРМА ===== */
 function setPoint(key, x, y) {
-    const p = (x === null) ? null : { x, y };
+    let p = null;
+    if (x != null && y != null) {
+        p = {
+            x: clamp(x, 0, MAP.size),
+            y: clamp(y, 0, MAP.size)
+        };
+    }
     if (key === 'A') pointA = p; else pointB = p;
     syncInputs(); recalc(); draw(); saveState();
 }
@@ -512,73 +644,113 @@ function syncInputs() {
     }
 }
 
-function onInput() {
-    pointA = readPair(inputs.ax, inputs.ay);
-    pointB = readPair(inputs.bx, inputs.by);
+function readPoint(ix, iy) {
+    const px = parseFloat(ix.value), py = parseFloat(iy.value);
+    if (isNaN(px) || isNaN(py)) return null;
+    return {
+        x: percentToMeters(clamp(px, 0, 100)),
+        y: percentToMeters(clamp(py, 0, 100))
+    };
+}
+
+function onInputImmediate() {
+    pointA = readPoint(inputs.ax, inputs.ay);
+    pointB = readPoint(inputs.bx, inputs.by);
     recalc(); draw(); saveState();
 }
 
-function readPair(ix, iy) {
-    const px = parseFloat(ix.value), py = parseFloat(iy.value);
-    if (isNaN(px) || isNaN(py)) return null;
-    return { x: percentToMeters(px), y: percentToMeters(py) };
+function onInput() {
+    clearTimeout(inputTimer);
+    inputTimer = setTimeout(onInputImmediate, INPUT_DEBOUNCE_MS);
 }
 
 Object.values(inputs).forEach(i => i.addEventListener('input', onInput));
+Object.values(inputs).forEach(i => i.addEventListener('blur', () => {
+    clearTimeout(inputTimer);
+    onInputImmediate();
+}));
+
 document.getElementById('clearA').onclick = () => setPoint('A', null);
 document.getElementById('clearB').onclick = () => setPoint('B', null);
 
-/* ===== РАСЧЁТ ===== */
+function distToMils(dist, table) {
+    if (!table || table.length === 0) return null;
+
+    if (dist > table[0].dist) return null;
+
+    if (dist <= table[table.length - 1].dist) {
+        return table[table.length - 1].mils;
+    }
+
+    for (let i = 0; i < table.length - 1; i++) {
+        const p1 = table[i];
+        const p2 = table[i + 1];
+
+        if (dist <= p1.dist && dist >= p2.dist) {
+            const range = p1.dist - p2.dist;
+            const t = range > 0 ? (p1.dist - dist) / range : 0;
+            return Math.round(p1.mils + t * (p2.mils - p1.mils));
+        }
+    }
+
+    return null;
+}
+
 function recalc() {
+    out.el.classList.remove('oor', 'warn');
+    out.dist.classList.remove('oor', 'warn');
+
     if (!pointA || !pointB) {
         out.dist.textContent = out.az.textContent = out.el.textContent = out.time.textContent = '—';
         return;
     }
+
     const dx = pointB.x - pointA.x, dy = pointB.y - pointA.y;
     const dist = Math.hypot(dx, dy);
     const az = (Math.atan2(dx, dy) * 180 / Math.PI + 360) % 360;
     out.dist.textContent = fmtDist(dist);
     out.az.textContent = az.toFixed(1) + '°';
 
-    if (dist === 0) {
+    if (dist < 0.001) {
         out.el.textContent = STR.zero;
+        out.el.classList.add('warn');
         out.time.textContent = '—';
         return;
     }
 
-    const { v0, g } = MORTAR;
-    const v2 = v0 * v0;
-    const disc = v2 * v2 - g * g * dist * dist;
-    if (disc < 0) {
+    const weapon = WEAPONS[currentWeapon];
+    const { milsTable, step, v0 } = weapon;
+
+    const milsExact = distToMils(dist, milsTable);
+
+    if (milsExact === null) {
         out.el.textContent = STR.oor;
+        out.el.classList.add('oor');
         out.time.textContent = '—';
         return;
     }
-    // навесная траектория: берём «+» корень (крутой угол, как у миномёта)
-    const el = Math.atan((v2 + Math.sqrt(disc)) / (g * dist));
-    out.el.textContent = (el * 180 / Math.PI).toFixed(1) + '°';
-    out.time.textContent = (dist / (v0 * Math.cos(el))).toFixed(1) + ' ' + STR.u_s;
+
+    const isExactInTable = milsTable.some(p => p.mils === milsExact);
+    const mils = isExactInTable ? milsExact : Math.round(milsExact / step) * step;
+
+    const theta = mils / 1000;
+    const flightTime = dist / (v0 * Math.cos(theta));
+
+    out.el.textContent = mils + NBSP + STR.u_mil;
+    out.time.textContent = (isFinite(flightTime) ? flightTime.toFixed(1) : '—') + NBSP + STR.u_s;
 }
 
-/* ===== МЫШЬ + СЕНСОР (Pointer Events) =====
-   Мышь:  ЛКМ — пан/точки, ПКМ — меню, колесо — зум, ховер — курсоры.
-   Тач:   1 палец — пан/точки, 2 пальца — pinch-zoom,
-          долгое нажатие (500 мс) — контекстное меню.
-   Клик по вышке: смещение < TAP_THRESHOLD — клик по башне, иначе пан. */
-const pointers = new Map();      // pointerId -> {x, y}
-let pinch = null;                // состояние pinch-жеста
+const pointers = new Map();
+let pinch = null;
 let longPressTimer = null;
 let longPressFired = false;
-let lastTouchTs = 0;             // для отличия contextmenu от тача и от мыши
-const TAP_THRESHOLD = 5;         // px
-const LONG_PRESS_MS = 500;
+let lastTouchTs = 0;
 
 function canvasPos(e) {
     const r = canvas.getBoundingClientRect();
     return { x: e.clientX - r.left, y: e.clientY - r.top };
 }
 
-/* --- контекстное меню: показ в точке --- */
 function openMenuAt(sx, sy) {
     menuWorld = screenToWorld(sx, sy);
     menuPointKey = hitPoint(sx, sy);
@@ -592,7 +764,6 @@ function openMenuAt(sx, sy) {
     menu.style.top = top + 'px';
 }
 
-/* --- long-press для сенсорных экранов --- */
 function startLongPress(sx, sy) {
     clearTimeout(longPressTimer);
     longPressFired = false;
@@ -609,15 +780,13 @@ canvas.addEventListener('pointerdown', e => {
     const p = canvasPos(e);
     if (e.pointerType !== 'mouse') lastTouchTs = performance.now();
 
-    // capture гарантирует pointerup даже вне окна/при уходе в фон
     try { canvas.setPointerCapture(e.pointerId); } catch (_) { }
     pointers.set(e.pointerId, p);
 
-    if (e.button !== 0) return; // ПКМ/средняя — не драг, их ведёт contextmenu
+    if (e.button !== 0) return;
 
     hideMenu();
 
-    // второй палец — начинаем pinch
     if (pointers.size === 2) {
         stopLongPress();
         dragging = null;
@@ -632,10 +801,8 @@ canvas.addEventListener('pointerdown', e => {
     }
     if (pointers.size > 2) return;
 
-    // один указатель
     if (e.pointerType !== 'mouse') startLongPress(p.x, p.y);
 
-    // 1) схватили точку (A/B) — тащим точку, даже если она стоит на башне
     const hit = hitPoint(p.x, p.y);
     if (hit) {
         dragging = { mode: 'point', key: hit };
@@ -643,7 +810,6 @@ canvas.addEventListener('pointerdown', e => {
         return;
     }
 
-    // 2) нажали на башню — либо клик по ней, либо пан (решит порог движения)
     const towerHit = findTowerAt(p.x, p.y);
     if (towerHit) {
         dragging = {
@@ -653,7 +819,6 @@ canvas.addEventListener('pointerdown', e => {
         return;
     }
 
-    // 3) иначе — пан карты
     dragging = { mode: 'pan', startX: p.x, startY: p.y, ox: view.ox, oy: view.oy };
     canvas.style.cursor = 'grabbing';
 });
@@ -666,12 +831,11 @@ window.addEventListener('pointermove', e => {
         if (e.pointerType !== 'mouse') lastTouchTs = performance.now();
     }
 
-    // pinch-zoom + пан двумя пальцами
     if (pinch && pointers.size >= 2) {
         const [p1, p2] = [...pointers.values()];
         const mid = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
         const dist = Math.hypot(p1.x - p2.x, p1.y - p2.y) || 1;
-        const newScale = Math.min(1, Math.max(0.005, pinch.scale * dist / pinch.dist));
+        const newScale = clamp(pinch.scale * dist / pinch.dist, 0.005, 1);
         view.scale = newScale;
         view.ox = mid.x - pinch.anchor.x * newScale;
         view.oy = mid.y + pinch.anchor.y * newScale;
@@ -680,7 +844,6 @@ window.addEventListener('pointermove', e => {
         return;
     }
 
-    // ховер без нажатия — только курсоры (мыши)
     if (!tracked) {
         if (e.pointerType === 'mouse' && !dragging) {
             const overPoint = hitPoint(p.x, p.y);
@@ -692,10 +855,9 @@ window.addEventListener('pointermove', e => {
 
     if (!dragging) return;
 
-    // порог движения: двинулись — пан, не двинулись — клик по башне
     if (dragging.mode === 'tower-or-pan') {
         const moved = Math.hypot(p.x - dragging.startX, p.y - dragging.startY) > TAP_THRESHOLD;
-        if (!moved) return; // пока это потенциальный клик по вышке
+        if (!moved) return;
         stopLongPress();
         dragging = { mode: 'pan', startX: dragging.startX, startY: dragging.startY, ox: dragging.ox, oy: dragging.oy };
         canvas.style.cursor = 'grabbing';
@@ -710,8 +872,8 @@ window.addEventListener('pointermove', e => {
     } else if (dragging.mode === 'point') {
         stopLongPress();
         const wpt = screenToWorld(p.x, p.y);
-        const px = Math.round(metersToPercent(wpt.x) * 100) / 100;
-        const py = Math.round(metersToPercent(wpt.y) * 100) / 100;
+        const px = clamp(Math.round(metersToPercent(wpt.x) * 100) / 100, 0, 100);
+        const py = clamp(Math.round(metersToPercent(wpt.y) * 100) / 100, 0, 100);
         setPoint(dragging.key, percentToMeters(px), percentToMeters(py));
     }
 });
@@ -723,7 +885,6 @@ function onPointerUp(e) {
 
     stopLongPress();
 
-    // вышел из pinch: оставшийся палец становится паном
     if (pinch) {
         if (pointers.size >= 2) return;
         pinch = null;
@@ -736,7 +897,6 @@ function onPointerUp(e) {
         return;
     }
 
-    // тап по башне (не сдвинулись и не было long-press)
     if (dragging && dragging.mode === 'tower-or-pan' && !longPressFired && e.button === 0) {
         const p = canvasPos(e);
         if (findTowerAt(p.x, p.y) === dragging.tower) {
@@ -754,7 +914,6 @@ function onPointerUp(e) {
 window.addEventListener('pointerup', onPointerUp);
 window.addEventListener('pointercancel', onPointerUp);
 
-// страховка: окно потеряло фокус — сбрасываем все жесты
 window.addEventListener('blur', () => {
     pointers.clear();
     pinch = null;
@@ -764,11 +923,10 @@ window.addEventListener('blur', () => {
     canvas.style.cursor = 'crosshair';
 });
 
-/* --- колесо мыши (десктоп) --- */
 canvas.addEventListener('wheel', e => {
     e.preventDefault();
     const factor = Math.exp(-e.deltaY * 0.0015);
-    const newScale = Math.min(1, Math.max(0.005, view.scale * factor));
+    const newScale = clamp(view.scale * factor, 0.005, 1);
     const wpt = screenToWorld(e.offsetX, e.offsetY);
     view.scale = newScale;
     view.ox = e.offsetX - wpt.x * view.scale;
@@ -777,11 +935,9 @@ canvas.addEventListener('wheel', e => {
     debouncedSaveView();
 }, { passive: false });
 
-/* ===== КОНТЕКСТНОЕ МЕНЮ (ПКМ / long-press) ===== */
 canvas.addEventListener('contextmenu', e => {
     e.preventDefault();
     const fromTouch = performance.now() - lastTouchTs < 1000;
-    // на таче меню уже открыл long-press — не дублируем
     if (fromTouch && longPressFired) return;
     stopLongPress();
     const p = canvasPos(e);
@@ -806,29 +962,44 @@ window.addEventListener('keydown', e => {
     }
 });
 
-/* ===== QR DISCORD: ecommerce-событие при клике ===== */
-document.getElementById('discordQr').addEventListener('click', () => {
+function sendDiscordEvent(source) {
     window.dataLayer = window.dataLayer || [];
     window.dataLayer.push({
         event: 'select_promotion',
         ecommerce: {
-            creative_name: 'Discord QR',
+            creative_name: source,
             creative_slot: 'panel',
             promotion_id: 'discord_invite',
         },
     });
-    // дублируем простой целью — так проще смотреть в отчётах
     if (typeof ym === 'function') ym(111625912, 'reachGoal', 'discord_qr_click');
+}
+
+document.getElementById('discordQr').addEventListener('click', () => {
+    sendDiscordEvent('Discord QR');
 });
 
-/* ===== LOCALSTORAGE ===== */
+document.getElementById('discordBtn').addEventListener('click', () => {
+    sendDiscordEvent('Discord Button');
+});
+
 function saveState() {
     const state = {
-        pointA: pointA ? { px: metersToPercent(pointA.x), py: metersToPercent(pointA.y) } : null,
-        pointB: pointB ? { px: metersToPercent(pointB.x), py: metersToPercent(pointB.y) } : null,
+        pointA: pointA ? {
+            px: metersToPercent(pointA.x),
+            py: metersToPercent(pointA.y)
+        } : null,
+        pointB: pointB ? {
+            px: metersToPercent(pointB.x),
+            py: metersToPercent(pointB.y)
+        } : null,
         view: { scale: view.scale, ox: view.ox, oy: view.oy }
     };
-    localStorage.setItem('wardogs_mortar_state', JSON.stringify(state));
+    try {
+        localStorage.setItem('wardogs_mortar_state', JSON.stringify(state));
+    } catch (e) {
+        console.warn('Failed to save state:', e);
+    }
 }
 
 function loadState() {
@@ -837,10 +1008,16 @@ function loadState() {
     try {
         const state = JSON.parse(saved);
         if (state.pointA) {
-            pointA = { x: percentToMeters(state.pointA.px), y: percentToMeters(state.pointA.py) };
+            pointA = {
+                x: percentToMeters(state.pointA.px),
+                y: percentToMeters(state.pointA.py)
+            };
         }
         if (state.pointB) {
-            pointB = { x: percentToMeters(state.pointB.px), y: percentToMeters(state.pointB.py) };
+            pointB = {
+                x: percentToMeters(state.pointB.px),
+                y: percentToMeters(state.pointB.py)
+            };
         }
         if (state.view) {
             view.scale = state.view.scale;
@@ -856,27 +1033,15 @@ function loadState() {
     }
 }
 
-/* ===== ПРИМЕНЕНИЕ ПЕРЕВОДА К DOM ===== */
-function applyDict(dict) {
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.dataset.i18n;
-        if (dict[key] !== undefined) el.innerHTML = dict[key];
+const weaponRadios = document.querySelectorAll('input[name="weapon"]');
+weaponRadios.forEach(radio => {
+    if (radio.value === currentWeapon) radio.checked = true;
+    radio.addEventListener('change', (e) => {
+        currentWeapon = e.target.value;
+        localStorage.setItem('wardogs_weapon', currentWeapon);
+        recalc();
+        draw();
     });
-    DYNAMIC_KEYS.forEach(k => { if (dict[k]) STR[k] = dict[k]; });
-    recalc();
-    draw();
-}
-
-/* ===== ПЕРЕКЛЮЧЕНИЕ ЯЗЫКА ===== */
-function translateUI(lang) {
-    const dict = (typeof I18N !== 'undefined' && I18N[lang]) ? I18N[lang] : I18N_STRINGS;
-    applyDict(dict);
-}
-
-langSelect.addEventListener('change', () => {
-    const lang = langSelect.value;
-    localStorage.setItem('wardogs_lang', lang);
-    translateUI(lang);
 });
 
 function initLang() {
@@ -885,7 +1050,6 @@ function initLang() {
     translateUI(lang);
 }
 
-/* ===== СТАРТ ===== */
 resize();
 const loaded = loadState();
 if (!loaded) resetView();

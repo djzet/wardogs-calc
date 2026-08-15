@@ -3,32 +3,27 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="theme-color" content="#1a1f27">
     <title>WARDOGS — миномётный калькулятор</title>
-    <!-- Фавикон: прицел с миномётом в фирменном зелёном -->
     <link rel="icon" type="image/svg+xml"
         href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%231a1f27'/><circle cx='32' cy='32' r='22' fill='none' stroke='%239fd356' stroke-width='3'/><circle cx='32' cy='32' r='3' fill='%239fd356'/><line x1='32' y1='4' x2='32' y2='18' stroke='%239fd356' stroke-width='3' stroke-linecap='round'/><line x1='32' y1='46' x2='32' y2='60' stroke='%239fd356' stroke-width='3' stroke-linecap='round'/><line x1='4' y1='32' x2='18' y2='32' stroke='%239fd356' stroke-width='3' stroke-linecap='round'/><line x1='46' y1='32' x2='60' y2='32' stroke='%239fd356' stroke-width='3' stroke-linecap='round'/><path d='M20 44 L44 20' stroke='%23e8c35a' stroke-width='2.5' stroke-linecap='round'/></svg>">
-    <!-- Для iPhone/iPad при добавлении на главный экран: PNG 180×180,
-         генерируется скриптом tools/make_apple_icon.py -->
-    <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+    <link rel="apple-touch-icon"
+        href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%231a1f27'/><circle cx='32' cy='32' r='22' fill='none' stroke='%239fd356' stroke-width='3'/></svg>">
     <link rel="stylesheet" href="css/style.css">
-    <!-- Yandex.Metrika counter -->
     <script type="text/javascript">
-        (function (m, e, t, r, i, k, a) {
-            m[i] = m[i] || function () { (m[i].a = m[i].a || []).push(arguments) };
-            m[i].l = 1 * new Date();
-            for (var j = 0; j < document.scripts.length; j++) { if (document.scripts[j].src === r) { return; } }
-            k = e.createElement(t), a = e.getElementsByTagName(t)[0], k.async = 1, k.src = r, a.parentNode.insertBefore(k, a)
-        })(window, document, 'script', 'https://mc.yandex.ru/metrika/tag.js?id=111625912', 'ym');
+        if (location.protocol === 'http:' || location.protocol === 'https:') {
+            (function (m, e, t, r, i, k, a) {
+                m[i] = m[i] || function () { (m[i].a = m[i].a || []).push(arguments) };
+                m[i].l = 1 * new Date();
+                for (var j = 0; j < document.scripts.length; j++) { if (document.scripts[j].src === r) { return; } }
+                k = e.createElement(t), a = e.getElementsByTagName(t)[0], k.async = 1, k.src = r, a.parentNode.insertBefore(k, a)
+            })(window, document, 'script', 'https://mc.yandex.ru/metrika/tag.js?id=111625912', 'ym');
 
-        ym(111625912, 'init', { ssr: true, webvisor: true, clickmap: true, ecommerce: "dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce: true, trackLinks: true });
+            ym(111625912, 'init', { ssr: true, webvisor: true, clickmap: true, ecommerce: "dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce: true, trackLinks: true });
+        }
     </script>
-    <noscript>
-        <div><img src="https://mc.yandex.ru/watch/111625912" style="position:absolute; left:-9999px;" alt="" /></div>
-    </noscript>
-    <!-- /Yandex.Metrika counter -->
 
-    <!-- Разметка JSON-LD для контент-аналитики Яндекс.Метрики -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
@@ -62,27 +57,6 @@
             "email": "mailto:egor.silaev2003@yandex.ru"
           },
           "inLanguage": ["ru", "en", "de", "fr", "es", "pl", "uk", "tr", "zh"]
-        },
-        {
-          "@type": "Article",
-          "@id": "https://djzet.github.io/wardogs-calc/#guide",
-          "mainEntityOfPage": { "@id": "https://djzet.github.io/wardogs-calc/" },
-          "headline": "Как пользоваться миномётным калькулятором WARDOGS — гайд по расчёту стрельбы",
-          "articleSection": "Гейм-гайды",
-          "inLanguage": "ru",
-          "datePublished": "2026-08-15",
-          "dateModified": "2026-08-16",
-          "author": {
-            "@type": "Person",
-            "name": "Egor Silaev",
-            "email": "mailto:egor.silaev2003@yandex.ru"
-          },
-          "publisher": {
-            "@type": "Person",
-            "name": "Egor Silaev",
-            "email": "mailto:egor.silaev2003@yandex.ru"
-          },
-          "articleBody": "Миномётный калькулятор WARDOGS — бесплатный одностраничный фан-инструмент для быстрого расчёта данных стрельбы в игре WARDOGS. Он предназначен для миномётных расчётов и помогает за несколько секунд определить точные параметры выстрела: дистанцию до цели, азимут в градусах от севера, угол возвышения ствола по навесной траектории и время подлёта снаряда. Чтобы начать работу, укажите свою огневую позицию (точка A) и цель (точка B). Это можно сделать двумя способами: ввести координаты вручную в процентах карты в полях левой панели, либо поставить точки прямо на карте. Работа с картой: правый клик по карте открывает контекстное меню, где можно поставить позицию миномёта или цель. Левая кнопка мыши перемещает карту и уже установленные точки — их можно перетаскивать мышью. Колесо мыши изменяет масштаб. На сенсорных экранах: один палец перемещает карту, два пальца масштабируют pinch-жестом, долгое нажатие открывает контекстное меню. На карте отмечены пять смотровых вышек — клик по любой из них показывает её название, а захват и перетаскивание карты начинается, только если вы сдвинули курсор больше чем на 5 пикселей. Координаты вводятся в процентах карты: например, 51.59 по X и 44.61 по Y. При ручном вводе значения можно скорректировать с шагом 0.01, и калькулятор мгновенно пересчитает все параметры стрельбы. Результаты расчёта появляются мгновенно. Дистанция — кратчайшее расстояние от позиции миномёта до цели в метрах или километрах. Азимут — направление на цель в градусах от географического севера. Угол возвышения — угол ствола миномёта для попадания в цель по навесной траектории; из двух математических решений баллистического уравнения выбирается крутой угол, соответствующий реальной работе миномёта. Время подлёта — время от выстрела до попадания снаряда в цель. Если цель находится вне зоны досягаемости миномёта по дальности, калькулятор выведет сообщение «вне досягаемости», а если точки совпадают — отдельное сообщение «точки совпадают». Инструмент особенно полезен при осаде баз, захвате вышек и скоординированных атаках отрядов, когда важно быстро и точно выставить миномёт под заданную цель. Для большинства стационарных объектов на карте 16×16 км калькулятор даёт достаточно точные данные для первого выстрела; при стрельбе по движущимся целям рекомендуется делать упреждение вручную, так как упрощённая баллистическая модель не учитывает движение цели. Сохранение данных работает автоматически: все введённые точки, текущий вид и масштаб карты, выбранная тема интерфейса (тёмная или светлая), язык и состояние отображения вышек сохраняются в localStorage браузера и восстанавливаются после перезагрузки страницы. Инструмент поддерживает 9 языков интерфейса: русский, английский, немецкий, французский, испанский, польский, украинский, турецкий и китайский. Это неофициальный фан-проект, не аффилированный с разработчиками игры WARDOGS."
         }
       ]
     }
@@ -95,7 +69,7 @@
         <aside class="panel">
             <div class="panel-header">
                 <h1 data-i18n="title">Миномётный калькулятор</h1>
-                <button class="menu-toggle" id="drawerToggle" title="Дополнительно">
+                <button class="menu-toggle" id="drawerToggle" title="Дополнительно" aria-label="Дополнительно">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round">
                         <line x1="4" y1="7" x2="20" y2="7" />
@@ -108,18 +82,18 @@
             <section>
                 <h2 data-i18n="posA">Огневая позиция (A)</h2>
                 <div class="coord-row">
-                    <label>X <input type="number" id="ax" placeholder="0.00" step="0.01"></label>
-                    <label>Y <input type="number" id="ay" placeholder="0.00" step="0.01"></label>
-                    <button class="clear" id="clearA" title="✕">✕</button>
+                    <label>X <input type="number" id="ax" placeholder="0.00" step="0.01" min="0" max="100"></label>
+                    <label>Y <input type="number" id="ay" placeholder="0.00" step="0.01" min="0" max="100"></label>
+                    <button class="clear" id="clearA" title="✕" aria-label="Очистить A">✕</button>
                 </div>
             </section>
 
             <section>
                 <h2 data-i18n="posB">Цель (B)</h2>
                 <div class="coord-row">
-                    <label>X <input type="number" id="bx" placeholder="0.00" step="0.01"></label>
-                    <label>Y <input type="number" id="by" placeholder="0.00" step="0.01"></label>
-                    <button class="clear" id="clearB" title="✕">✕</button>
+                    <label>X <input type="number" id="bx" placeholder="0.00" step="0.01" min="0" max="100"></label>
+                    <label>Y <input type="number" id="by" placeholder="0.00" step="0.01" min="0" max="100"></label>
+                    <button class="clear" id="clearB" title="✕" aria-label="Очистить B">✕</button>
                 </div>
             </section>
 
@@ -128,6 +102,24 @@
                 <div><span data-i18n="az">Азимут</span><b id="azimuth">—</b></div>
                 <div><span data-i18n="el">Угол возвышения</span><b id="elevation">—</b></div>
                 <div><span data-i18n="time">Время подлёта</span><b id="flightTime">—</b></div>
+            </section>
+
+            <section class="controls-section">
+                <h2 data-i18n="controlsTitle">Настройки</h2>
+
+                <div class="control-group">
+                    <label class="control-label" data-i18n="weaponType">Тип орудия</label>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="weapon" value="mortar" checked>
+                            <span data-i18n="weaponMortar">Миномёт (700 м)</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="weapon" value="artillery">
+                            <span data-i18n="weaponArtillery">Артиллерия (>2 км)</span>
+                        </label>
+                    </div>
+                </div>
             </section>
 
             <p class="hint" data-i18n="hint">
@@ -145,8 +137,16 @@
                 <h2 data-i18n="discordTitle">Wardogs СНГ / CIS</h2>
                 <a class="discord-qr" id="discordQr" href="https://discord.gg/kwxrTCJxre" target="_blank" rel="noopener"
                     title="Discord">
-                    <img src="icons/discord-qr.png" alt="QR: Discord" width="200" height="200">
+                    <img src="icons/discord-qr.png" alt="QR: Discord" width="200" height="200" loading="lazy">
                     <span data-i18n="discord">Wardogs СНГ / CIS</span>
+                </a>
+                <a class="discord-btn" id="discordBtn" href="https://discord.gg/kwxrTCJxre" target="_blank"
+                    rel="noopener">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M19.27 5.33C17.94 4.71 16.5 4.26 15 4a.09.09 0 0 0-.07.03c-.18.33-.39.76-.53 1.09a16.09 16.09 0 0 0-4.8 0c-.14-.34-.35-.76-.54-1.09-.01-.02-.04-.03-.07-.03-1.5.26-2.93.71-4.27 1.33-.01 0-.02.01-.03.02-2.72 4.07-3.47 8.03-3.1 11.95 0 .02.01.04.03.05 1.8 1.32 3.53 2.12 5.24 2.65.03.01.06 0 .07-.02.4-.55.76-1.13 1.07-1.74.02-.04 0-.08-.04-.09-.57-.22-1.11-.48-1.64-.78-.04-.02-.04-.08-.01-.11.11-.08.22-.17.33-.25.02-.02.05-.02.07-.01 3.44 1.57 7.15 1.57 10.55 0 .02-.01.05-.01.07.01.11.09.22.17.33.26.04.03.04.09-.01.11-.52.31-1.07.56-1.64.78-.04.01-.05.06-.04.09.32.61.68 1.19 1.07 1.74.03.01.06.02.09.01 1.72-.53 3.45-1.33 5.24-2.65.02-.01.03-.03.03-.05.44-4.53-.73-8.46-3.1-11.95-.01-.01-.02-.02-.04-.02zM8.52 14.51c-.92 0-1.69-.85-1.69-1.89s.75-1.89 1.69-1.89c.94 0 1.7.86 1.69 1.89 0 1.04-.75 1.89-1.69 1.89zm6.98 0c-.92 0-1.69-.85-1.69-1.89s.75-1.89 1.69-1.89c.94 0 1.7.86 1.69 1.89 0 1.04-.75 1.89-1.69 1.89z" />
+                    </svg>
+                    <span data-i18n="discordBtn">Перейти в Discord</span>
                 </a>
             </section>
 
@@ -169,7 +169,7 @@
         <main class="map-wrap">
             <canvas id="map"></canvas>
             <div class="map-controls">
-                <button class="view-reset help-toggle" id="helpToggle" title="Справка">
+                <button class="view-reset help-toggle" id="helpToggle" title="Справка" aria-label="Справка">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
                         stroke-linecap="round" stroke-linejoin="round">
                         <circle cx="12" cy="12" r="10" />
@@ -177,7 +177,7 @@
                         <line x1="12" y1="17" x2="12.01" y2="17" />
                     </svg>
                 </button>
-                <button class="view-reset theme-toggle" id="themeToggle" title="Тема">
+                <button class="view-reset theme-toggle" id="themeToggle" title="Тема" aria-label="Переключить тему">
                     <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2" stroke-linecap="round">
                         <circle cx="12" cy="12" r="4" />
@@ -206,11 +206,10 @@
             </div>
         </main>
 
-        <!-- выезжающая вкладка -->
         <aside class="drawer" id="drawer">
             <div class="drawer-header">
                 <h2 data-i18n="extra">Дополнительно</h2>
-                <button class="clear" id="drawerClose" title="✕">✕</button>
+                <button class="clear" id="drawerClose" title="✕" aria-label="Закрыть">✕</button>
             </div>
 
             <label class="switch-row">
@@ -221,35 +220,26 @@
         </aside>
         <div class="drawer-backdrop hidden" id="drawerBackdrop"></div>
 
-        <!-- модальное окно справки -->
         <div class="modal-backdrop hidden" id="helpModal">
-            <div class="modal">
+            <div class="modal" role="dialog" aria-labelledby="helpTitle">
                 <div class="modal-header">
-                    <h2 data-i18n="helpTitle">Как пользоваться калькулятором</h2>
-                    <button class="clear" id="helpClose" title="✕">✕</button>
+                    <h2 id="helpTitle" data-i18n="helpTitle">Как пользоваться калькулятором</h2>
+                    <button class="clear" id="helpClose" title="✕" aria-label="Закрыть">✕</button>
                 </div>
                 <div class="modal-body">
-                    <p data-i18n="helpP1"><b>Установка точек.</b> Миномётный калькулятор WARDOGS предназначен для
-                        быстрого расчёта данных стрельбы. Укажите свою позицию (точка A) и цель (точка B) —
+                    <p data-i18n="helpP1"><b>Установка точек.</b> Укажите свою позицию (точка A) и цель (точка B) —
                         калькулятор рассчитает дистанцию, азимут, угол возвышения и время подлёта снаряда.</p>
-                    <p data-i18n="helpP2"><b>Работа с картой.</b> Правый клик по карте открывает меню, где можно
-                        поставить позицию миномёта или цель. Левая кнопка мыши перемещает карту и уже установленные
-                        точки. Колесо мыши изменяет масштаб. На сенсорных экранах: один палец — перемещение карты,
-                        два пальца — масштаб, долгое нажатие — контекстное меню. Клик по вышке показывает её название.
-                    </p>
-                    <p data-i18n="helpP3"><b>Координаты.</b> Координаты вводятся в процентах карты: например 51.59
-                        по X и 44.61 по Y. Значения можно ввести вручную в поля левой панели — точки появятся на карте
-                        автоматически.</p>
-                    <p data-i18n="helpP4"><b>Результаты расчёта.</b> Дистанция — расстояние до цели. Азимут —
-                        направление на цель в градусах от севера. Угол возвышения — угол для миномёта (навесная
-                        траектория). Время подлёта — время от выстрела до попадания. Если цель слишком далеко,
-                        калькулятор покажет «вне досягаемости».</p>
-                    <p data-i18n="helpP5"><b>Сохранение.</b> Все данные — точки, вид карты, тема, язык и отображение
-                        вышек — сохраняются автоматически и восстанавливаются после перезагрузки страницы.</p>
-                    <p data-i18n="helpP6"><b>О калькуляторе.</b> Фан-инструмент для миномётных расчётов в тактическом
-                        шутере WARDOGS. Работает на интерактивной карте 16×16 км с тайлами, поддерживает 9 языков
-                        интерфейса, сохраняет состояние между сессиями и не требует установки. Неофициальный проект,
-                        не аффилирован с разработчиками игры.</p>
+                    <p data-i18n="helpP2"><b>Работа с картой.</b> Правый клик по карте открывает меню. Левая кнопка
+                        мыши перемещает карту. Колесо мыши изменяет масштаб. На сенсорных экранах: один палец —
+                        перемещение, два пальца — масштаб, долгое нажатие — контекстное меню.</p>
+                    <p data-i18n="helpP3"><b>Координаты.</b> X и Y вводятся в процентах карты (0–100). Значения можно
+                        ввести вручную или поставить точки прямо на карте.</p>
+                    <p data-i18n="helpP4"><b>Результаты.</b> Дистанция, азимут от севера, угол ствола в mils, время
+                        подлёта. Если цель вне досягаемости — соответствующее сообщение.</p>
+                    <p data-i18n="helpP5"><b>Сохранение.</b> Все данные автоматически сохраняются и восстанавливаются
+                        после перезагрузки страницы.</p>
+                    <p data-i18n="helpP6"><b>О калькуляторе.</b> Фан-инструмент для игры WARDOGS. Неофициальный
+                        проект, не аффилирован с разработчиками игры.</p>
                 </div>
             </div>
         </div>

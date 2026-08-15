@@ -8,10 +8,8 @@ html,
 body {
     height: 100%;
     overscroll-behavior: none;
-    /* без pull-to-refresh поверх карты */
 }
 
-/* ===== ТЁМНАЯ ТЕМА (по умолчанию) ===== */
 :root {
     --bg: #12151a;
     --panel: #1a1f27;
@@ -23,14 +21,17 @@ body {
     --accent: #9fd356;
     --accent-hover: #b8e877;
     --danger: #e05656;
+    --danger-hover: #ff6b6b;
     --menu: #1e242e;
     --menu-border: #39424f;
     --hover: #2c3440;
     --btn-bg: rgba(30, 36, 46, .85);
     --btn-text: #cfd6df;
+    --discord: #5865F2;
+    --discord-hover: #4752C4;
+    --warn: #e8c35a;
 }
 
-/* ===== СВЕТЛАЯ ТЕМА ===== */
 body.light {
     --bg: #eef1f5;
     --panel: #ffffff;
@@ -42,11 +43,15 @@ body.light {
     --accent: #4e8f1d;
     --accent-hover: #3f7517;
     --danger: #c23b3b;
+    --danger-hover: #e04444;
     --menu: #ffffff;
     --menu-border: #c9d1db;
     --hover: #e8edf3;
     --btn-bg: rgba(255, 255, 255, .92);
     --btn-text: #333c47;
+    --discord: #5865F2;
+    --discord-hover: #4752C4;
+    --warn: #8a6d00;
 }
 
 body {
@@ -60,7 +65,6 @@ body {
     display: flex;
     height: 100vh;
     height: 100dvh;
-    /* корректная высота на мобильных с учётом адресной строки */
 }
 
 .panel {
@@ -89,13 +93,13 @@ h2 {
 }
 
 .coord-row {
-    display: flex;
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
     gap: 8px;
     align-items: flex-end;
 }
 
 .coord-row label {
-    flex: 1;
     display: flex;
     flex-direction: column;
     gap: 4px;
@@ -111,11 +115,22 @@ input[type="number"] {
     padding: 8px 10px;
     border-radius: 6px;
     font-size: 15px;
+    -moz-appearance: textfield;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
 }
 
 input[type="number"]:focus {
     outline: none;
     border-color: var(--accent);
+}
+
+input[type="number"]:invalid {
+    border-color: var(--danger);
 }
 
 .clear {
@@ -125,6 +140,7 @@ input[type="number"]:focus {
     font-size: 16px;
     cursor: pointer;
     padding: 8px 2px;
+    line-height: 1;
 }
 
 .clear:hover {
@@ -144,15 +160,88 @@ input[type="number"]:focus {
     display: flex;
     justify-content: space-between;
     font-size: 14px;
+    gap: 12px;
 }
 
 .result span {
     color: var(--muted);
+    flex-shrink: 0;
 }
 
 .result b {
     color: var(--accent);
     font-variant-numeric: tabular-nums;
+    text-align: right;
+    word-break: break-word;
+}
+
+.result b.oor {
+    color: var(--danger);
+}
+
+.result b.warn {
+    color: var(--warn);
+}
+
+.controls-section {
+    background: var(--field);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+}
+
+.controls-section h2 {
+    margin-bottom: 12px;
+}
+
+.control-group {
+    margin-bottom: 14px;
+}
+
+.control-group:last-child {
+    margin-bottom: 0;
+}
+
+.control-label {
+    display: block;
+    font-size: 11px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+.radio-group {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.radio-option {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    padding: 4px 0;
+}
+
+.radio-option input[type="radio"] {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: var(--accent);
+    margin: 0;
+}
+
+.radio-option input[type="radio"]:disabled {
+    cursor: not-allowed;
+}
+
+.radio-option span {
+    font-size: 13px;
+    color: var(--text);
+    cursor: pointer;
 }
 
 .hint {
@@ -161,7 +250,6 @@ input[type="number"]:focus {
     line-height: 1.6;
 }
 
-/* ===== Блок контактов ===== */
 .contact {
     background: var(--field);
     border: 1px solid var(--border);
@@ -193,11 +281,11 @@ input[type="number"]:focus {
     text-decoration: underline;
 }
 
-/* ===== Карта ===== */
 .map-wrap {
     flex: 1;
     position: relative;
     overflow: hidden;
+    background: var(--bg);
 }
 
 canvas {
@@ -205,7 +293,6 @@ canvas {
     width: 100%;
     height: 100%;
     cursor: crosshair;
-    /* сенсорные жесты обрабатываем сами, браузеру не мешаем */
     touch-action: none;
     -webkit-user-select: none;
     user-select: none;
@@ -218,6 +305,7 @@ canvas {
     right: 12px;
     display: flex;
     gap: 8px;
+    z-index: 5;
 }
 
 .view-reset {
@@ -228,13 +316,14 @@ canvas {
     border-radius: 6px;
     cursor: pointer;
     font-size: 13px;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
 }
 
 .view-reset:hover {
     background: var(--hover);
 }
 
-/* ===== Кнопка темы ===== */
 .theme-toggle {
     display: flex;
     align-items: center;
@@ -259,7 +348,6 @@ body.light .theme-toggle .icon-moon {
     display: block;
 }
 
-/* ===== Контекстное меню ===== */
 .ctx-menu {
     position: absolute;
     z-index: 10;
@@ -292,11 +380,14 @@ body.light .theme-toggle .icon-moon {
     color: var(--danger);
 }
 
-.hidden {
-    display: none;
+.ctx-menu button.danger:hover {
+    color: var(--danger-hover);
 }
 
-/* ===== Переключатель языка ===== */
+.hidden {
+    display: none !important;
+}
+
 .translate-widget {
     margin-top: auto;
     padding-top: 16px;
@@ -328,7 +419,6 @@ body.light .theme-toggle .icon-moon {
     border-color: var(--accent);
 }
 
-/* ===== Адаптивность ===== */
 @media (max-width: 800px) {
     .app {
         flex-direction: column;
@@ -336,17 +426,21 @@ body.light .theme-toggle .icon-moon {
 
     .panel {
         width: 100%;
+        max-height: 45vh;
         border-right: none;
         border-bottom: 1px solid var(--border);
     }
 
     .map-wrap {
         flex: 1;
-        min-height: 50vh;
+        min-height: 55vh;
+    }
+
+    .result div {
+        font-size: 13px;
     }
 }
 
-/* ===== Шапка панели + кнопка меню ===== */
 .panel-header {
     display: flex;
     align-items: center;
@@ -372,7 +466,6 @@ body.light .theme-toggle .icon-moon {
     background: var(--hover);
 }
 
-/* ===== Выезжающая вкладка ===== */
 .drawer {
     position: fixed;
     top: 0;
@@ -411,9 +504,10 @@ body.light .theme-toggle .icon-moon {
     inset: 0;
     background: rgba(0, 0, 0, .35);
     z-index: 25;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
 }
 
-/* ===== Переключатель (switch) ===== */
 .switch-row {
     display: flex;
     align-items: center;
@@ -459,11 +553,10 @@ body.light .theme-toggle .icon-moon {
     background: #fff;
 }
 
-/* ===== Блок Discord в панели ===== */
 .discord-block {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 10px;
 }
 
 .discord-qr {
@@ -488,7 +581,6 @@ body.light .theme-toggle .icon-moon {
     height: 200px;
     border-radius: 6px;
     background: #fff;
-    /* QR читается только на светлом фоне */
     padding: 6px;
 }
 
@@ -497,7 +589,35 @@ body.light .theme-toggle .icon-moon {
     color: var(--muted);
 }
 
-/* ===== Кнопка справки ===== */
+.discord-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    padding: 12px 16px;
+    background: var(--discord);
+    color: #fff;
+    border-radius: 8px;
+    text-decoration: none;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background .15s ease, transform .1s ease;
+    box-shadow: 0 2px 8px rgba(88, 101, 242, .3);
+}
+
+.discord-btn:hover {
+    background: var(--discord-hover);
+}
+
+.discord-btn:active {
+    transform: translateY(1px);
+}
+
+.discord-btn svg {
+    flex-shrink: 0;
+}
+
 .help-toggle {
     display: flex;
     align-items: center;
@@ -506,7 +626,6 @@ body.light .theme-toggle .icon-moon {
     padding: 6px 0;
 }
 
-/* ===== Модальное окно справки ===== */
 .modal-backdrop {
     position: fixed;
     inset: 0;
@@ -516,10 +635,12 @@ body.light .theme-toggle .icon-moon {
     align-items: center;
     justify-content: center;
     padding: 20px;
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
 }
 
 .modal-backdrop.hidden {
-    display: none;
+    display: none !important;
 }
 
 .modal {
@@ -560,4 +681,11 @@ body.light .theme-toggle .icon-moon {
 
 .modal-body b {
     color: var(--muted);
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
 }
