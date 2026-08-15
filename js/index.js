@@ -127,6 +127,8 @@ const I18N_STRINGS = {
     contactLabel: '✉️ Связь',
     extra: 'Дополнительно',
     towers: 'Иконки вышек',
+    discordTitle: 'Discord',
+    discord: 'Wardogs СНГ / CIS',
     tower1: 'Башня 1',
     tower2: 'Башня 2',
     tower3: 'Башня 3',
@@ -801,6 +803,21 @@ window.addEventListener('keydown', e => {
         hideMenu();
         openHelp(false);
     }
+});
+
+/* ===== QR DISCORD: ecommerce-событие при клике ===== */
+document.getElementById('discordQr').addEventListener('click', () => {
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({
+        event: 'select_promotion',
+        ecommerce: {
+            creative_name: 'Discord QR',
+            creative_slot: 'panel',
+            promotion_id: 'discord_invite',
+        },
+    });
+    // дублируем простой целью — так проще смотреть в отчётах
+    if (typeof ym === 'function') ym(111625912, 'reachGoal', 'discord_qr_click');
 });
 
 /* ===== LOCALSTORAGE ===== */
