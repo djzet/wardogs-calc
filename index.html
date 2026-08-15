@@ -27,6 +27,56 @@
         <div><img src="https://mc.yandex.ru/watch/111625912" style="position:absolute; left:-9999px;" alt="" /></div>
     </noscript>
     <!-- /Yandex.Metrika counter -->
+
+    <!-- Разметка JSON-LD для контент-аналитики Яндекс.Метрики -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@graph": [
+        {
+          "@type": "WebSite",
+          "@id": "https://djzet.github.io/wardogs-calc/#website",
+          "url": "https://djzet.github.io/wardogs-calc/",
+          "name": "WARDOGS — Mortar Calculator",
+          "description": "Одностраничный калькулятор миномётного расчёта для игры WARDOGS: интерактивная карта 16×16 км, дистанция, азимут, угол возвышения и время подлёта.",
+          "inLanguage": ["ru", "en", "de", "fr", "es", "pl", "uk", "tr", "zh"],
+          "publisher": { "@id": "https://djzet.github.io/wardogs-calc/#author" }
+        },
+        {
+          "@type": "WebApplication",
+          "@id": "https://djzet.github.io/wardogs-calc/#app",
+          "name": "WARDOGS — Mortar Calculator",
+          "url": "https://djzet.github.io/wardogs-calc/",
+          "applicationCategory": "GameApplication",
+          "operatingSystem": "Any",
+          "browserRequirements": "Requires JavaScript",
+          "isAccessibleForFree": true,
+          "offers": { "@type": "Offer", "price": "0", "priceCurrency": "RUB" },
+          "author": { "@id": "https://djzet.github.io/wardogs-calc/#author" },
+          "inLanguage": ["ru", "en", "de", "fr", "es", "pl", "uk", "tr", "zh"]
+        },
+        {
+          "@type": "Article",
+          "@id": "https://djzet.github.io/wardogs-calc/#guide",
+          "mainEntityOfPage": { "@id": "https://djzet.github.io/wardogs-calc/" },
+          "headline": "Как пользоваться миномётным калькулятором WARDOGS",
+          "articleSection": "Гейм-гайды",
+          "inLanguage": "ru",
+          "datePublished": "2026-08-15",
+          "dateModified": "2026-08-15",
+          "author": { "@id": "https://djzet.github.io/wardogs-calc/#author" },
+          "publisher": { "@id": "https://djzet.github.io/wardogs-calc/#author" },
+          "articleBody": "Миномётный калькулятор WARDOGS — инструмент для быстрого расчёта данных стрельбы. Укажите свою позицию (точка A) и цель (точка B), и калькулятор вычислит дистанцию, азимут, угол возвышения и время подлёта снаряда. Работа с картой. Правый клик по карте открывает контекстное меню, где можно поставить позицию миномёта или цель. Левая кнопка мыши перемещает карту и уже установленные точки. Колесо мыши изменяет масштаб карты. Клик по смотровой вышке показывает её название. Координаты вводятся в процентах карты: например, 51.59 по X и 44.61 по Y. Значения можно ввести вручную в поля левой панели — точки появятся на карте автоматически, а калькулятор мгновенно пересчитает параметры стрельбы. Результаты расчёта. Дистанция — расстояние от позиции миномёта до цели. Азимут — направление на цель в градусах от севера. Угол возвышения — угол ствола миномёта для попадания в цель. Время подлёта — время от выстрела до попадания. Если цель находится вне досягаемости миномёта, калькулятор покажет «вне досягаемости». Сохранение данных. Все данные — точки, вид карты, тема интерфейса, язык и отображение вышек — сохраняются автоматически в браузере и восстанавливаются после перезагрузки страницы."
+        },
+        {
+          "@type": "Person",
+          "@id": "https://djzet.github.io/wardogs-calc/#author",
+          "name": "Egor Silaev",
+          "email": "mailto:egor.silaev2003@yandex.ru"
+        }
+      ]
+    }
+    </script>
 </head>
 
 <body>
@@ -100,6 +150,14 @@
         <main class="map-wrap">
             <canvas id="map"></canvas>
             <div class="map-controls">
+                <button class="view-reset help-toggle" id="helpToggle" title="Справка">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10" />
+                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                        <line x1="12" y1="17" x2="12.01" y2="17" />
+                    </svg>
+                </button>
                 <button class="view-reset theme-toggle" id="themeToggle" title="Тема">
                     <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="2" stroke-linecap="round">
@@ -143,6 +201,33 @@
             </label>
         </aside>
         <div class="drawer-backdrop hidden" id="drawerBackdrop"></div>
+
+        <!-- модальное окно справки -->
+        <div class="modal-backdrop hidden" id="helpModal">
+            <div class="modal">
+                <div class="modal-header">
+                    <h2 data-i18n="helpTitle">Как пользоваться калькулятором</h2>
+                    <button class="clear" id="helpClose" title="✕">✕</button>
+                </div>
+                <div class="modal-body">
+                    <p data-i18n="helpP1"><b>Установка точек.</b> Миномётный калькулятор WARDOGS предназначен для
+                        быстрого расчёта данных стрельбы. Укажите свою позицию (точка A) и цель (точка B) —
+                        калькулятор рассчитает дистанцию, азимут, угол возвышения и время подлёта снаряда.</p>
+                    <p data-i18n="helpP2"><b>Работа с картой.</b> Правый клик по карте открывает меню, где можно
+                        поставить позицию миномёта или цель. Левая кнопка мыши перемещает карту и уже установленные
+                        точки. Колесо мыши изменяет масштаб. Клик по вышке показывает её название.</p>
+                    <p data-i18n="helpP3"><b>Координаты.</b> Координаты вводятся в процентах карты: например 51.59
+                        по X и 44.61 по Y. Значения можно ввести вручную в поля левой панели — точки появятся на карте
+                        автоматически.</p>
+                    <p data-i18n="helpP4"><b>Результаты расчёта.</b> Дистанция — расстояние до цели. Азимут —
+                        направление на цель в градусах от севера. Угол возвышения — угол для миномёта. Время подлёта —
+                        время от выстрела до попадания. Если цель слишком далеко, калькулятор покажет «вне
+                        досягаемости».</p>
+                    <p data-i18n="helpP5"><b>Сохранение.</b> Все данные — точки, вид карты, тема, язык и отображение
+                        вышек — сохраняются автоматически и восстанавливаются после перезагрузки страницы.</p>
+                </div>
+            </div>
+        </div>
 
     </div>
 

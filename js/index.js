@@ -119,6 +119,12 @@ const I18N_STRINGS = {
     tower3: 'Башня 3',
     tower4: 'Башня 4',
     tower5: 'Башня 5',
+    helpTitle: 'Как пользоваться калькулятором',
+    helpP1: '<b>Установка точек.</b> Миномётный калькулятор WARDOGS предназначен для быстрого расчёта данных стрельбы. Укажите свою позицию (точка A) и цель (точка B) — калькулятор рассчитает дистанцию, азимут, угол возвышения и время подлёта снаряда.',
+    helpP2: '<b>Работа с картой.</b> Правый клик по карте открывает меню, где можно поставить позицию миномёта или цель. Левая кнопка мыши перемещает карту и уже установленные точки. Колесо мыши изменяет масштаб. Клик по вышке показывает её название.',
+    helpP3: '<b>Координаты.</b> Координаты вводятся в процентах карты: например 51.59 по X и 44.61 по Y. Значения можно ввести вручную в поля левой панели — точки появятся на карте автоматически.',
+    helpP4: '<b>Результаты расчёта.</b> Дистанция — расстояние до цели. Азимут — направление на цель в градусах от севера. Угол возвышения — угол для миномёта. Время подлёта — время от выстрела до попадания. Если цель слишком далеко, калькулятор покажет «вне досягаемости».',
+    helpP5: '<b>Сохранение.</b> Все данные — точки, вид карты, тема, язык и отображение вышек — сохраняются автоматически и восстанавливаются после перезагрузки страницы.',
     oor: 'вне досягаемости',
     u_m: 'м',
     u_km: 'км',
@@ -127,6 +133,7 @@ const I18N_STRINGS = {
 const DYNAMIC_KEYS = [
     'oor', 'u_m', 'u_km', 'u_s',
     'tower1', 'tower2', 'tower3', 'tower4', 'tower5',
+    'helpTitle', 'helpP1', 'helpP2', 'helpP3', 'helpP4', 'helpP5',
 ];
 const STR = { ...I18N_STRINGS };
 
@@ -217,6 +224,18 @@ function openDrawer(state) {
 document.getElementById('drawerToggle').onclick = () => openDrawer(true);
 document.getElementById('drawerClose').onclick = () => openDrawer(false);
 drawerBackdrop.onclick = () => openDrawer(false);
+
+/* ===== МОДАЛЬНОЕ ОКНО СПРАВКИ ===== */
+const helpModal = document.getElementById('helpModal');
+
+function openHelp(state) {
+    helpModal.classList.toggle('hidden', !state);
+}
+document.getElementById('helpToggle').onclick = () => openHelp(true);
+document.getElementById('helpClose').onclick = () => openHelp(false);
+helpModal.addEventListener('mousedown', e => {
+    if (e.target === helpModal) openHelp(false); // клик по подложке закрывает
+});
 
 /* ===== ПЕРЕКЛЮЧАТЕЛЬ ВЫШЕК ===== */
 const towersToggle = document.getElementById('towersToggle');
@@ -631,7 +650,12 @@ menu.addEventListener('click', e => {
 
 function hideMenu() { menu.classList.add('hidden'); }
 window.addEventListener('mousedown', e => { if (!menu.contains(e.target)) hideMenu(); });
-window.addEventListener('keydown', e => { if (e.key === 'Escape') hideMenu(); });
+window.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+        hideMenu();
+        openHelp(false);
+    }
+});
 
 /* ===== LOCALSTORAGE ===== */
 function saveState() {

@@ -188,6 +188,32 @@ input[type="number"]:focus {
     text-decoration: underline;
 }
 
+/* ===== Гайд (размеченная статья для контент-аналитики) ===== */
+.guide {
+    background: var(--field);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--dim);
+    line-height: 1.5;
+}
+
+.guide h2 {
+    margin-bottom: 0;
+}
+
+.guide p {
+    margin: 0;
+}
+
+.guide b {
+    color: var(--muted);
+}
+
 /* ===== Карта ===== */
 .map-wrap {
     flex: 1;
@@ -446,4 +472,69 @@ body.light .theme-toggle .icon-moon {
 .switch-row input:checked+.switch::after {
     left: 20px;
     background: #fff;
+}
+
+/* ===== Кнопка справки ===== */
+.help-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    padding: 6px 0;
+}
+
+/* ===== Модальное окно справки ===== */
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .5);
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+.modal-backdrop.hidden {
+    display: none;
+}
+
+.modal {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    box-shadow: 0 16px 48px rgba(0, 0, 0, .4);
+    width: 100%;
+    max-width: 560px;
+    max-height: 80vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+}
+
+.modal-header h2 {
+    margin-bottom: 0;
+}
+
+.modal-body {
+    padding: 16px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--dim);
+    line-height: 1.6;
+}
+
+.modal-body b {
+    color: var(--muted);
 }
