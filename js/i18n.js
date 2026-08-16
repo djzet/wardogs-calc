@@ -371,7 +371,7 @@ const I18N = {
         helpP3: '<b>Koordinatlar.</b> X ve Y harita yüzdesi olarak girilir (0–100). Değerler manuel olarak girilebilir veya doğrudan haritaya yerleştirilebilir.',
         helpP4: '<b>Hesaplama sonuçları.</b> Mesafe, kuzeyden azimut, mils cinsinden açı, uçuş süresi. Hedef menzil dışındaysa — ilgili mesaj.',
         helpP5: '<b>Kaydetme.</b> Tüm veriler otomatik kaydedilir ve sayfa yeniden yüklendiğinde geri yüklenir.',
-        helpP6: "<b>Hesaplayıcı hakkında.</b> WARDOGS için topluluk tarafından hazırlanmış araç. Oyunun разработчиков ile bağlantısı olmayan resmi olmayan proje.",
+        helpP6: "<b>Hesaplayıcı hakkında.</b> WARDOGS için topluluk tarafından hazırlanmış bir araç. Resmi olmayan proje, oyunun geliştiricileriyle herhangi bir bağlantısı yoktur.",
         share: 'Paylaş',
         shareCopied: 'Bağlantı kopyalandı!',
         shareApplied: 'Koordinatlar bağlantıdan uygulandı',
