@@ -7,14 +7,22 @@
     <meta name="theme-color" content="#1a1f27">
 
     <!-- Primary SEO Meta Tags -->
-    <title>WARDOGS — миномётный и артиллерийский калькулятор | Карта, Азимут, Дистанция</title>
-    <meta name="title" content="WARDOGS — миномётный и артиллерийский калькулятор | Карта, Азимут, Дистанция">
+    <title>WARDOGS — миномётный и артиллерийский калькулятор</title>
+    <meta name="title" content="WARDOGS — миномётный и артиллерийский калькулятор">
     <meta name="description"
-        content="Удобный онлайн калькулятор для WARDOGS. Точный расчет дистанции, азимута, угла возвышения (mils) и времени подлета для миномета и артиллерии. Интерактивная карта 16x16 км.">
+        content="Онлайн-калькулятор для WARDOGS: дистанция, азимут, угол возвышения (mils) и время подлёта миномёта и артиллерии. Интерактивная карта 16×16 км, 9 языков.">
     <meta name="keywords"
         content="wardogs, wardogs калькулятор, миномет wardogs, артиллерия wardogs, wardogs map, wardogs азимут, wardogs mortar calculator, wardogs artillery, wardogs карта, wardogs calculator, wardogs mils, wardogs tools">
     <meta name="author" content="Egor Silaev">
     <link rel="canonical" href="https://djzet.github.io/wardogs-calc/">
+
+    <!-- Robots — явно разрешаем индексацию -->
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+
+    <!-- Улучшения для превью -->
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="WARDOGS Mortar Calculator — интерактивная карта с миномётным расчётом">
 
     <!-- Open Graph / Facebook / Discord / Telegram -->
     <meta property="og:type" content="website">
@@ -32,6 +40,8 @@
     <meta property="twitter:title" content="WARDOGS — миномётный и артиллерийский калькулятор">
     <meta property="twitter:description" content="Точный расчет дистанции, азимута, угла возвышения и времени подлета.">
     <meta property="twitter:image" content="https://djzet.github.io/wardogs-calc/preview.png">
+    <meta property="twitter:image:alt"
+        content="WARDOGS Mortar Calculator — интерактивная карта с расчётом миномётного и артиллерийского огня">
 
     <!-- Hreflang для многоязычности (важно для международного SEO) -->
     <link rel="alternate" hreflang="ru" href="https://djzet.github.io/wardogs-calc/">
@@ -67,41 +77,53 @@
 
     <script type="application/ld+json">
     {
-      "@context": "https://schema.org",
-      "@graph": [
+    "@context": "https://schema.org",
+    "@graph": [
         {
-          "@type": "WebSite",
-          "@id": "https://djzet.github.io/wardogs-calc/#website",
-          "url": "https://djzet.github.io/wardogs-calc/",
-          "name": "WARDOGS — Mortar & Artillery Calculator",
-          "description": "Онлайн калькулятор для игры WARDOGS: расчет дистанции, азимута, угла возвышения (mils) и времени подлета снаряда для миномета и артиллерии. Интерактивная карта 16×16 км с поддержкой 9 языков.",
-          "inLanguage": ["ru", "en", "de", "fr", "es", "pl", "uk", "tr", "zh"],
-          "publisher": {
+        "@type": "WebSite",
+        "@id": "https://djzet.github.io/wardogs-calc/#website",
+        "url": "https://djzet.github.io/wardogs-calc/",
+        "name": "WARDOGS — Mortar & Artillery Calculator",
+        "description": "Онлайн калькулятор для игры WARDOGS: расчет дистанции, азимута, угла возвышения (mils) и времени подлета снаряда для миномета и артиллерии. Интерактивная карта 16×16 км с поддержкой 9 языков.",
+        "inLanguage": ["ru", "en", "de", "fr", "es", "pl", "uk", "tr", "zh"],
+        "publisher": {
             "@type": "Person",
             "name": "Egor Silaev",
             "email": "mailto:egor.silaev2003@yandex.ru"
-          }
+        }
         },
         {
-          "@type": "WebApplication",
-          "@id": "https://djzet.github.io/wardogs-calc/#app",
-          "name": "WARDOGS — Mortar & Artillery Calculator",
-          "url": "https://djzet.github.io/wardogs-calc/",
-          "applicationCategory": "GameApplication",
-          "operatingSystem": "Any",
-          "browserRequirements": "Requires JavaScript",
-          "isAccessibleForFree": true,
-          "offers": { "@type": "Offer", "price": "0", "priceCurrency": "RUB" },
-          "author": {
+        "@type": "WebApplication",
+        "@id": "https://djzet.github.io/wardogs-calc/#app",
+        "name": "WARDOGS — Mortar & Artillery Calculator",
+        "url": "https://djzet.github.io/wardogs-calc/",
+        "applicationCategory": "GameApplication",
+        "operatingSystem": "Any",
+        "browserRequirements": "Requires JavaScript",
+        "isAccessibleForFree": true,
+        "offers": { 
+            "@type": "Offer", 
+            "price": "0",
+            "availability": "https://schema.org/InStock"
+        },
+        "author": {
             "@type": "Person",
             "name": "Egor Silaev",
             "email": "mailto:egor.silaev2003@yandex.ru"
-          },
-          "inLanguage": ["ru", "en", "de", "fr", "es", "pl", "uk", "tr", "zh"],
-          "screenshot": "https://djzet.github.io/wardogs-calc/preview.png",
-          "featureList": "Расчет дистанции, азимута, угла возвышения, времени подлета, поддержка миномета и артиллерии, интерактивная карта, многоязычность"
+        },
+        "inLanguage": ["ru", "en", "de", "fr", "es", "pl", "uk", "tr", "zh"],
+        "screenshot": "https://djzet.github.io/wardogs-calc/preview.png",
+        "featureList": [
+            "Расчет дистанции",
+            "Расчет азимута",
+            "Угол возвышения в mils",
+            "Время подлета снаряда",
+            "Поддержка миномета и артиллерии",
+            "Интерактивная карта 16×16 км",
+            "9 языков интерфейса"
+        ]
         }
-      ]
+    ]
     }
     </script>
 </head>
