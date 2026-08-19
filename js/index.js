@@ -14,7 +14,10 @@ const INPUT_DEBOUNCE_MS = CONFIG.timing.inputDebounceMs;
 const TAP_THRESHOLD = CONFIG.timing.tapThreshold;
 const LONG_PRESS_MS = CONFIG.timing.longPressMs;
 
-const NBSP = '\u00A0';
+// Короткие ссылки на утилиты из модуля
+const { clamp, percentToMeters, metersToPercent, formatPercent,
+    worldToScreen, screenToWorld, fmtCoord, fmtDist, NBSP } = window.AppUtils;
+
 const tileCache = new Map();
 
 // Обёртка для совместимости со старым кодом
@@ -45,10 +48,10 @@ const out = {
     time: document.getElementById('flightTime'),
 };
 
-let showTowers = localStorage.getItem('wardogs_towers') !== '0';
+let showTowers = AppStorage.loadTowers();
 let selectedTower = null;
-let currentWeapon = localStorage.getItem('wardogs_weapon') || CONFIG.defaultWeapon;
-let theme = localStorage.getItem('wardogs_theme') || CONFIG.defaultTheme;
+let currentWeapon = AppStorage.loadWeapon(CONFIG.defaultWeapon);
+let theme = AppStorage.loadTheme(CONFIG.defaultTheme);
 
 const view = { scale: 0.05, ox: 0, oy: 0 };
 let pointA = null;
@@ -61,45 +64,6 @@ let inputTimer = null;
 const towerIcon = new Image();
 towerIcon.src = 'assets/icons/tower.webp';
 towerIcon.onload = () => draw();
-
-const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
-
-function percentToMeters(percent) {
-    return (percent * MAP.size) / 100;
-}
-
-function metersToPercent(meters) {
-    return (meters * 100) / MAP.size;
-}
-
-function formatPercent(v) {
-    return v.toFixed(2);
-}
-
-function worldToScreen(wx, wy) {
-    return { x: wx * view.scale + view.ox, y: -wy * view.scale + view.oy };
-}
-
-function screenToWorld(sx, sy) {
-    return { x: (sx - view.ox) / view.scale, y: (view.oy - sy) / view.scale };
-}
-
-function fmtWithNbsp(num) {
-    return String(Math.round(num)).replace(/\B(?=(\d{3})+(?!\d))/g, NBSP);
-}
-
-function fmtCoord(meters, step) {
-    if (step >= 1000) {
-        const km = meters / 1000;
-        const v = Number.isInteger(km) ? String(km) : km.toFixed(1);
-        return v + NBSP + STR.u_km;
-    }
-    return Math.round(meters) + NBSP + STR.u_m;
-}
-
-function fmtDist(d) {
-    return fmtWithNbsp(d) + NBSP + STR.u_m;
-}
 
 function getTile(z, x, y) {
     const key = `${z}/${x}_${y}`;
@@ -137,7 +101,7 @@ function drawTiles() {
     const tileScale = (tps * TILES.size) / MAP.size;
     const drawSize = TILES.size * (view.scale / tileScale);
 
-    const a = screenToWorld(0, 0), b = screenToWorld(w, h);
+    const a = screenToWorld(0, 0, view), b = screenToWorld(w, h, view);
     const x0 = Math.max(0, Math.floor((a.x / MAP.size) * tps));
     const x1 = Math.min(tps - 1, Math.floor((b.x / MAP.size) * tps));
     const y0 = Math.max(0, Math.floor(((MAP.size - a.y) / MAP.size) * tps));
@@ -147,7 +111,7 @@ function drawTiles() {
         for (let tx = x0; tx <= x1; tx++) {
             const wx0 = (tx / tps) * MAP.size;
             const wy0 = MAP.size - (ty / tps) * MAP.size;
-            const s = worldToScreen(wx0, wy0);
+            const s = worldToScreen(wx0, wy0, view);
             const t = getTile(z, tx, ty);
             if (t.loaded) {
                 ctx.drawImage(t.img, s.x, s.y, drawSize + 0.5, drawSize + 0.5);
@@ -184,7 +148,9 @@ function CT() { return CANVAS_THEMES[theme] || CANVAS_THEMES.dark; }
 let saveViewTimer = null;
 function debouncedSaveView() {
     clearTimeout(saveViewTimer);
-    saveViewTimer = setTimeout(saveState, 200);
+    saveViewTimer = setTimeout(() => {
+        AppStorage.saveState(pointA, pointB, view, MAP.size);
+    }, 200);
 }
 
 function resize() {
@@ -232,7 +198,7 @@ const towersToggle = document.getElementById('towersToggle');
 towersToggle.checked = showTowers;
 towersToggle.addEventListener('change', () => {
     showTowers = towersToggle.checked;
-    localStorage.setItem('wardogs_towers', showTowers ? '1' : '0');
+    AppStorage.saveTowers(showTowers);
     if (!showTowers) selectedTower = null;
     draw();
 });
@@ -244,7 +210,7 @@ function applyTheme() {
 }
 themeToggle.onclick = () => {
     theme = (theme === 'dark') ? 'light' : 'dark';
-    localStorage.setItem('wardogs_theme', theme);
+    AppStorage.saveTheme(theme);
     applyTheme();
 };
 
@@ -258,7 +224,7 @@ function niceStep() {
 function hitPoint(sx, sy) {
     for (const [key, p] of [['A', pointA], ['B', pointB]]) {
         if (!p) continue;
-        const s = worldToScreen(p.x, p.y);
+        const s = worldToScreen(p.x, p.y, view);
         if (Math.hypot(s.x - sx, s.y - sy) <= 12) return key;
     }
     return null;
@@ -268,7 +234,7 @@ function findTowerAt(sx, sy) {
     if (!showTowers) return null;
     const halfSize = getTowerIconSize() / 2;
     for (const p of TOWERS) {
-        const s = worldToScreen(percentToMeters(p.x), percentToMeters(p.y));
+        const s = worldToScreen(percentToMeters(p.x, MAP.size), percentToMeters(p.y, MAP.size), view);
         if (Math.abs(s.x - sx) <= halfSize && Math.abs(s.y - sy) <= halfSize) {
             return p;
         }
@@ -283,7 +249,7 @@ function drawRangeCircle() {
     if (!weapon || !weapon.maxRangeKm) return;
 
     const maxRangeMeters = weapon.maxRangeKm * 1000;
-    const sa = worldToScreen(pointA.x, pointA.y);
+    const sa = worldToScreen(pointA.x, pointA.y, view);
     const radiusPx = maxRangeMeters * view.scale;
     const color = weapon.rangeColor || '#9fd356';
 
@@ -299,7 +265,6 @@ function drawRangeCircle() {
     ctx.setLineDash([]);
     ctx.lineWidth = 1;
 
-    // Динамическая подпись из конфига
     const label = weapon.maxRangeKm < 1
         ? Math.round(weapon.maxRangeKm * 1000) + NBSP + STR.u_m
         : weapon.maxRangeKm.toFixed(1) + NBSP + STR.u_km;
@@ -319,15 +284,15 @@ function draw() {
     ctx.fillStyle = c.bg;
     ctx.fillRect(0, 0, w, h);
 
-    const m0 = worldToScreen(0, 0);
-    const m1 = worldToScreen(MAP.size, MAP.size);
+    const m0 = worldToScreen(0, 0, view);
+    const m1 = worldToScreen(MAP.size, MAP.size, view);
     ctx.fillStyle = c.mapBg;
     ctx.fillRect(m0.x, m1.y, m1.x - m0.x, m0.y - m1.y);
 
     drawTiles();
 
     const step = niceStep(), minor = step / 5;
-    const a = screenToWorld(0, 0), b = screenToWorld(w, h);
+    const a = screenToWorld(0, 0, view), b = screenToWorld(w, h, view);
     const minX = a.x, maxX = b.x, minY = b.y, maxY = a.y;
     ctx.lineWidth = 1;
 
@@ -335,11 +300,11 @@ function draw() {
         ctx.strokeStyle = c.gridMinor;
         ctx.beginPath();
         for (let gx = Math.ceil(minX / minor) * minor; gx <= maxX; gx += minor) {
-            const s = worldToScreen(gx, 0);
+            const s = worldToScreen(gx, 0, view);
             ctx.moveTo(Math.round(s.x) + .5, 0); ctx.lineTo(Math.round(s.x) + .5, h);
         }
         for (let gy = Math.ceil(minY / minor) * minor; gy <= maxY; gy += minor) {
-            const s = worldToScreen(0, gy);
+            const s = worldToScreen(0, gy, view);
             ctx.moveTo(0, Math.round(s.y) + .5); ctx.lineTo(w, Math.round(s.y) + .5);
         }
         ctx.stroke();
@@ -348,18 +313,18 @@ function draw() {
     ctx.strokeStyle = c.gridMajor;
     ctx.beginPath();
     for (let gx = Math.ceil(minX / step) * step; gx <= maxX; gx += step) {
-        const s = worldToScreen(gx, 0);
+        const s = worldToScreen(gx, 0, view);
         ctx.moveTo(Math.round(s.x) + .5, 0); ctx.lineTo(Math.round(s.x) + .5, h);
     }
     for (let gy = Math.ceil(minY / step) * step; gy <= maxY; gy += step) {
-        const s = worldToScreen(0, gy);
+        const s = worldToScreen(0, gy, view);
         ctx.moveTo(0, Math.round(s.y) + .5); ctx.lineTo(w, Math.round(s.y) + .5);
     }
     ctx.stroke();
 
     ctx.strokeStyle = c.axes;
     ctx.beginPath();
-    const zero = worldToScreen(0, 0);
+    const zero = worldToScreen(0, 0, view);
     ctx.moveTo(zero.x + .5, 0); ctx.lineTo(zero.x + .5, h);
     ctx.moveTo(0, zero.y + .5); ctx.lineTo(w, zero.y + .5);
     ctx.stroke();
@@ -375,7 +340,7 @@ function draw() {
     ctx.strokeRect(m0.x, m1.y, m1.x - m0.x, m0.y - m1.y);
     ctx.lineWidth = 1;
 
-    const zc = worldToScreen(ZONE.cx, ZONE.cy);
+    const zc = worldToScreen(ZONE.cx, ZONE.cy, view);
     ctx.beginPath();
     ctx.arc(zc.x, zc.y, ZONE.r * view.scale, 0, Math.PI * 2);
     ctx.fillStyle = 'rgba(159, 211, 86, 0.05)';
@@ -394,13 +359,13 @@ function draw() {
     ctx.textAlign = 'start';
     ctx.textBaseline = 'alphabetic';
     for (let gx = Math.ceil(minX / step) * step; gx <= maxX; gx += step)
-        ctx.fillText(fmtCoord(gx, step), worldToScreen(gx, 0).x + 4, h - 6);
+        ctx.fillText(fmtCoord(gx, step, STR), worldToScreen(gx, 0, view).x + 4, h - 6);
     for (let gy = Math.ceil(minY / step) * step; gy <= maxY; gy += step)
-        ctx.fillText(fmtCoord(gy, step), 4, worldToScreen(0, gy).y - 4);
+        ctx.fillText(fmtCoord(gy, step, STR), 4, worldToScreen(0, gy, view).y - 4);
 
     if (pointA && pointB) {
-        const sa = worldToScreen(pointA.x, pointA.y);
-        const sb = worldToScreen(pointB.x, pointB.y);
+        const sa = worldToScreen(pointA.x, pointA.y, view);
+        const sb = worldToScreen(pointB.x, pointB.y, view);
         ctx.strokeStyle = c.line;
         ctx.setLineDash([6, 6]);
         ctx.beginPath(); ctx.moveTo(sa.x, sa.y); ctx.lineTo(sb.x, sb.y); ctx.stroke();
@@ -408,7 +373,7 @@ function draw() {
         const d = Math.hypot(pointB.x - pointA.x, pointB.y - pointA.y);
         ctx.fillStyle = c.line;
         ctx.font = '12px monospace';
-        ctx.fillText(fmtDist(d), (sa.x + sb.x) / 2 + 8, (sa.y + sb.y) / 2 - 8);
+        ctx.fillText(fmtDist(d, STR), (sa.x + sb.x) / 2 + 8, (sa.y + sb.y) / 2 - 8);
     }
 
     drawRangeCircle();
@@ -418,7 +383,7 @@ function draw() {
 }
 
 function drawPoint(p, color, label) {
-    const s = worldToScreen(p.x, p.y);
+    const s = worldToScreen(p.x, p.y, view);
     ctx.fillStyle = color;
     ctx.beginPath(); ctx.arc(s.x, s.y, 7, 0, Math.PI * 2); ctx.fill();
     ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
@@ -434,8 +399,8 @@ function getTowerIconSize() {
 }
 
 function drawTower(p) {
-    const wx = percentToMeters(p.x), wy = percentToMeters(p.y);
-    const s = worldToScreen(wx, wy);
+    const wx = percentToMeters(p.x, MAP.size), wy = percentToMeters(p.y, MAP.size);
+    const s = worldToScreen(wx, wy, view);
     const iconSize = getTowerIconSize();
 
     if (towerIcon.complete && towerIcon.naturalWidth > 0) {
@@ -498,19 +463,20 @@ function setPoint(key, x, y) {
         };
     }
     if (key === 'A') pointA = p; else pointB = p;
-    syncInputs(); recalc(); draw(); saveState();
+    syncInputs(); recalc(); draw();
+    AppStorage.saveState(pointA, pointB, view, MAP.size);
 }
 
 function syncInputs() {
     if (pointA) {
-        inputs.ax.value = formatPercent(metersToPercent(pointA.x));
-        inputs.ay.value = formatPercent(metersToPercent(pointA.y));
+        inputs.ax.value = formatPercent(metersToPercent(pointA.x, MAP.size));
+        inputs.ay.value = formatPercent(metersToPercent(pointA.y, MAP.size));
     } else {
         inputs.ax.value = ''; inputs.ay.value = '';
     }
     if (pointB) {
-        inputs.bx.value = formatPercent(metersToPercent(pointB.x));
-        inputs.by.value = formatPercent(metersToPercent(pointB.y));
+        inputs.bx.value = formatPercent(metersToPercent(pointB.x, MAP.size));
+        inputs.by.value = formatPercent(metersToPercent(pointB.y, MAP.size));
     } else {
         inputs.bx.value = ''; inputs.by.value = '';
     }
@@ -520,15 +486,16 @@ function readPoint(ix, iy) {
     const px = parseFloat(ix.value), py = parseFloat(iy.value);
     if (isNaN(px) || isNaN(py)) return null;
     return {
-        x: percentToMeters(clamp(px, 0, 100)),
-        y: percentToMeters(clamp(py, 0, 100))
+        x: percentToMeters(clamp(px, 0, 100), MAP.size),
+        y: percentToMeters(clamp(py, 0, 100), MAP.size)
     };
 }
 
 function onInputImmediate() {
     pointA = readPoint(inputs.ax, inputs.ay);
     pointB = readPoint(inputs.bx, inputs.by);
-    recalc(); draw(); saveState();
+    recalc(); draw();
+    AppStorage.saveState(pointA, pointB, view, MAP.size);
 }
 
 function onInput() {
@@ -545,90 +512,45 @@ Object.values(inputs).forEach(i => i.addEventListener('blur', () => {
 document.getElementById('clearA').onclick = () => setPoint('A', null);
 document.getElementById('clearB').onclick = () => setPoint('B', null);
 
-function distToMils(dist, table) {
-    if (!table || table.length === 0) return null;
-
-    if (dist > table[0].dist) return null;
-
-    if (dist <= table[table.length - 1].dist) {
-        return table[table.length - 1].mils;
-    }
-
-    for (let i = 0; i < table.length - 1; i++) {
-        const p1 = table[i];
-        const p2 = table[i + 1];
-
-        if (dist <= p1.dist && dist >= p2.dist) {
-            const range = p1.dist - p2.dist;
-            const t = range > 0 ? (p1.dist - dist) / range : 0;
-            return Math.round(p1.mils + t * (p2.mils - p1.mils));
-        }
-    }
-
-    return null;
-}
-
 function recalc() {
     out.el.classList.remove('oor', 'warn');
     out.dist.classList.remove('oor', 'warn');
 
-    if (!pointA || !pointB) {
+    const weapon = WEAPONS[currentWeapon];
+    const result = AppCalculator.calculate(pointA, pointB, weapon);
+
+    if (result.status === 'noPoints') {
         out.dist.textContent = out.az.textContent = out.el.textContent = out.time.textContent = '—';
         return;
     }
 
-    const dx = pointB.x - pointA.x, dy = pointB.y - pointA.y;
-    const dist = Math.hypot(dx, dy);
-    const az = (Math.atan2(dx, dy) * 180 / Math.PI + 360) % 360;
-    out.dist.textContent = fmtDist(dist);
-    out.az.textContent = az.toFixed(1) + '°';
+    out.dist.textContent = fmtDist(result.dist, STR);
+    out.az.textContent = result.azimuth.toFixed(1) + '°';
 
-    if (dist < 0.001) {
-        out.el.textContent = STR.zero;
-        out.el.classList.add('warn');
-        out.time.textContent = '—';
-        return;
+    switch (result.status) {
+        case 'coincide':
+            out.el.textContent = STR.zero;
+            out.el.classList.add('warn');
+            out.time.textContent = '—';
+            break;
+        case 'tooClose':
+            out.el.textContent = STR.tooClose || 'слишком близко';
+            out.el.classList.add('warn');
+            out.time.textContent = '—';
+            break;
+        case 'outOfRange':
+        case 'noSolution':
+            out.el.textContent = STR.oor;
+            out.el.classList.add('oor');
+            out.time.textContent = '—';
+            break;
+        case 'ok':
+            out.el.textContent = result.mils + NBSP + STR.u_mil;
+            out.time.textContent = (result.flightTime !== null
+                ? result.flightTime.toFixed(1)
+                : '—') + NBSP + STR.u_s;
+            break;
     }
-
-    const weapon = WEAPONS[currentWeapon];
-    const { table, step, v0 } = weapon;
-
-    // Проверка минимальной дистанции (конвертируем км → м)
-    const minRange = (weapon.minRangeKm || 0) * 1000;
-    if (dist < minRange) {
-        out.el.textContent = STR.tooClose || 'слишком близко';
-        out.el.classList.add('warn');
-        out.time.textContent = '—';
-        return;
-    }
-
-    // Проверка максимальной дистанции (конвертируем км → м)
-    const maxRange = (weapon.maxRangeKm || 0) * 1000;
-    if (dist > maxRange) {
-        out.el.textContent = STR.oor;
-        out.el.classList.add('oor');
-        out.time.textContent = '—';
-        return;
-    }
-
-    // Расчёт elevation через таблицу
-    const milsExact = distToMils(dist, table);
-
-    if (milsExact === null) {
-        out.el.textContent = STR.oor;
-        out.el.classList.add('oor');
-        out.time.textContent = '—';
-        return;
-    }
-
-    const isExactInTable = table.some(p => p.mils === milsExact);
-    const mils = isExactInTable ? milsExact : Math.round(milsExact / step) * step;
-
-    const theta = mils / 1000;
-    const flightTime = dist / (v0 * Math.cos(theta));
-
-    out.el.textContent = mils + NBSP + STR.u_mil;
-    out.time.textContent = (isFinite(flightTime) ? flightTime.toFixed(1) : '—') + NBSP + STR.u_s;
 }
 
 const pointers = new Map();
@@ -643,7 +565,7 @@ function canvasPos(e) {
 }
 
 function openMenuAt(sx, sy) {
-    menuWorld = screenToWorld(sx, sy);
+    menuWorld = screenToWorld(sx, sy, view);
     menuPointKey = hitPoint(sx, sy);
     document.getElementById('menuDelete').classList.toggle('hidden', !menuPointKey);
     menu.classList.remove('hidden');
@@ -686,7 +608,7 @@ canvas.addEventListener('pointerdown', e => {
         pinch = {
             dist: Math.hypot(p1.x - p2.x, p1.y - p2.y) || 1,
             scale: view.scale,
-            anchor: screenToWorld(mid.x, mid.y),
+            anchor: screenToWorld(mid.x, mid.y, view),
         };
         return;
     }
@@ -762,10 +684,10 @@ window.addEventListener('pointermove', e => {
         debouncedSaveView();
     } else if (dragging.mode === 'point') {
         stopLongPress();
-        const wpt = screenToWorld(p.x, p.y);
-        const px = clamp(Math.round(metersToPercent(wpt.x) * 100) / 100, 0, 100);
-        const py = clamp(Math.round(metersToPercent(wpt.y) * 100) / 100, 0, 100);
-        setPoint(dragging.key, percentToMeters(px), percentToMeters(py));
+        const wpt = screenToWorld(p.x, p.y, view);
+        const px = clamp(Math.round(metersToPercent(wpt.x, MAP.size) * 100) / 100, 0, 100);
+        const py = clamp(Math.round(metersToPercent(wpt.y, MAP.size) * 100) / 100, 0, 100);
+        setPoint(dragging.key, percentToMeters(px, MAP.size), percentToMeters(py, MAP.size));
     }
 });
 
@@ -818,7 +740,7 @@ canvas.addEventListener('wheel', e => {
     e.preventDefault();
     const factor = Math.exp(-e.deltaY * 0.0015);
     const newScale = clamp(view.scale * factor, 0.005, 1);
-    const wpt = screenToWorld(e.offsetX, e.offsetY);
+    const wpt = screenToWorld(e.offsetX, e.offsetY, view);
     view.scale = newScale;
     view.ox = e.offsetX - wpt.x * view.scale;
     view.oy = e.offsetY + wpt.y * view.scale;
@@ -874,173 +796,60 @@ document.getElementById('discordBtn').addEventListener('click', () => {
     sendDiscordEvent('Discord Button');
 });
 
-let toastTimer = null;
-
-function showToast(message, type = 'success') {
-    let toast = document.getElementById('toast');
-    if (!toast) {
-        toast = document.createElement('div');
-        toast.id = 'toast';
-        toast.className = 'toast';
-        document.querySelector('.map-wrap').appendChild(toast);
-    }
-    toast.textContent = message;
-    toast.className = 'toast ' + type;
-    void toast.offsetWidth;
-    toast.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(() => {
-        toast.classList.remove('show');
-    }, 2500);
-}
-
-function generateShareUrl() {
-    const params = new URLSearchParams();
-    if (pointA) {
-        params.set('ax', metersToPercent(pointA.x).toFixed(2));
-        params.set('ay', metersToPercent(pointA.y).toFixed(2));
-    }
-    if (pointB) {
-        params.set('bx', metersToPercent(pointB.x).toFixed(2));
-        params.set('by', metersToPercent(pointB.y).toFixed(2));
-    }
-    params.set('w', currentWeapon);
-    return location.origin + location.pathname + '?' + params.toString();
-}
-
 async function copyShareLink() {
-    const url = generateShareUrl();
-    try {
-        await navigator.clipboard.writeText(url);
-        showToast(STR.shareCopied, 'success');
-    } catch (e) {
-        const input = document.createElement('input');
-        input.value = url;
-        input.style.position = 'fixed';
-        input.style.opacity = '0';
-        document.body.appendChild(input);
-        input.select();
-        document.execCommand('copy');
-        document.body.removeChild(input);
-        showToast(STR.shareCopied, 'success');
-    }
+    const url = AppShare.generateUrl(pointA, pointB, currentWeapon, MAP.size);
+    await AppShare.copyToClipboard(url);
+    AppShare.showToast(STR.shareCopied, 'success');
 }
 
 function applySharedParams() {
-    const params = new URLSearchParams(location.search);
-    let applied = false;
+    const parsed = AppShare.parseSharedParams(MAP.size);
+    if (!parsed.applied) return;
 
-    if (params.has('ax') && params.has('ay')) {
-        const ax = parseFloat(params.get('ax'));
-        const ay = parseFloat(params.get('ay'));
-        if (!isNaN(ax) && !isNaN(ay)) {
-            pointA = {
-                x: percentToMeters(clamp(ax, 0, 100)),
-                y: percentToMeters(clamp(ay, 0, 100))
-            };
-            applied = true;
-        }
+    if (parsed.pointA) pointA = parsed.pointA;
+    if (parsed.pointB) pointB = parsed.pointB;
+    if (parsed.weapon) {
+        currentWeapon = parsed.weapon;
+        AppStorage.saveWeapon(currentWeapon);
+        document.querySelectorAll('input[name="weapon"]').forEach(r => {
+            r.checked = r.value === currentWeapon;
+        });
     }
 
-    if (params.has('bx') && params.has('by')) {
-        const bx = parseFloat(params.get('bx'));
-        const by = parseFloat(params.get('by'));
-        if (!isNaN(bx) && !isNaN(by)) {
-            pointB = {
-                x: percentToMeters(clamp(bx, 0, 100)),
-                y: percentToMeters(clamp(by, 0, 100))
-            };
-            applied = true;
-        }
-    }
-
-    if (params.has('w')) {
-        const w = params.get('w');
-        if (w === 'mortar' || w === 'artillery') {
-            currentWeapon = w;
-            localStorage.setItem('wardogs_weapon', w);
-            document.querySelectorAll('input[name="weapon"]').forEach(r => {
-                r.checked = r.value === w;
-            });
-            applied = true;
-        }
-    }
-
-    if (applied) {
-        syncInputs();
-        recalc();
-        draw();
-        saveState();
-        setTimeout(() => showToast(STR.shareApplied, 'success'), 400);
-        history.replaceState({}, '', location.pathname);
-    }
+    syncInputs();
+    recalc();
+    draw();
+    AppStorage.saveState(pointA, pointB, view, MAP.size);
+    setTimeout(() => AppShare.showToast(STR.shareApplied, 'success'), 400);
+    history.replaceState({}, '', location.pathname);
 }
 
 document.getElementById('shareBtn').addEventListener('click', copyShareLink);
-
-function saveState() {
-    const state = {
-        pointA: pointA ? {
-            px: metersToPercent(pointA.x),
-            py: metersToPercent(pointA.y)
-        } : null,
-        pointB: pointB ? {
-            px: metersToPercent(pointB.x),
-            py: metersToPercent(pointB.y)
-        } : null,
-        view: { scale: view.scale, ox: view.ox, oy: view.oy }
-    };
-    try {
-        localStorage.setItem('wardogs_mortar_state', JSON.stringify(state));
-    } catch (e) {
-        console.warn('Failed to save state:', e);
-    }
-}
-
-function loadState() {
-    const saved = localStorage.getItem('wardogs_mortar_state');
-    if (!saved) return false;
-    try {
-        const state = JSON.parse(saved);
-        if (state.pointA) {
-            pointA = {
-                x: percentToMeters(state.pointA.px),
-                y: percentToMeters(state.pointA.py)
-            };
-        }
-        if (state.pointB) {
-            pointB = {
-                x: percentToMeters(state.pointB.px),
-                y: percentToMeters(state.pointB.py)
-            };
-        }
-        if (state.view) {
-            view.scale = state.view.scale;
-            view.ox = state.view.ox;
-            view.oy = state.view.oy;
-        }
-        syncInputs();
-        recalc();
-        return true;
-    } catch (e) {
-        console.warn('Failed to load state:', e);
-        return false;
-    }
-}
 
 const weaponRadios = document.querySelectorAll('input[name="weapon"]');
 weaponRadios.forEach(radio => {
     if (radio.value === currentWeapon) radio.checked = true;
     radio.addEventListener('change', (e) => {
         currentWeapon = e.target.value;
-        localStorage.setItem('wardogs_weapon', currentWeapon);
+        AppStorage.saveWeapon(currentWeapon);
         recalc();
         draw();
     });
 });
 
 resize();
-const loaded = loadState();
+const loadedState = AppStorage.loadState(MAP.size);
+const loaded = !!loadedState;
+if (loaded) {
+    pointA = loadedState.pointA;
+    pointB = loadedState.pointB;
+    if (loadedState.view) {
+        view.scale = loadedState.view.scale;
+        view.ox = loadedState.view.ox;
+        view.oy = loadedState.view.oy;
+    }
+    syncInputs();
+}
 applySharedParams();
 if (!loaded) resetView();
 draw();
