@@ -1,79 +1,21 @@
 'use strict';
 
-const MAP = { size: 16000 };
-const ZONE = { cx: 8240, cy: 7330, r: 1000 };
+// Конфиги из отдельных файлов
+const CONFIG = window.CONFIG_APP;
+const WEAPONS = window.CONFIG_WEAPONS.weapons;
 
-const TOWERS = [
-    { x: 51.59, y: 44.61, name: 'tower1' },
-    { x: 47.86, y: 44.77, name: 'tower2' },
-    { x: 47.86, y: 48.62, name: 'tower3' },
-    { x: 55.07, y: 48.00, name: 'tower4' },
-    { x: 53.50, y: 43.01, name: 'tower5' },
-];
+// Ссылки на конфигурацию для удобства
+const MAP = CONFIG.map;
+const ZONE = CONFIG.zone;
+const TOWERS = CONFIG.towers;
+const TILES = CONFIG.tiles;
+const TILE_CACHE_MAX = CONFIG.tiles.cacheMax;
+const INPUT_DEBOUNCE_MS = CONFIG.timing.inputDebounceMs;
+const TAP_THRESHOLD = CONFIG.timing.tapThreshold;
+const LONG_PRESS_MS = CONFIG.timing.longPressMs;
 
 const NBSP = '\u00A0';
-
-const MORTAR_TABLE = [
-    { mils: 290, dist: 700 },
-    { mils: 340, dist: 650 },
-    { mils: 390, dist: 600 },
-    { mils: 440, dist: 550 },
-    { mils: 490, dist: 500 },
-    { mils: 540, dist: 450 },
-    { mils: 590, dist: 400 },
-    { mils: 640, dist: 350 },
-    { mils: 690, dist: 300 },
-    { mils: 700, dist: 290 },
-    { mils: 750, dist: 240 },
-    { mils: 800, dist: 187 },
-    { mils: 850, dist: 132 },
-    { mils: 900, dist: 110 },
-];
-
-const ARTILLERY_TABLE = [
-    { mils: 290, dist: 2500 },
-    { mils: 900, dist: 2352 },
-    { mils: 910, dist: 2331 },
-    { mils: 920, dist: 2310 },
-    { mils: 930, dist: 2289 },
-    { mils: 940, dist: 2268 },
-    { mils: 950, dist: 2247 },
-    { mils: 960, dist: 2226 },
-    { mils: 970, dist: 2204 },
-    { mils: 980, dist: 2182 },
-    { mils: 990, dist: 2160 },
-    { mils: 1000, dist: 2138 },
-];
-
-const WEAPONS = {
-    mortar: {
-        milsTable: MORTAR_TABLE,
-        step: 50,
-        v0: 290 / (22 * Math.cos(700 / 1000)),
-        maxRange: 700,
-        rangeColor: '#5ba8d3'
-    },
-    artillery: {
-        milsTable: ARTILLERY_TABLE,
-        step: 10,
-        v0: 2500 / (12 * Math.cos(290 / 1000)),
-        maxRange: 2500,
-        rangeColor: '#5ba8d3'
-    }
-};
-
-const TILES = {
-    maxZoom: 5,
-    size: 256,
-    path: (z, x, y) => `maps/tiles/zoom_${z}/${x}_${y}.webp`,
-};
-
-const TILE_CACHE_MAX = 500;
-const tileCache = new Map();
-
-const INPUT_DEBOUNCE_MS = 80;
-const TAP_THRESHOLD = 5;
-const LONG_PRESS_MS = 500;
+const tileCache = new Map(); 
 
 const canvas = document.getElementById('map');
 const ctx = canvas.getContext('2d');
@@ -96,8 +38,8 @@ const out = {
 
 let showTowers = localStorage.getItem('wardogs_towers') !== '0';
 let selectedTower = null;
-let currentWeapon = localStorage.getItem('wardogs_weapon') || 'mortar';
-let theme = localStorage.getItem('wardogs_theme') || 'dark';
+let currentWeapon = localStorage.getItem('wardogs_weapon') || CONFIG.defaultWeapon;
+let theme = localStorage.getItem('wardogs_theme') || CONFIG.defaultTheme;
 
 const view = { scale: 0.05, ox: 0, oy: 0 };
 let pointA = null;
@@ -250,6 +192,7 @@ const I18N_STRINGS = {
     langLabel: 'Язык интерфейса',
     contactLabel: '✉️ Связь',
     oor: 'вне досягаемости',
+    tooClose: 'слишком близко',
     zero: 'точки совпадают',
     u_m: 'м',
     u_km: 'км',
@@ -278,7 +221,7 @@ const I18N_STRINGS = {
 };
 
 const DYNAMIC_KEYS = [
-    'oor', 'zero', 'u_m', 'u_km', 'u_s', 'u_mil',
+    'oor', 'tooClose', 'zero', 'u_m', 'u_km', 'u_s', 'u_mil',
     'tower1', 'tower2', 'tower3', 'tower4', 'tower5',
     'share', 'shareCopied', 'shareApplied'
 ];
@@ -415,10 +358,11 @@ function drawRangeCircle() {
     if (!pointA) return;
 
     const weapon = WEAPONS[currentWeapon];
-    if (!weapon || !weapon.maxRange) return;
+    if (!weapon || !weapon.maxRangeKm) return;
 
+    const maxRangeMeters = weapon.maxRangeKm * 1000;
     const sa = worldToScreen(pointA.x, pointA.y);
-    const radiusPx = weapon.maxRange * view.scale;
+    const radiusPx = maxRangeMeters * view.scale;
     const color = weapon.rangeColor || '#9fd356';
 
     ctx.beginPath();
@@ -433,9 +377,11 @@ function drawRangeCircle() {
     ctx.setLineDash([]);
     ctx.lineWidth = 1;
 
-    const label = currentWeapon === 'mortar'
-        ? '700' + NBSP + STR.u_m
-        : '2.5' + NBSP + STR.u_km;
+    // Динамическая подпись из конфига
+    const label = weapon.maxRangeKm < 1
+        ? Math.round(weapon.maxRangeKm * 1000) + NBSP + STR.u_m
+        : weapon.maxRangeKm.toFixed(1) + NBSP + STR.u_km;
+
     ctx.fillStyle = color;
     ctx.font = 'bold 11px sans-serif';
     ctx.textAlign = 'center';
@@ -723,9 +669,28 @@ function recalc() {
     }
 
     const weapon = WEAPONS[currentWeapon];
-    const { milsTable, step, v0 } = weapon;
+    const { table, step, v0 } = weapon;
 
-    const milsExact = distToMils(dist, milsTable);
+    // Проверка минимальной дистанции (конвертируем км → м)
+    const minRange = (weapon.minRangeKm || 0) * 1000;
+    if (dist < minRange) {
+        out.el.textContent = STR.tooClose || 'слишком близко';
+        out.el.classList.add('warn');
+        out.time.textContent = '—';
+        return;
+    }
+
+    // Проверка максимальной дистанции (конвертируем км → м)
+    const maxRange = (weapon.maxRangeKm || 0) * 1000;
+    if (dist > maxRange) {
+        out.el.textContent = STR.oor;
+        out.el.classList.add('oor');
+        out.time.textContent = '—';
+        return;
+    }
+
+    // Расчёт elevation через таблицу
+    const milsExact = distToMils(dist, table);
 
     if (milsExact === null) {
         out.el.textContent = STR.oor;
@@ -734,7 +699,7 @@ function recalc() {
         return;
     }
 
-    const isExactInTable = milsTable.some(p => p.mils === milsExact);
+    const isExactInTable = table.some(p => p.mils === milsExact);
     const mils = isExactInTable ? milsExact : Math.round(milsExact / step) * step;
 
     const theta = mils / 1000;
