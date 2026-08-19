@@ -15,7 +15,16 @@ const TAP_THRESHOLD = CONFIG.timing.tapThreshold;
 const LONG_PRESS_MS = CONFIG.timing.longPressMs;
 
 const NBSP = '\u00A0';
-const tileCache = new Map(); 
+const tileCache = new Map();
+
+// Обёртка для совместимости со старым кодом
+const STR = new Proxy({}, {
+    get(target, prop) {
+        return window.LocaleManager ? window.LocaleManager.t(prop) : prop;
+    }
+});
+
+window.I18N = {};
 
 const canvas = document.getElementById('map');
 const ctx = canvas.getContext('2d');
@@ -171,93 +180,6 @@ const CANVAS_THEMES = {
     },
 };
 function CT() { return CANVAS_THEMES[theme] || CANVAS_THEMES.dark; }
-
-const I18N_STRINGS = {
-    title: 'Миномётный калькулятор',
-    posA: 'Огневая позиция (A)',
-    posB: 'Цель (B)',
-    dist: 'Дистанция',
-    az: 'Азимут',
-    el: 'Угол возвышения',
-    time: 'Время подлёта',
-    controlsTitle: 'Настройки',
-    weaponType: 'Тип орудия',
-    weaponMortar: 'Миномёт (700 м)',
-    weaponArtillery: 'Артиллерия (>2 км)',
-    hint: 'ПКМ по карте — поставить или удалить точку.<br>ЛКМ — двигать карту (или саму точку).<br>Колесо мыши — масштаб.',
-    reset: 'Сбросить вид',
-    menuA: '📍 Позиция миномёта (A)',
-    menuB: '🎯 Цель (B)',
-    menuDel: '✕ Удалить точку',
-    langLabel: 'Язык интерфейса',
-    contactLabel: '✉️ Связь',
-    oor: 'вне досягаемости',
-    tooClose: 'слишком близко',
-    zero: 'точки совпадают',
-    u_m: 'м',
-    u_km: 'км',
-    u_s: 'с',
-    u_mil: 'mil',
-    extra: 'Дополнительно',
-    towers: 'Иконки вышек',
-    discordTitle: 'Discord',
-    discord: 'Wardogs СНГ / CIS',
-    discordBtn: 'Перейти в Discord',
-    tower1: 'Башня 1',
-    tower2: 'Башня 2',
-    tower3: 'Башня 3',
-    tower4: 'Башня 4',
-    tower5: 'Башня 5',
-    helpTitle: 'Как пользоваться калькулятором',
-    helpP1: '<b>Установка точек.</b> Укажите свою позицию (точка A) и цель (точка B) — калькулятор рассчитает дистанцию, азимут, угол возвышения и время подлёта снаряда.',
-    helpP2: '<b>Работа с картой.</b> Правый клик по карте открывает меню. Левая кнопка мыши перемещает карту. Колесо мыши изменяет масштаб. На сенсорных экранах: один палец — перемещение, два пальца — масштаб, долгое нажатие — контекстное меню.',
-    helpP3: '<b>Координаты.</b> X и Y вводятся в процентах карты (0–100). Значения можно ввести вручную или поставить точки прямо на карте.',
-    helpP4: '<b>Результаты.</b> Дистанция, азимут от севера, угол ствола в mils, время подлёта. Если цель вне досягаемости — соответствующее сообщение.',
-    helpP5: '<b>Сохранение.</b> Все данные автоматически сохраняются и восстанавливаются после перезагрузки страницы.',
-    helpP6: '<b>О калькуляторе.</b> Фан-инструмент для игры WARDOGS. Неофициальный проект, не аффилирован с разработчиками игры.',
-    share: 'Поделиться',
-    shareCopied: 'Ссылка скопирована!',
-    shareApplied: 'Координаты применены из ссылки',
-};
-
-const DYNAMIC_KEYS = [
-    'oor', 'tooClose', 'zero', 'u_m', 'u_km', 'u_s', 'u_mil',
-    'tower1', 'tower2', 'tower3', 'tower4', 'tower5',
-    'share', 'shareCopied', 'shareApplied'
-];
-
-const STR = { ...I18N_STRINGS };
-
-const HTML_KEYS = new Set([
-    'hint',
-    'helpP1', 'helpP2', 'helpP3', 'helpP4', 'helpP5', 'helpP6'
-]);
-
-function applyDict(dict) {
-    document.querySelectorAll('[data-i18n]').forEach(el => {
-        const key = el.dataset.i18n;
-        if (dict[key] === undefined) return;
-        if (HTML_KEYS.has(key)) {
-            el.innerHTML = dict[key];
-        } else {
-            el.textContent = dict[key];
-        }
-    });
-    DYNAMIC_KEYS.forEach(k => { if (dict[k]) STR[k] = dict[k]; });
-    recalc();
-    draw();
-}
-
-function translateUI(lang) {
-    const dict = (typeof I18N !== 'undefined' && I18N[lang]) ? I18N[lang] : I18N_STRINGS;
-    applyDict(dict);
-}
-
-langSelect.addEventListener('change', () => {
-    const lang = langSelect.value;
-    localStorage.setItem('wardogs_lang', lang);
-    translateUI(lang);
-});
 
 let saveViewTimer = null;
 function debouncedSaveView() {
@@ -1117,16 +1039,9 @@ weaponRadios.forEach(radio => {
     });
 });
 
-function initLang() {
-    const lang = localStorage.getItem('wardogs_lang') || 'ru';
-    langSelect.value = lang;
-    translateUI(lang);
-}
-
 resize();
 const loaded = loadState();
 applySharedParams();
 if (!loaded) resetView();
 draw();
 applyTheme();
-initLang();
