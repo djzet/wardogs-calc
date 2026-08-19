@@ -65,7 +65,7 @@ const WEAPONS = {
 const TILES = {
     maxZoom: 5,
     size: 256,
-    path: (z, x, y) => `tiles/zoom_${z}/${x}_${y}.webp`,
+    path: (z, x, y) => `maps/tiles/zoom_${z}/${x}_${y}.webp`,
 };
 
 const TILE_CACHE_MAX = 500;
@@ -108,7 +108,7 @@ let dragging = null;
 let inputTimer = null;
 
 const towerIcon = new Image();
-towerIcon.src = 'icons/tower.webp';
+towerIcon.src = 'assets/icons/tower.webp';
 towerIcon.onload = () => draw();
 
 const clamp = (v, min, max) => Math.max(min, Math.min(max, v));
