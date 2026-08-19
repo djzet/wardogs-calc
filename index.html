@@ -61,7 +61,12 @@
     <link rel="apple-touch-icon"
         href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%231a1f27'/><circle cx='32' cy='32' r='22' fill='none' stroke='%239fd356' stroke-width='3'/></svg>">
 
-    <link rel="stylesheet" href="styles/style.css">
+    <link rel="stylesheet" href="styles/variables.css">
+    <link rel="stylesheet" href="styles/base.css">
+    <link rel="stylesheet" href="styles/panel.css">
+    <link rel="stylesheet" href="styles/map.css">
+    <link rel="stylesheet" href="styles/overlays.css">
+    <link rel="stylesheet" href="styles/mobile.css">
 
     <script type="text/javascript">
         if (location.protocol === 'http:' || location.protocol === 'https:') {
@@ -323,7 +328,39 @@
 
     </div>
 
-    <script src="js/i18n.js"></script>
+    <!-- Конфиги -->
+    <script src="config/weapons.js"></script>
+    <script src="config/app.js"></script>
+
+    <!-- Ядро -->
+    <script src="js/core/utils.js"></script>
+    <script src="js/core/calculator.js"></script>
+
+    <!-- Фичи -->
+    <script src="js/features/storage.js"></script>
+    <script src="js/features/share.js"></script>
+    <script src="js/features/points.js"></script>
+    <script src="js/features/analytics.js"></script>
+
+    <!-- Карта -->
+    <script src="js/map/tiles.js"></script>
+    <script src="js/map/renderer.js"></script>
+    <script src="js/map/interactions.js"></script>
+    <script src="js/map/viewport.js"></script>
+
+    <!-- UI -->
+    <script src="js/ui/panels.js"></script>
+    <script src="js/ui/inputs.js"></script>
+    <script src="js/ui/contextMenu.js"></script>
+    <script src="js/ui/results.js"></script>
+
+    <!-- Фичи -->
+    <script src="js/features/weapons.js"></script>
+
+    <!-- Локализация -->
+    <script src="js/locales/index.js"></script>
+
+    <!-- Главная логика -->
     <script src="js/index.js"></script>
 </body>
 

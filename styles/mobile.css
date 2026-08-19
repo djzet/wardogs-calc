@@ -1,0 +1,23 @@
+/* styles/mobile.css — мобильная адаптация (подключается последним!) */
+
+@media (max-width: 800px) {
+    .app {
+        flex-direction: column;
+    }
+
+    .panel {
+        width: 100%;
+        max-height: 45vh;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+    }
+
+    .map-wrap {
+        flex: 1;
+        min-height: 55vh;
+    }
+
+    .result div {
+        font-size: 13px;
+    }
+}
