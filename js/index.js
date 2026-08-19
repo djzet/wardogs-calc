@@ -23,10 +23,9 @@ const STR = new Proxy({}, {
 
 window.I18N = {};
 
-// DOM элементы
+// DOM
 const canvas = document.getElementById('map');
 const ctx = canvas.getContext('2d');
-const menu = document.getElementById('ctxMenu');
 const langSelect = document.getElementById('langSelect');
 
 const inputs = {
@@ -44,17 +43,9 @@ const out = {
 };
 
 // Состояние
-let showTowers = AppStorage.loadTowers();
 let selectedTower = null;
 let currentWeapon = AppStorage.loadWeapon(CONFIG.defaultWeapon);
-let theme = AppStorage.loadTheme(CONFIG.defaultTheme);
-
 const view = { scale: 0.05, ox: 0, oy: 0 };
-let pointA = null;
-let pointB = null;
-let menuWorld = null;
-let menuPointKey = null;
-let inputTimer = null;
 
 const towerIcon = new Image();
 towerIcon.src = 'assets/icons/tower.webp';
@@ -62,12 +53,25 @@ towerIcon.onload = () => renderMap();
 
 MapTiles.configure(TILE_CACHE_MAX);
 
+// Координация: при изменении точек — обновить UI, пересчитать, перерисовать, сохранить
+function onPointsChanged() {
+    UIInputs.sync();
+    recalc();
+    renderMap();
+    AppStorage.saveState(AppPoints.getA(), AppPoints.getB(), view, MAP.size);
+}
+
+AppPoints.configure({ mapSize: MAP.size, onChange: onPointsChanged });
+
 function renderMap() {
     MapRenderer.draw(ctx, canvas, {
         view, MAP, ZONE, TOWERS,
         WEAPONS, currentWeapon,
-        pointA, pointB,
-        theme, showTowers, selectedTower,
+        pointA: AppPoints.getA(),
+        pointB: AppPoints.getB(),
+        theme: UIPanels.getTheme(),
+        showTowers: UIPanels.getShowTowers(),
+        selectedTower,
         STR, towerIcon, TILES,
         onTileLoaded: renderMap
     });
@@ -77,7 +81,7 @@ let saveViewTimer = null;
 function debouncedSaveView() {
     clearTimeout(saveViewTimer);
     saveViewTimer = setTimeout(() => {
-        AppStorage.saveState(pointA, pointB, view, MAP.size);
+        AppStorage.saveState(AppPoints.getA(), AppPoints.getB(), view, MAP.size);
     }, 200);
 }
 
@@ -100,63 +104,8 @@ function resetView() {
 }
 document.getElementById('resetView').onclick = resetView;
 
-// Drawer
-const drawer = document.getElementById('drawer');
-const drawerBackdrop = document.getElementById('drawerBackdrop');
-
-function openDrawer(state) {
-    drawer.classList.toggle('open', state);
-    drawerBackdrop.classList.toggle('hidden', !state);
-}
-document.getElementById('drawerToggle').onclick = () => openDrawer(true);
-document.getElementById('drawerClose').onclick = () => openDrawer(false);
-drawerBackdrop.onclick = () => openDrawer(false);
-
-// Help modal
-const helpModal = document.getElementById('helpModal');
-
-function openHelp(state) {
-    helpModal.classList.toggle('hidden', !state);
-}
-document.getElementById('helpToggle').onclick = () => openHelp(true);
-document.getElementById('helpClose').onclick = () => openHelp(false);
-helpModal.addEventListener('mousedown', e => {
-    if (e.target === helpModal) openHelp(false);
-});
-
-// Toggles
-const towersToggle = document.getElementById('towersToggle');
-towersToggle.checked = showTowers;
-towersToggle.addEventListener('change', () => {
-    showTowers = towersToggle.checked;
-    AppStorage.saveTowers(showTowers);
-    if (!showTowers) selectedTower = null;
-    renderMap();
-});
-
-const themeToggle = document.getElementById('themeToggle');
-function applyTheme() {
-    document.body.classList.toggle('light', theme === 'light');
-    renderMap();
-}
-themeToggle.onclick = () => {
-    theme = (theme === 'dark') ? 'light' : 'dark';
-    AppStorage.saveTheme(theme);
-    applyTheme();
-};
-
-// Hit detection
-function hitPoint(sx, sy) {
-    for (const [key, p] of [['A', pointA], ['B', pointB]]) {
-        if (!p) continue;
-        const s = worldToScreen(p.x, p.y, view);
-        if (Math.hypot(s.x - sx, s.y - sy) <= 12) return key;
-    }
-    return null;
-}
-
 function findTowerAt(sx, sy) {
-    if (!showTowers) return null;
+    if (!UIPanels.getShowTowers()) return null;
     const halfSize = MapRenderer.getTowerIconSize(view.scale) / 2;
     for (const p of TOWERS) {
         const s = worldToScreen(percentToMeters(p.x, MAP.size), percentToMeters(p.y, MAP.size), view);
@@ -167,72 +116,12 @@ function findTowerAt(sx, sy) {
     return null;
 }
 
-// Points management
-function setPoint(key, x, y) {
-    let p = null;
-    if (x != null && y != null) {
-        p = {
-            x: clamp(x, 0, MAP.size),
-            y: clamp(y, 0, MAP.size)
-        };
-    }
-    if (key === 'A') pointA = p; else pointB = p;
-    syncInputs(); recalc(); renderMap();
-    AppStorage.saveState(pointA, pointB, view, MAP.size);
-}
-
-function syncInputs() {
-    if (pointA) {
-        inputs.ax.value = formatPercent(metersToPercent(pointA.x, MAP.size));
-        inputs.ay.value = formatPercent(metersToPercent(pointA.y, MAP.size));
-    } else {
-        inputs.ax.value = ''; inputs.ay.value = '';
-    }
-    if (pointB) {
-        inputs.bx.value = formatPercent(metersToPercent(pointB.x, MAP.size));
-        inputs.by.value = formatPercent(metersToPercent(pointB.y, MAP.size));
-    } else {
-        inputs.bx.value = ''; inputs.by.value = '';
-    }
-}
-
-function readPoint(ix, iy) {
-    const px = parseFloat(ix.value), py = parseFloat(iy.value);
-    if (isNaN(px) || isNaN(py)) return null;
-    return {
-        x: percentToMeters(clamp(px, 0, 100), MAP.size),
-        y: percentToMeters(clamp(py, 0, 100), MAP.size)
-    };
-}
-
-function onInputImmediate() {
-    pointA = readPoint(inputs.ax, inputs.ay);
-    pointB = readPoint(inputs.bx, inputs.by);
-    recalc(); renderMap();
-    AppStorage.saveState(pointA, pointB, view, MAP.size);
-}
-
-function onInput() {
-    clearTimeout(inputTimer);
-    inputTimer = setTimeout(onInputImmediate, INPUT_DEBOUNCE_MS);
-}
-
-Object.values(inputs).forEach(i => i.addEventListener('input', onInput));
-Object.values(inputs).forEach(i => i.addEventListener('blur', () => {
-    clearTimeout(inputTimer);
-    onInputImmediate();
-}));
-
-document.getElementById('clearA').onclick = () => setPoint('A', null);
-document.getElementById('clearB').onclick = () => setPoint('B', null);
-
-// Calculations
 function recalc() {
     out.el.classList.remove('oor', 'warn');
     out.dist.classList.remove('oor', 'warn');
 
     const weapon = WEAPONS[currentWeapon];
-    const result = AppCalculator.calculate(pointA, pointB, weapon);
+    const result = AppCalculator.calculate(AppPoints.getA(), AppPoints.getB(), weapon);
 
     if (result.status === 'noPoints') {
         out.dist.textContent = out.az.textContent = out.el.textContent = out.time.textContent = '—';
@@ -268,73 +157,58 @@ function recalc() {
     }
 }
 
-// Context menu
-function openMenuAt(sx, sy) {
-    menuWorld = screenToWorld(sx, sy, view);
-    menuPointKey = hitPoint(sx, sy);
-    document.getElementById('menuDelete').classList.toggle('hidden', !menuPointKey);
-    menu.classList.remove('hidden');
-    const wrap = canvas.parentElement.getBoundingClientRect();
-    let left = sx, top = sy;
-    if (left + menu.offsetWidth > wrap.width) left -= menu.offsetWidth;
-    if (top + menu.offsetHeight > wrap.height) top -= menu.offsetHeight;
-    menu.style.left = left + 'px';
-    menu.style.top = top + 'px';
-}
+// Инициализация UI-модулей
+UIPanels.init({ onChange: () => {
+    if (!UIPanels.getShowTowers()) selectedTower = null;
+    renderMap();
+}});
 
-function hideMenu() { menu.classList.add('hidden'); }
+UIInputs.init({ inputs, debounceMs: INPUT_DEBOUNCE_MS, mapSize: MAP.size });
 
-menu.addEventListener('click', e => {
-    const action = e.target.dataset.action;
-    if (!action) return;
-    if (action === 'setA') setPoint('A', menuWorld.x, menuWorld.y);
-    if (action === 'setB') setPoint('B', menuWorld.x, menuWorld.y);
-    if (action === 'delete') setPoint(menuPointKey, null);
-    hideMenu();
+UIContextMenu.init({
+    getView: () => view,
+    hitPoint: (sx, sy) => AppPoints.hitPoint(sx, sy, view),
+    setPoint: (k, x, y) => AppPoints.setPoint(k, x, y),
+    getWrapRect: () => canvas.parentElement.getBoundingClientRect()
 });
 
-window.addEventListener('pointerdown', e => { if (!menu.contains(e.target)) hideMenu(); });
-window.addEventListener('keydown', e => {
-    if (e.key === 'Escape') {
-        hideMenu();
-        openHelp(false);
-    }
-});
+AppAnalytics.init();
 
-// Map interactions setup
-function setSelectedTower(tower) {
-    selectedTower = tower;
-}
+document.getElementById('clearA').onclick = () => AppPoints.setPoint('A', null);
+document.getElementById('clearB').onclick = () => AppPoints.setPoint('B', null);
 
+// Map interactions
 canvas.addEventListener('pointerdown', e => {
     MapInteractions.handlePointerDown(e, canvas, {
-        view, hitPoint, findTowerAt, openMenuAt, hideMenu,
+        view,
+        hitPoint: (sx, sy) => AppPoints.hitPoint(sx, sy, view),
+        findTowerAt,
+        openMenuAt: (sx, sy) => UIContextMenu.openMenuAt(sx, sy),
+        hideMenu: () => UIContextMenu.hideMenu(),
         LONG_PRESS_MS, utils: window.AppUtils
     });
 });
 
 window.addEventListener('pointermove', e => {
     MapInteractions.handlePointerMove(e, canvas, {
-        view, renderMap, debouncedSaveView, hitPoint, findTowerAt, setPoint,
+        view, renderMap, debouncedSaveView,
+        hitPoint: (sx, sy) => AppPoints.hitPoint(sx, sy, view),
+        findTowerAt,
+        setPoint: (k, x, y) => AppPoints.setPoint(k, x, y),
         utils: window.AppUtils, TAP_THRESHOLD, MAP
     });
 });
 
-window.addEventListener('pointerup', e => {
+function onPointerUp(e) {
     MapInteractions.handlePointerUp(e, canvas, {
-        view, renderMap, findTowerAt, selectedTower, setSelectedTower
+        view, renderMap, findTowerAt, selectedTower,
+        setSelectedTower: t => { selectedTower = t; }
     });
-});
+}
+window.addEventListener('pointerup', onPointerUp);
+window.addEventListener('pointercancel', onPointerUp);
 
-window.addEventListener('pointercancel', e => {
-    MapInteractions.handlePointerUp(e, canvas, {
-        view, renderMap, findTowerAt, selectedTower, setSelectedTower
-    });
-});
-
-window.addEventListener('blur', () => {
-    MapInteractions.handleBlur(canvas);
-});
+window.addEventListener('blur', () => MapInteractions.handleBlur(canvas));
 
 canvas.addEventListener('wheel', e => {
     MapInteractions.handleWheel(e, canvas, {
@@ -343,34 +217,26 @@ canvas.addEventListener('wheel', e => {
 }, { passive: false });
 
 canvas.addEventListener('contextmenu', e => {
-    MapInteractions.handleContextMenu(e, canvas, { openMenuAt });
-});
-
-// Discord tracking
-function sendDiscordEvent(source) {
-    window.dataLayer = window.dataLayer || [];
-    window.dataLayer.push({
-        event: 'select_promotion',
-        ecommerce: {
-            creative_name: source,
-            creative_slot: 'panel',
-            promotion_id: 'discord_invite',
-        },
+    MapInteractions.handleContextMenu(e, canvas, {
+        openMenuAt: (sx, sy) => UIContextMenu.openMenuAt(sx, sy)
     });
-    if (typeof ym === 'function') ym(111625912, 'reachGoal', 'discord_qr_click');
-}
-
-document.getElementById('discordQr').addEventListener('click', () => {
-    sendDiscordEvent('Discord QR');
 });
 
-document.getElementById('discordBtn').addEventListener('click', () => {
-    sendDiscordEvent('Discord Button');
+window.addEventListener('pointerdown', e => {
+    const menu = document.getElementById('ctxMenu');
+    if (!menu.contains(e.target)) UIContextMenu.hideMenu();
+});
+
+window.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+        UIContextMenu.hideMenu();
+        UIPanels.openHelp(false);
+    }
 });
 
 // Share
 async function copyShareLink() {
-    const url = AppShare.generateUrl(pointA, pointB, currentWeapon, MAP.size);
+    const url = AppShare.generateUrl(AppPoints.getA(), AppPoints.getB(), currentWeapon, MAP.size);
     await AppShare.copyToClipboard(url);
     AppShare.showToast(STR.shareCopied, 'success');
 }
@@ -379,8 +245,10 @@ function applySharedParams() {
     const parsed = AppShare.parseSharedParams(MAP.size);
     if (!parsed.applied) return;
 
-    if (parsed.pointA) pointA = parsed.pointA;
-    if (parsed.pointB) pointB = parsed.pointB;
+    const newA = parsed.pointA || AppPoints.getA();
+    const newB = parsed.pointB || AppPoints.getB();
+    AppPoints.assign(newA, newB);
+
     if (parsed.weapon) {
         currentWeapon = parsed.weapon;
         AppStorage.saveWeapon(currentWeapon);
@@ -389,10 +257,10 @@ function applySharedParams() {
         });
     }
 
-    syncInputs();
+    UIInputs.sync();
     recalc();
     renderMap();
-    AppStorage.saveState(pointA, pointB, view, MAP.size);
+    AppStorage.saveState(AppPoints.getA(), AppPoints.getB(), view, MAP.size);
     setTimeout(() => AppShare.showToast(STR.shareApplied, 'success'), 400);
     history.replaceState({}, '', location.pathname);
 }
@@ -416,16 +284,14 @@ resize();
 const loadedState = AppStorage.loadState(MAP.size);
 const loaded = !!loadedState;
 if (loaded) {
-    pointA = loadedState.pointA;
-    pointB = loadedState.pointB;
+    AppPoints.assign(loadedState.pointA, loadedState.pointB);
     if (loadedState.view) {
         view.scale = loadedState.view.scale;
         view.ox = loadedState.view.ox;
         view.oy = loadedState.view.oy;
     }
-    syncInputs();
+    UIInputs.sync();
 }
 applySharedParams();
 if (!loaded) resetView();
 renderMap();
-applyTheme();
