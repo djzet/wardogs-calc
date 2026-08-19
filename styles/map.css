@@ -1,0 +1,138 @@
+/* styles/map.css — карта, кнопки управления, контекстное меню, toast */
+
+.map-wrap {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    background: var(--bg);
+}
+
+canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-touch-callout: none;
+}
+
+.map-controls {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: flex;
+    gap: 8px;
+    z-index: 5;
+}
+
+.view-reset {
+    background: var(--btn-bg);
+    border: 1px solid var(--menu-border);
+    color: var(--btn-text);
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 13px;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+}
+
+.view-reset:hover {
+    background: var(--hover);
+}
+
+.theme-toggle,
+.help-toggle {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 36px;
+    padding: 6px 0;
+}
+
+.theme-toggle .icon-sun {
+    display: block;
+}
+
+.theme-toggle .icon-moon {
+    display: none;
+}
+
+body.light .theme-toggle .icon-sun {
+    display: none;
+}
+
+body.light .theme-toggle .icon-moon {
+    display: block;
+}
+
+/* Контекстное меню */
+.ctx-menu {
+    position: absolute;
+    z-index: 10;
+    min-width: 210px;
+    padding: 4px;
+    background: var(--menu);
+    border: 1px solid var(--menu-border);
+    border-radius: var(--radius-md);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, .25);
+}
+
+.ctx-menu button {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border: none;
+    color: var(--text);
+    padding: 8px 12px;
+    font-size: 14px;
+    cursor: pointer;
+    border-radius: 5px;
+}
+
+.ctx-menu button:hover {
+    background: var(--hover);
+}
+
+.ctx-menu button.danger {
+    color: var(--danger);
+}
+
+.ctx-menu button.danger:hover {
+    color: var(--danger-hover);
+}
+
+/* Toast-уведомления */
+.toast {
+    position: absolute;
+    top: 56px;
+    right: 12px;
+    background: var(--btn-bg);
+    border: 1px solid var(--menu-border);
+    color: var(--btn-text);
+    padding: 10px 16px;
+    border-radius: var(--radius-sm);
+    font-size: 13px;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, .2);
+    opacity: 0;
+    transform: translateY(-10px);
+    pointer-events: none;
+    transition: opacity .25s ease, transform .25s ease;
+    z-index: 20;
+    max-width: 280px;
+}
+
+.toast.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.toast.success {
+    border-color: var(--accent);
+    color: var(--accent);
+}

@@ -1,0 +1,53 @@
+/* styles/variables.css — CSS-переменные и темы */
+
+:root {
+    --bg: #12151a;
+    --panel: #1a1f27;
+    --border: #2c3440;
+    --field: #0f1319;
+    --text: #e6e6e6;
+    --muted: #8a94a3;
+    --dim: #5c6875;
+    --accent: #9fd356;
+    --accent-hover: #b8e877;
+    --danger: #e05656;
+    --danger-hover: #ff6b6b;
+    --menu: #1e242e;
+    --menu-border: #39424f;
+    --hover: #2c3440;
+    --btn-bg: rgba(30, 36, 46, .85);
+    --btn-text: #cfd6df;
+    --discord: #5865F2;
+    --discord-hover: #4752C4;
+    --warn: #e8c35a;
+
+    /* Размеры и радиусы */
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 10px;
+    --panel-width: 320px;
+    --drawer-width: 260px;
+}
+
+/* Светлая тема */
+body.light {
+    --bg: #eef1f5;
+    --panel: #ffffff;
+    --border: #d7dde5;
+    --field: #f6f8fa;
+    --text: #1d2530;
+    --muted: #5c6875;
+    --dim: #6b7684;
+    --accent: #4e8f1d;
+    --accent-hover: #3f7517;
+    --danger: #c23b3b;
+    --danger-hover: #e04444;
+    --menu: #ffffff;
+    --menu-border: #c9d1db;
+    --hover: #e8edf3;
+    --btn-bg: rgba(255, 255, 255, .92);
+    --btn-text: #333c47;
+    --discord: #5865F2;
+    --discord-hover: #4752C4;
+    --warn: #8a6d00;
+}
