@@ -136,7 +136,9 @@ window.UIPanels = (function (storage) {
             try {
                 const code = await AppLobby.create(AppPoints.getA(), AppPoints.getB(), AppWeapons.get());
                 if (code) {
-                    AppShare.showToast(`${t('lobbyCreated')}: ${code}`, 'success');
+                    // Автокопирование кода лобби в буфер обмена
+                    await AppShare.copyToClipboard(code);
+                    AppShare.showToast(`${t('lobbyCreated')}: ${code} — ${t('codeCopied')}`, 'success');
                     renderLobbyPlayers();
                     if (renderMap) renderMap();
                 }
