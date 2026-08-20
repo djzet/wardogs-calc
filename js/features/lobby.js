@@ -60,7 +60,7 @@ window.AppLobby = (function () {
         try {
             const code = generateCode();
             const myColor = COLORS[0];
-            const myName = 'Командир';
+            const myName = t('hostName');
 
             const { error: lobbyError } = await sb
                 .from('lobbies')
@@ -86,23 +86,42 @@ window.AppLobby = (function () {
         }
     }
 
+    // Helper для переводов
+    function t(key) {
+        return window.LocaleManager ? window.LocaleManager.t(key) : key;
+    }
+
     // ─── Присоединение к лобби ──────────────────────────────
     async function join(code) {
         const sb = getSupabase();
         if (!sb) return { ok: false, error: 'not_configured' };
 
         try {
+            // Если уже в лобби — сначала выйти
+            if (state.code && state.code !== code) {
+                await leave();
+            }
+
             const { data: lobby, error: lobbyError } = await sb
                 .from('lobbies').select('*').eq('code', code).single();
             if (lobbyError || !lobby) return { ok: false, error: 'not_found' };
 
+            // Уже в этом лобби — не дублировать подключение
+            if (state.code === code) {
+                return { ok: true, pointA: lobby.point_a, pointB: lobby.point_b, weapon: lobby.weapon };
+            }
+
             const { data: existingPlayers } = await sb
                 .from('players').select('*').eq('lobby_code', code);
 
-            const takenColors = (existingPlayers || []).map(p => p.color);
+            // ─── ФИКС 23505: удаляем старую запись игрока перед insert ───
+            await sb.from('players').delete().eq('lobby_code', code).eq('player_id', myId);
+
+            const others = (existingPlayers || []).filter(p => p.player_id !== myId);
+            const takenColors = others.map(p => p.color);
             const myColor = COLORS.find(c => !takenColors.includes(c)) ||
                 '#' + Math.floor(Math.random() * 16777215).toString(16).padStart(6, '0');
-            const myName = `Игрок ${(existingPlayers?.length || 0) + 1}`;
+            const myName = `${t('playerName')} ${others.length + 1}`;
 
             const { error: playerError } = await sb
                 .from('players')
@@ -114,7 +133,7 @@ window.AppLobby = (function () {
             state.me = { playerId: myId, name: myName, color: myColor };
 
             const playersMap = {};
-            (existingPlayers || []).forEach(p => {
+            others.forEach(p => {
                 playersMap[p.player_id] = { playerId: p.player_id, name: p.name, color: p.color };
             });
             playersMap[myId] = state.me;
