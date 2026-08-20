@@ -1,6 +1,6 @@
 // js/features/points.js — Владение точками A/B
 
-window.AppPoints = (function(utils) {
+window.AppPoints = (function (utils) {
     let pointA = null;
     let pointB = null;
     let mapSize = 16000;
@@ -30,12 +30,14 @@ window.AppPoints = (function(utils) {
         pointB = b;
     }
 
+    // Поля ввода в игровых координатах (метры / 100, 0–160)
     function readPoint(ix, iy) {
-        const px = parseFloat(ix.value), py = parseFloat(iy.value);
-        if (isNaN(px) || isNaN(py)) return null;
+        const gx = parseFloat(ix.value), gy = parseFloat(iy.value);
+        if (isNaN(gx) || isNaN(gy)) return null;
+        const maxGame = mapSize / 100;
         return {
-            x: utils.percentToMeters(utils.clamp(px, 0, 100), mapSize),
-            y: utils.percentToMeters(utils.clamp(py, 0, 100), mapSize)
+            x: utils.clamp(gx, 0, maxGame) * 100,   // игровая координата → метры
+            y: utils.clamp(gy, 0, maxGame) * 100
         };
     }
 

@@ -1,6 +1,6 @@
-// js/ui/inputs.js — Координатные поля (ax, ay, bx, by)
+// js/ui/inputs.js — Координатные поля (ax, ay, bx, by) в игровых координатах
 
-window.UIInputs = (function(points, utils) {
+window.UIInputs = (function (points, utils) {
     let inputs = null;
     let timer = null;
     let debounceMs = 80;
@@ -10,6 +10,15 @@ window.UIInputs = (function(points, utils) {
         inputs = opts.inputs;
         debounceMs = opts.debounceMs || 80;
         mapSize = opts.mapSize;
+
+        // Лимиты по размеру карты: 16000 м → 0–160, шаг 0.01
+        const maxGame = String(mapSize / 100);
+        Object.values(inputs).forEach(i => {
+            i.min = '0';
+            i.max = maxGame;
+            i.step = '0.01';
+        });
+
         bind();
     }
 
@@ -20,14 +29,14 @@ window.UIInputs = (function(points, utils) {
     function sync() {
         const A = points.getA(), B = points.getB();
         if (A) {
-            setField(inputs.ax, utils.formatPercent(utils.metersToPercent(A.x, mapSize)));
-            setField(inputs.ay, utils.formatPercent(utils.metersToPercent(A.y, mapSize)));
+            setField(inputs.ax, utils.gameCoord(A.x));
+            setField(inputs.ay, utils.gameCoord(A.y));
         } else {
             setField(inputs.ax, ''); setField(inputs.ay, '');
         }
         if (B) {
-            setField(inputs.bx, utils.formatPercent(utils.metersToPercent(B.x, mapSize)));
-            setField(inputs.by, utils.formatPercent(utils.metersToPercent(B.y, mapSize)));
+            setField(inputs.bx, utils.gameCoord(B.x));
+            setField(inputs.by, utils.gameCoord(B.y));
         } else {
             setField(inputs.bx, ''); setField(inputs.by, '');
         }

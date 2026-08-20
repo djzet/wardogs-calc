@@ -1,6 +1,5 @@
 'use strict';
 
-// Конфиги
 const CONFIG = window.CONFIG_APP;
 const WEAPONS = window.CONFIG_WEAPONS.weapons;
 const MAP = CONFIG.map;
@@ -19,7 +18,6 @@ const STR = new Proxy({}, {
 });
 window.I18N = {};
 
-// DOM
 function el(id) { return document.getElementById(id); }
 const canvas = el('map');
 const ctx = canvas.getContext('2d');
@@ -34,6 +32,7 @@ towerIcon.src = 'assets/icons/tower.webp';
 towerIcon.onload = () => renderMap();
 
 MapTiles.configure(TILE_CACHE_MAX);
+AppDraw.configure(MAP.size);
 
 function renderMap() {
     MapRenderer.draw(ctx, canvas, {
@@ -55,6 +54,14 @@ function onPointsChanged() {
     UIResults.update();
     renderMap();
     saveState();
+
+    if (AppLobby.isConnected()) {
+        AppLobby.syncState({
+            pointA: AppPoints.getA(),
+            pointB: AppPoints.getB(),
+            weapon: AppWeapons.get()
+        });
+    }
 }
 
 // Инициализация модулей
@@ -65,7 +72,14 @@ AppPoints.configure({ mapSize: MAP.size, onChange: onPointsChanged });
 
 UIResults.init({ out, getWeapons: () => WEAPONS, getCurrentWeapon: () => AppWeapons.get(), STR });
 
-UIPanels.init({ onChange: () => { if (!UIPanels.getShowTowers()) selectedTower = null; renderMap(); } });
+UIPanels.init({
+    onChange: () => {
+        if (!UIPanels.getShowTowers()) selectedTower = null;
+        renderMap();
+    },
+    renderMap: renderMap,
+    saveState: saveState  
+});
 
 UIInputs.init({ inputs, debounceMs: INPUT_DEBOUNCE_MS, mapSize: MAP.size });
 
@@ -78,11 +92,45 @@ UIContextMenu.init({
 
 AppWeapons.init(CONFIG.defaultWeapon, () => { UIResults.update(); renderMap(); });
 
+AppLobby.setOnRemoteState((remote) => {
+    if (remote.pointA !== undefined || remote.pointB !== undefined) {
+        AppPoints.assign(remote.pointA, remote.pointB);
+        if (remote.weapon) AppWeapons.set(remote.weapon);
+        UIInputs.sync();
+        UIResults.update();
+        renderMap();
+    }
+});
+
+AppLobby.setOnDrawing(() => { renderMap(); });
+
+AppLobby.setOnCursor(() => { renderMap(); });
+
+AppLobby.setOnPlayersChange(() => {
+    UIPanels.renderLobbyPlayers();
+});
+
 AppAnalytics.init();
 
 el('resetView').onclick = () => MapViewport.resetView();
 el('clearA').onclick = () => AppPoints.setPoint('A', null);
 el('clearB').onclick = () => AppPoints.setPoint('B', null);
+
+document.querySelectorAll('.draw-tool').forEach(btn => {
+    btn.addEventListener('click', () => {
+        window.AppDraw.setTool(btn.dataset.tool);
+        canvas.style.cursor = btn.dataset.tool === 'pan' ? 'crosshair' : 'default';
+    });
+});
+
+document.querySelectorAll('.width-opt').forEach(btn => {
+    btn.addEventListener('click', () => window.AppDraw.setWidth(btn.dataset.width));
+});
+
+el('clearDrawingsBtn').addEventListener('click', () => {
+    window.AppDraw.clearDrawings();
+    renderMap();
+});
 
 function findTowerAt(sx, sy) {
     if (!UIPanels.getShowTowers()) return null;
@@ -96,16 +144,22 @@ function findTowerAt(sx, sy) {
 
 // Map interactions
 canvas.addEventListener('pointerdown', e => MapInteractions.handlePointerDown(e, canvas, {
-    view, hitPoint: (sx, sy) => AppPoints.hitPoint(sx, sy, view), findTowerAt,
+    view, mapSize: MAP.size, renderMap,   // ← добавить renderMap
+    hitPoint: (sx, sy) => AppPoints.hitPoint(sx, sy, view), findTowerAt,
     openMenuAt: (sx, sy) => UIContextMenu.openMenuAt(sx, sy), hideMenu: () => UIContextMenu.hideMenu(),
     LONG_PRESS_MS, utils: window.AppUtils
 }));
 
+canvas.addEventListener('pointerleave', () => {
+    const cc = document.getElementById('cursorCoords');
+    if (cc) cc.classList.remove('visible');
+});
+
 window.addEventListener('pointermove', e => MapInteractions.handlePointerMove(e, canvas, {
-    view, renderMap, debouncedSaveView: () => MapViewport.debouncedSave(),
+    view, mapSize: MAP.size, renderMap, debouncedSaveView: () => MapViewport.debouncedSave(),
     hitPoint: (sx, sy) => AppPoints.hitPoint(sx, sy, view), findTowerAt,
     setPoint: (k, x, y) => AppPoints.setPoint(k, x, y),
-    utils: window.AppUtils, TAP_THRESHOLD, MAP
+    utils: window.AppUtils, TAP_THRESHOLD
 }));
 
 const onUp = e => MapInteractions.handlePointerUp(e, canvas, {

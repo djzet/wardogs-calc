@@ -20,4 +20,28 @@
     .result div {
         font-size: 13px;
     }
+
+    .drawer {
+        width: 100%;
+        max-width: 320px;
+    }
+
+    .map-controls {
+        top: 8px;
+        right: 8px;
+        gap: 6px;
+        flex-wrap: wrap;
+        max-width: calc(100% - 16px);
+    }
+
+    .view-reset {
+        padding: 5px 10px;
+        font-size: 12px;
+    }
+
+    .theme-toggle,
+    .help-toggle {
+        width: 32px;
+        padding: 5px 0;
+    }
 }
