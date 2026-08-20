@@ -4,11 +4,15 @@ window.UIPanels = (function (storage) {
     let theme = storage.loadTheme('dark');
     let showTowers = storage.loadTowers();
     let onChange = null;
+    let renderMap = null;
+    let saveState = null;
 
     function emit() { if (onChange) onChange(); }
 
     function init(opts) {
         onChange = opts.onChange || null;
+        renderMap = opts.renderMap || null;
+        saveState = opts.saveState || null;
         bind();
         applyThemeClass();
     }
@@ -56,7 +60,15 @@ window.UIPanels = (function (storage) {
         const players = window.AppLobby.getPlayers();
         const myId = window.AppLobby.getMyId();
 
-        info.innerHTML = `<span class="lobby-code">Код: <b>${code}</b></span>`;
+        // Безопасно через DOM API
+        info.textContent = '';
+        const codeSpan = document.createElement('span');
+        codeSpan.className = 'lobby-code';
+        codeSpan.textContent = 'Код: ';
+        const codeBold = document.createElement('b');
+        codeBold.textContent = code;
+        codeSpan.appendChild(codeBold);
+        info.appendChild(codeSpan);
 
         list.innerHTML = '';
         Object.values(players).forEach(p => {
@@ -65,18 +77,32 @@ window.UIPanels = (function (storage) {
 
             const row = document.createElement('label');
             row.className = 'player-row';
-            row.innerHTML = `
-      <span class="player-color" style="background:${p.color}"></span>
-      <span class="player-name">${p.name} ${isMe ? '(вы)' : ''}</span>
-      ${!isMe ? `<input type="checkbox" ${!isHidden ? 'checked' : ''} data-pid="${p.playerId}">` : ''}
-    `;
 
-            const cb = row.querySelector('input');
-            if (cb) {
+            // Color indicator
+            const colorSpan = document.createElement('span');
+            colorSpan.className = 'player-color';
+            colorSpan.style.background = p.color;
+            row.appendChild(colorSpan);
+
+            // Name
+            const nameSpan = document.createElement('span');
+            nameSpan.className = 'player-name';
+            nameSpan.textContent = `${p.name}${isMe ? ' (вы)' : ''}`;
+            row.appendChild(nameSpan);
+
+            // Checkbox (только для других игроков)
+            if (!isMe) {
+                const cb = document.createElement('input');
+                cb.type = 'checkbox';
+                cb.checked = !isHidden;
+                cb.dataset.pid = p.playerId;
                 cb.addEventListener('change', (e) => {
                     window.AppLobby.togglePlayerVisibility(p.playerId, e.target.checked);
+                    renderMap();
                 });
+                row.appendChild(cb);
             }
+
             list.appendChild(row);
         });
     }
@@ -106,6 +132,7 @@ window.UIPanels = (function (storage) {
             if (code) {
                 AppShare.showToast(`Лобби создано: ${code}`, 'success');
                 renderLobbyPlayers();
+                if (renderMap) renderMap();
             }
         });
 
@@ -118,7 +145,7 @@ window.UIPanels = (function (storage) {
                     if (res.weapon) AppWeapons.set(res.weapon);
                     UIInputs.sync();
                     UIResults.update();
-                    renderMap();
+                    if (renderMap) renderMap();
                     AppShare.showToast('Подключено к лобби', 'success');
                     renderLobbyPlayers();
                 } else {
@@ -130,6 +157,7 @@ window.UIPanels = (function (storage) {
         document.getElementById('leaveLobbyBtn').addEventListener('click', () => {
             AppLobby.leave();
             renderLobbyPlayers();
+            if (renderMap) renderMap();
         });
     }
 

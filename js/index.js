@@ -77,8 +77,8 @@ UIPanels.init({
         if (!UIPanels.getShowTowers()) selectedTower = null;
         renderMap();
     },
-    renderMap,
-    saveState
+    renderMap: renderMap,
+    saveState: saveState  
 });
 
 UIInputs.init({ inputs, debounceMs: INPUT_DEBOUNCE_MS, mapSize: MAP.size });
@@ -149,10 +149,6 @@ canvas.addEventListener('pointerdown', e => MapInteractions.handlePointerDown(e,
     openMenuAt: (sx, sy) => UIContextMenu.openMenuAt(sx, sy), hideMenu: () => UIContextMenu.hideMenu(),
     LONG_PRESS_MS, utils: window.AppUtils
 }));
-
-canvas.addEventListener('mousedown', e => {
-    if (e.button === 1) e.preventDefault();
-});
 
 canvas.addEventListener('pointerleave', () => {
     const cc = document.getElementById('cursorCoords');

@@ -111,12 +111,15 @@ window.AppDraw = (function (utils) {
     const connected = window.AppLobby && window.AppLobby.isConnected();
     const strokes = connected ? window.AppLobby.getDrawings() : localDrawings;
     const myId = connected ? window.AppLobby.getMyId() : 'local';
-    const R = 12; // радиус захвата в px
+    const baseEraseRadius = 8; // базовый радиус
     let removed = false;
 
     for (let i = strokes.length - 1; i >= 0; i--) {
       const st = strokes[i];
-      if (st.playerId !== myId) continue; // стираем только своё
+      if (st.playerId !== myId) continue;
+
+      // Масштабируем радиус по толщине линии
+      const strokeRadius = baseEraseRadius + 2 * (st.width || 1);
 
       let hit = false;
       for (const p of st.points || []) {
@@ -125,7 +128,10 @@ window.AppDraw = (function (utils) {
           utils.percentToMeters(p.y, mapSize),
           view
         );
-        if (Math.hypot(s.x - sx, s.y - sy) <= R) { hit = true; break; }
+        if (Math.hypot(s.x - sx, s.y - sy) <= strokeRadius) {
+          hit = true;
+          break;
+        }
       }
 
       if (hit) {
