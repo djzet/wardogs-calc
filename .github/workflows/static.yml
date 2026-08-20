@@ -24,15 +24,22 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      # Безопасная инъекция через Node.js (не ломается на & \ и других спецсимволах)
       - name: Inject Supabase credentials
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
         run: |
           if [ -n "$SUPABASE_URL" ] && [ -n "$SUPABASE_KEY" ]; then
-            sed -i "s|__SUPABASE_URL__|$SUPABASE_URL|g" js/features/lobby.js
-            sed -i "s|__SUPABASE_KEY__|$SUPABASE_KEY|g" js/features/lobby.js
-            echo "✅ Supabase credentials injected"
+            node -e "
+              const fs = require('fs');
+              const f = 'js/features/lobby.js';
+              let c = fs.readFileSync(f, 'utf8');
+              c = c.split('__SUPABASE_URL__').join(process.env.SUPABASE_URL);
+              c = c.split('__SUPABASE_KEY__').join(process.env.SUPABASE_KEY);
+              fs.writeFileSync(f, c);
+              console.log('✅ Supabase credentials injected');
+            "
           else
             echo "⚠️  Secrets not found — placeholders remain (OK for forks)"
           fi

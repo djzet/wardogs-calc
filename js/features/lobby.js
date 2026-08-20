@@ -18,7 +18,13 @@ window.AppLobby = (function () {
     function getSupabase() {
         if (!_supabase) {
             if (!window.supabase) {
-                throw new Error('Supabase SDK не загружен');
+                console.warn('[Lobby] Supabase SDK not loaded');
+                return null;
+            }
+            // Guard: не создаём клиент с placeholder-значениями
+            if (SUPABASE_URL.startsWith('__') || SUPABASE_KEY.startsWith('__')) {
+                console.warn('[Lobby] Supabase credentials not configured (placeholders detected). Lobby disabled.');
+                return null;
             }
             _supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         }
@@ -48,12 +54,14 @@ window.AppLobby = (function () {
 
     // ─── Создание лобби ─────────────────────────────────────
     async function create(pointA, pointB, weapon) {
+        const sb = getSupabase();
+        if (!sb) throw new Error('Lobby недоступен: Supabase не настроен');
+
         try {
             const code = generateCode();
             const myColor = COLORS[0];
             const myName = 'Командир';
 
-            const sb = getSupabase();
             const { error: lobbyError } = await sb
                 .from('lobbies')
                 .insert({ code, host_id: myId, point_a: pointA, point_b: pointB, weapon });
@@ -80,8 +88,10 @@ window.AppLobby = (function () {
 
     // ─── Присоединение к лобби ──────────────────────────────
     async function join(code) {
+        const sb = getSupabase();
+        if (!sb) return { ok: false, error: 'not_configured' };
+
         try {
-            const sb = getSupabase();
             const { data: lobby, error: lobbyError } = await sb
                 .from('lobbies').select('*').eq('code', code).single();
             if (lobbyError || !lobby) return { ok: false, error: 'not_found' };
@@ -133,6 +143,7 @@ window.AppLobby = (function () {
     // ─── Подписка на Realtime ───────────────────────────────
     function subscribeToLobby(code) {
         const sb = getSupabase();
+        if (!sb) return;
         if (realtimeChannel) sb.removeChannel(realtimeChannel);
 
         realtimeChannel = sb.channel(`lobby:${code}`)
@@ -164,14 +175,21 @@ window.AppLobby = (function () {
 
     // ─── Покинуть лобби ─────────────────────────────────────
     async function leave() {
-        if (realtimeChannel) { getSupabase().removeChannel(realtimeChannel); realtimeChannel = null; }
-        if (state.code) {
-            const sb = getSupabase();
-            await sb.from('players').delete().eq('lobby_code', state.code).eq('player_id', myId);
-            if (state.isHost) {
-                await sb.from('drawings').delete().eq('lobby_code', state.code);
-                await sb.from('players').delete().eq('lobby_code', state.code);
-                await sb.from('lobbies').delete().eq('code', state.code);
+        const sb = getSupabase();
+        if (realtimeChannel && sb) {
+            try { sb.removeChannel(realtimeChannel); } catch (e) { }
+            realtimeChannel = null;
+        }
+        if (state.code && sb) {
+            try {
+                await sb.from('players').delete().eq('lobby_code', state.code).eq('player_id', myId);
+                if (state.isHost) {
+                    await sb.from('drawings').delete().eq('lobby_code', state.code);
+                    await sb.from('players').delete().eq('lobby_code', state.code);
+                    await sb.from('lobbies').delete().eq('code', state.code);
+                }
+            } catch (e) {
+                console.warn('[Lobby] leave cleanup failed:', e);
             }
         }
         state.code = null; state.isHost = false; state.connected = false;
@@ -181,13 +199,17 @@ window.AppLobby = (function () {
 
     async function syncState({ pointA, pointB, weapon }) {
         if (!state.code) return;
-        try { await getSupabase().from('lobbies').update({ point_a: pointA, point_b: pointB, weapon }).eq('code', state.code); }
+        const sb = getSupabase();
+        if (!sb) return;
+        try { await sb.from('lobbies').update({ point_a: pointA, point_b: pointB, weapon }).eq('code', state.code); }
         catch (e) { console.warn('[Lobby] syncState failed:', e); }
     }
 
     async function sendDrawing(tool, color, points, width, label) {
         if (!state.code) return;
-        try { await getSupabase().from('drawings').insert({ lobby_code: state.code, player_id: myId, tool, color, points, width, label }); }
+        const sb = getSupabase();
+        if (!sb) return;
+        try { await sb.from('drawings').insert({ lobby_code: state.code, player_id: myId, tool, color, points, width, label }); }
         catch (e) { console.warn('[Lobby] sendDrawing failed:', e); }
     }
 
@@ -196,28 +218,31 @@ window.AppLobby = (function () {
         if (!state.code || !realtimeChannel) return;
         if (cursorTimer) return;
         cursorTimer = setTimeout(() => { cursorTimer = null; }, CURSOR_THROTTLE_MS);
-        realtimeChannel.send({ type: 'broadcast', event: 'cursor', payload: { x, y, playerId: myId, color: state.me?.color } });
+        try {
+            realtimeChannel.send({ type: 'broadcast', event: 'cursor', payload: { x, y, playerId: myId, color: state.me?.color } });
+        } catch (e) {
+            console.warn('[Lobby] sendCursor failed:', e);
+        }
     }
 
     async function clearDrawings() {
         if (!state.isHost || !state.code) return;
-        try { await getSupabase().from('drawings').delete().eq('lobby_code', state.code); }
+        const sb = getSupabase();
+        if (!sb) return;
+        try { await sb.from('drawings').delete().eq('lobby_code', state.code); }
         catch (e) { console.warn('[Lobby] clearDrawings failed:', e); }
     }
 
     async function deleteDrawing(id) {
         if (!state.code) return;
+        const sb = getSupabase();
+        if (!sb) return;
         try {
-            await getSupabase()
-                .from('drawings')
-                .delete()
-                .eq('id', id)
-                .eq('player_id', myId); // только свои
+            await sb.from('drawings').delete().eq('id', id).eq('player_id', myId);
         } catch (e) {
             console.warn('[Lobby] deleteDrawing failed:', e);
         }
     }
-
 
     function togglePlayerVisibility(playerId, visible) {
         if (visible) state.hiddenPlayers.delete(playerId); else state.hiddenPlayers.add(playerId);

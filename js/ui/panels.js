@@ -7,6 +7,11 @@ window.UIPanels = (function (storage) {
     let renderMap = null;
     let saveState = null;
 
+    // Helper: получить перевод через LocaleManager
+    function t(key) {
+        return window.LocaleManager ? window.LocaleManager.t(key) : key;
+    }
+
     function emit() { if (onChange) onChange(); }
 
     function init(opts) {
@@ -50,7 +55,7 @@ window.UIPanels = (function (storage) {
         const list = document.getElementById('lobbyPlayersList');
         const info = document.getElementById('lobbyInfo');
         const section = document.getElementById('lobbySection');
-        if (!window.AppLobby.isConnected()) {
+        if (!window.AppLobby || !window.AppLobby.isConnected()) {
             section.classList.add('hidden');
             return;
         }
@@ -64,7 +69,7 @@ window.UIPanels = (function (storage) {
         info.textContent = '';
         const codeSpan = document.createElement('span');
         codeSpan.className = 'lobby-code';
-        codeSpan.textContent = 'Код: ';
+        codeSpan.textContent = t('lobbyCodeLabel') + ' ';
         const codeBold = document.createElement('b');
         codeBold.textContent = code;
         codeSpan.appendChild(codeBold);
@@ -84,10 +89,10 @@ window.UIPanels = (function (storage) {
             colorSpan.style.background = p.color;
             row.appendChild(colorSpan);
 
-            // Name
+            // Name (с переводом "вы")
             const nameSpan = document.createElement('span');
             nameSpan.className = 'player-name';
-            nameSpan.textContent = `${p.name}${isMe ? ' (вы)' : ''}`;
+            nameSpan.textContent = p.name + (isMe ? ' ' + t('you') : '');
             row.appendChild(nameSpan);
 
             // Checkbox (только для других игроков)
@@ -98,7 +103,7 @@ window.UIPanels = (function (storage) {
                 cb.dataset.pid = p.playerId;
                 cb.addEventListener('change', (e) => {
                     window.AppLobby.togglePlayerVisibility(p.playerId, e.target.checked);
-                    renderMap();
+                    if (renderMap) renderMap();
                 });
                 row.appendChild(cb);
             }
@@ -126,34 +131,51 @@ window.UIPanels = (function (storage) {
 
         document.getElementById('themeToggle').onclick = toggleTheme;
 
-        // Lobby кнопки
+        // ─── Создать лобби (с обработкой ошибок) ───
         document.getElementById('createLobbyBtn').addEventListener('click', async () => {
-            const code = await AppLobby.create(AppPoints.getA(), AppPoints.getB(), AppWeapons.get());
-            if (code) {
-                AppShare.showToast(`Лобби создано: ${code}`, 'success');
-                renderLobbyPlayers();
-                if (renderMap) renderMap();
+            try {
+                const code = await AppLobby.create(AppPoints.getA(), AppPoints.getB(), AppWeapons.get());
+                if (code) {
+                    AppShare.showToast(`${t('lobbyCreated')}: ${code}`, 'success');
+                    renderLobbyPlayers();
+                    if (renderMap) renderMap();
+                }
+            } catch (error) {
+                console.error('[Lobby] create failed:', error);
+                AppShare.showToast(error.message || t('lobbyError'), 'error');
             }
         });
 
-        document.getElementById('joinLobbyBtn').addEventListener('click', () => {
-            const code = prompt('Введите код лобби:');
+        // ─── Присоединиться к лобби ───
+        document.getElementById('joinLobbyBtn').addEventListener('click', async () => {
+            const code = prompt(t('enterLobbyCode'));
             if (!code) return;
-            AppLobby.join(code.trim().toUpperCase()).then(res => {
+
+            try {
+                const res = await AppLobby.join(code.trim().toUpperCase());
+
                 if (res.ok) {
                     AppPoints.assign(res.pointA, res.pointB);
                     if (res.weapon) AppWeapons.set(res.weapon);
                     UIInputs.sync();
                     UIResults.update();
                     if (renderMap) renderMap();
-                    AppShare.showToast('Подключено к лобби', 'success');
+                    AppShare.showToast(t('lobbyConnected'), 'success');
                     renderLobbyPlayers();
+                } else if (res.error === 'not_configured') {
+                    AppShare.showToast(t('lobbyNotConfigured'), 'error');
+                } else if (res.error === 'not_found') {
+                    AppShare.showToast(t('lobbyNotFound'), 'error');
                 } else {
-                    AppShare.showToast('Лобби не найдено', 'error');
+                    AppShare.showToast(t('lobbyError'), 'error');
                 }
-            });
+            } catch (error) {
+                console.error('[Lobby] join failed:', error);
+                AppShare.showToast(t('lobbyError'), 'error');
+            }
         });
 
+        // ─── Покинуть лобби ───
         document.getElementById('leaveLobbyBtn').addEventListener('click', () => {
             AppLobby.leave();
             renderLobbyPlayers();
