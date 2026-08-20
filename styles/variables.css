@@ -1,6 +1,9 @@
 /* styles/variables.css — CSS-переменные и темы */
 
 :root {
+    color-scheme: dark;
+    /* нативные элементы (стрелки, скроллбары, селекты) в тёмной теме */
+
     --bg: #12151a;
     --panel: #1a1f27;
     --border: #2c3440;
@@ -31,6 +34,9 @@
 
 /* Светлая тема */
 body.light {
+    color-scheme: light;
+    /* нативные элементы в светлой теме */
+
     --bg: #eef1f5;
     --panel: #ffffff;
     --border: #d7dde5;

@@ -1,6 +1,8 @@
 // js/map/interactions.js — Обработка пользовательских взаимодействий
-
 window.MapInteractions = (function () {
+    const MIN_SCALE = 0.005;
+    const MAX_SCALE = 4;
+
     let pointers = new Map();
     let pinch = null;
     let longPressTimer = null;
@@ -13,9 +15,7 @@ window.MapInteractions = (function () {
         return { x: e.clientX - r.left, y: e.clientY - r.top };
     }
 
-    function stopLongPress() {
-        clearTimeout(longPressTimer);
-    }
+    function stopLongPress() { clearTimeout(longPressTimer); }
 
     function startLongPress(sx, sy, delay, callback) {
         clearTimeout(longPressTimer);
@@ -28,7 +28,7 @@ window.MapInteractions = (function () {
     }
 
     function handlePointerDown(e, canvas, opts) {
-        const { view, hitPoint, findTowerAt, openMenuAt, LONG_PRESS_MS, utils } = opts;
+        const { view, hitPoint, findTowerAt, openMenuAt, hideMenu, LONG_PRESS_MS, utils, mapSize, renderMap } = opts;
         const p = canvasPos(e, canvas);
 
         if (e.pointerType !== 'mouse') lastTouchTs = performance.now();
@@ -36,9 +36,18 @@ window.MapInteractions = (function () {
         try { canvas.setPointerCapture(e.pointerId); } catch (_) { }
         pointers.set(e.pointerId, p);
 
-        if (e.button !== 0) return;
+        // ─── Средняя кнопка мыши — ВСЕГДА перемещение карты,
+        // независимо от выбранного инструмента (карандаш, метка, ластик...) ───
+        if (e.button === 1) {
+            e.preventDefault(); // блокируем autoscroll
+            stopLongPress();
+            dragging = { mode: 'pan', startX: p.x, startY: p.y, ox: view.ox, oy: view.oy };
+            canvas.style.cursor = 'grabbing';
+            return;
+        }
 
-        if (typeof opts.hideMenu === 'function') opts.hideMenu();
+        if (e.button !== 0) return;
+        if (typeof hideMenu === 'function') hideMenu();
 
         if (pointers.size === 2) {
             stopLongPress();
@@ -56,7 +65,6 @@ window.MapInteractions = (function () {
 
         if (e.pointerType !== 'mouse') {
             startLongPress(p.x, p.y, LONG_PRESS_MS, (sx, sy) => {
-                canvas.style.cursor = 'crosshair';
                 openMenuAt(sx, sy);
             });
         }
@@ -70,27 +78,30 @@ window.MapInteractions = (function () {
 
         const towerHit = findTowerAt(p.x, p.y);
         if (towerHit) {
-            dragging = {
-                mode: 'tower-or-pan',
-                tower: towerHit,
-                startX: p.x,
-                startY: p.y,
-                ox: view.ox,
-                oy: view.oy,
-            };
+            dragging = { mode: 'tower-or-pan', tower: towerHit, startX: p.x, startY: p.y, ox: view.ox, oy: view.oy };
+            return;
+        }
+
+        // ─── Ластик: удаляет свои штрихи ───
+        const drawTool = window.AppDraw ? window.AppDraw.getTool() : 'pan';
+        if (drawTool === 'eraser') {
+            stopLongPress();
+            dragging = { mode: 'erase' };
+            if (window.AppDraw.eraseAt(p.x, p.y, view) && renderMap) renderMap();
+            canvas.style.cursor = 'cell';
             return;
         }
 
         // ─── Рисование ───
-        const drawTool = window.AppDraw ? window.AppDraw.getTool() : 'pan';
-        if (drawTool !== 'pan' && e.button === 0) {
+        if (drawTool !== 'pan') {
             stopLongPress();
             const wpt = utils.screenToWorld(p.x, p.y, view);
-            const px = utils.metersToPercent(wpt.x, MAP.size);
-            const py = utils.metersToPercent(wpt.y, MAP.size);
+            const px = utils.metersToPercent(wpt.x, mapSize);
+            const py = utils.metersToPercent(wpt.y, mapSize);
             window.AppDraw.startStroke(px, py);
             dragging = { mode: 'draw' };
-            canvas.style.cursor = drawTool === 'eraser' ? 'cell' : 'crosshair';
+            if (renderMap) renderMap();
+            canvas.style.cursor = 'crosshair';
             return;
         }
 
@@ -99,7 +110,7 @@ window.MapInteractions = (function () {
     }
 
     function handlePointerMove(e, canvas, opts) {
-        const { view, renderMap, debouncedSaveView, hitPoint, findTowerAt, setPoint, utils, TAP_THRESHOLD, MAP } = opts;
+        const { view, renderMap, debouncedSaveView, hitPoint, findTowerAt, setPoint, utils, TAP_THRESHOLD, mapSize } = opts;
         const p = canvasPos(e, canvas);
         const tracked = pointers.has(e.pointerId);
 
@@ -112,7 +123,7 @@ window.MapInteractions = (function () {
             const [p1, p2] = [...pointers.values()];
             const mid = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
             const dist = Math.hypot(p1.x - p2.x, p1.y - p2.y) || 1;
-            const newScale = utils.clamp(pinch.scale * dist / pinch.dist, 0.005, 1);
+            const newScale = utils.clamp(pinch.scale * dist / pinch.dist, MIN_SCALE, MAX_SCALE);
             view.scale = newScale;
             view.ox = mid.x - pinch.anchor.x * newScale;
             view.oy = mid.y + pinch.anchor.y * newScale;
@@ -121,18 +132,37 @@ window.MapInteractions = (function () {
             return;
         }
 
-        // Обновляем координаты курсора (если есть элемент #cursorCoords)
         const cursorCoords = document.getElementById('cursorCoords');
         if (cursorCoords) {
             const wpt = utils.screenToWorld(p.x, p.y, view);
-            cursorCoords.textContent = `x${utils.gameCoord(wpt.x)}  y${utils.gameCoord(wpt.y)}`;
+            cursorCoords.innerHTML =
+                `<span>x${utils.gameCoord(wpt.x)}</span>` +
+                `<span>y${utils.gameCoord(wpt.y)}</span>`;
+
+            // Позиция справа-снизу от мыши, с переворотом у краёв
+            const wrap = canvas.parentElement.getBoundingClientRect();
+            let lx = p.x + 14;
+            let ly = p.y + 18;
+            if (lx + 80 > wrap.width) lx = p.x - 90;
+            if (ly + 44 > wrap.height) ly = p.y - 50;
+            cursorCoords.style.left = lx + 'px';
+            cursorCoords.style.top = ly + 'px';
+            cursorCoords.classList.add('visible');
         }
+
+        // ─── Ластик в процессе ───
+        if (dragging && dragging.mode === 'erase') {
+            stopLongPress();
+            if (window.AppDraw.eraseAt(p.x, p.y, view)) renderMap();
+            return;
+        }
+
         // ─── Рисование в процессе ───
         if (dragging && dragging.mode === 'draw') {
             stopLongPress();
             const wpt = utils.screenToWorld(p.x, p.y, view);
-            const px = utils.metersToPercent(wpt.x, MAP.size);
-            const py = utils.metersToPercent(wpt.y, MAP.size);
+            const px = utils.metersToPercent(wpt.x, mapSize);
+            const py = utils.metersToPercent(wpt.y, mapSize);
             window.AppDraw.continueStroke(px, py);
             renderMap();
             return;
@@ -166,9 +196,9 @@ window.MapInteractions = (function () {
         } else if (dragging.mode === 'point') {
             stopLongPress();
             const wpt = utils.screenToWorld(p.x, p.y, view);
-            const px = utils.clamp(Math.round(utils.metersToPercent(wpt.x, MAP.size) * 100) / 100, 0, 100);
-            const py = utils.clamp(Math.round(utils.metersToPercent(wpt.y, MAP.size) * 100) / 100, 0, 100);
-            setPoint(dragging.key, utils.percentToMeters(px, MAP.size), utils.percentToMeters(py, MAP.size));
+            const px = utils.clamp(Math.round(utils.metersToPercent(wpt.x, mapSize) * 100) / 100, 0, 100);
+            const py = utils.clamp(Math.round(utils.metersToPercent(wpt.y, mapSize) * 100) / 100, 0, 100);
+            setPoint(dragging.key, utils.percentToMeters(px, mapSize), utils.percentToMeters(py, mapSize));
         }
     }
 
@@ -192,20 +222,28 @@ window.MapInteractions = (function () {
             }
             return;
         }
-        // ─── Завершение рисования ───
+
+        // ─── Конец ластика ───
+        if (dragging && dragging.mode === 'erase') {
+            dragging = null;
+            canvas.style.cursor = 'cell';
+            return;
+        }
+
+        // ─── Конец рисования ───
         if (dragging && dragging.mode === 'draw') {
             window.AppDraw.finishStroke();
             dragging = null;
+            renderMap();
             const tool = window.AppDraw ? window.AppDraw.getTool() : 'pan';
-            canvas.style.cursor = tool === 'pan' ? 'crosshair' : 'default';
+            canvas.style.cursor = tool === 'eraser' ? 'cell' : 'crosshair';
             return;
         }
 
         if (dragging && dragging.mode === 'tower-or-pan' && !longPressFired && e.button === 0) {
             const p = canvasPos(e, canvas);
             if (findTowerAt(p.x, p.y) === dragging.tower) {
-                const newSelected = (selectedTower === dragging.tower) ? null : dragging.tower;
-                setSelectedTower(newSelected);
+                setSelectedTower((selectedTower === dragging.tower) ? null : dragging.tower);
                 renderMap();
             }
         }
@@ -213,7 +251,8 @@ window.MapInteractions = (function () {
 
         if (pointers.size === 0) {
             dragging = null;
-            canvas.style.cursor = 'crosshair';
+            const tool = window.AppDraw ? window.AppDraw.getTool() : 'pan';
+            canvas.style.cursor = tool === 'eraser' ? 'cell' : 'crosshair';
         }
     }
 
@@ -231,7 +270,7 @@ window.MapInteractions = (function () {
         const { view, renderMap, debouncedSaveView, utils } = opts;
         e.preventDefault();
         const factor = Math.exp(-e.deltaY * 0.0015);
-        const newScale = utils.clamp(view.scale * factor, 0.005, 1);
+        const newScale = utils.clamp(view.scale * factor, MIN_SCALE, MAX_SCALE);
         const wpt = utils.screenToWorld(e.offsetX, e.offsetY, view);
         view.scale = newScale;
         view.ox = e.offsetX - wpt.x * view.scale;
@@ -250,27 +289,8 @@ window.MapInteractions = (function () {
         openMenuAt(p.x, p.y);
     }
 
-    function isPinching() {
-        return pinch !== null;
-    }
-
-    function getDragging() {
-        return dragging;
-    }
-
-    function isLongPressFired() {
-        return longPressFired;
-    }
-
     return {
-        handlePointerDown,
-        handlePointerMove,
-        handlePointerUp,
-        handleBlur,
-        handleWheel,
-        handleContextMenu,
-        isPinching,
-        getDragging,
-        isLongPressFired
+        handlePointerDown, handlePointerMove, handlePointerUp,
+        handleBlur, handleWheel, handleContextMenu
     };
 })();

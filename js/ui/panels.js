@@ -75,41 +75,11 @@ window.UIPanels = (function (storage) {
             if (cb) {
                 cb.addEventListener('change', (e) => {
                     window.AppLobby.togglePlayerVisibility(p.playerId, e.target.checked);
-                    renderMap();
                 });
             }
             list.appendChild(row);
         });
     }
-
-    // Кнопки в панели
-    document.getElementById('createLobbyBtn').addEventListener('click', async () => {
-        const code = await AppLobby.create(AppPoints.getA(), AppPoints.getB(), AppWeapons.get());
-        showToast(`Лобби создано: ${code}`, 'success');
-        renderLobbyPlayers();
-    });
-
-    document.getElementById('joinLobbyBtn').addEventListener('click', () => {
-        const code = prompt('Введите код лобби:');
-        if (!code) return;
-        AppLobby.join(code.trim().toUpperCase()).then(res => {
-            if (res.ok) {
-                AppPoints.assign(res.pointA, res.pointB);
-                if (res.weapon) AppWeapons.set(res.weapon);
-                UIInputs.sync(); UIResults.update(); renderMap(); saveState();
-                showToast('Подключено к лобби', 'success');
-                renderLobbyPlayers();
-            } else {
-                showToast('Лобби не найдено', 'error');
-            }
-        });
-    });
-
-    document.getElementById('leaveLobbyBtn').addEventListener('click', () => {
-        AppLobby.leave();
-        renderLobbyPlayers();
-        renderMap();
-    });
 
     function bind() {
         document.getElementById('drawerToggle').onclick = () => openDrawer(true);
@@ -129,7 +99,42 @@ window.UIPanels = (function (storage) {
         });
 
         document.getElementById('themeToggle').onclick = toggleTheme;
+
+        // Lobby кнопки
+        document.getElementById('createLobbyBtn').addEventListener('click', async () => {
+            const code = await AppLobby.create(AppPoints.getA(), AppPoints.getB(), AppWeapons.get());
+            if (code) {
+                AppShare.showToast(`Лобби создано: ${code}`, 'success');
+                renderLobbyPlayers();
+            }
+        });
+
+        document.getElementById('joinLobbyBtn').addEventListener('click', () => {
+            const code = prompt('Введите код лобби:');
+            if (!code) return;
+            AppLobby.join(code.trim().toUpperCase()).then(res => {
+                if (res.ok) {
+                    AppPoints.assign(res.pointA, res.pointB);
+                    if (res.weapon) AppWeapons.set(res.weapon);
+                    UIInputs.sync();
+                    UIResults.update();
+                    renderMap();
+                    AppShare.showToast('Подключено к лобби', 'success');
+                    renderLobbyPlayers();
+                } else {
+                    AppShare.showToast('Лобби не найдено', 'error');
+                }
+            });
+        });
+
+        document.getElementById('leaveLobbyBtn').addEventListener('click', () => {
+            AppLobby.leave();
+            renderLobbyPlayers();
+        });
     }
 
-    return { init, getTheme, getShowTowers, toggleTheme, setShowTowers, openDrawer, openHelp };
+    return {
+        init, getTheme, getShowTowers, toggleTheme, setShowTowers,
+        openDrawer, openHelp, renderLobbyPlayers
+    };
 })(window.AppStorage);

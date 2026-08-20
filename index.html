@@ -7,6 +7,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="theme-color" content="#1a1f27">
 
+    <!-- Preconnect для ускорения загрузки внешних ресурсов -->
+    <link rel="preconnect" href="https://mc.yandex.ru">
+    <link rel="preconnect" href="https://discord.gg">
+
     <!-- Primary SEO Meta Tags -->
     <title>WARDOGS — миномётный и артиллерийский калькулятор</title>
     <meta name="title" content="WARDOGS — миномётный и артиллерийский калькулятор">
@@ -135,17 +139,146 @@
 </head>
 
 <body>
+    <!-- ═══════════════ SVG SPRITE ИКОНКИ ═══════════════ -->
+    <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+        <!-- Карандаш -->
+        <symbol id="icon-pen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 19l7-7 3 3-7 7-3-3z" />
+            <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" />
+            <path d="M2 2l7.586 7.586" />
+            <circle cx="11" cy="11" r="2" />
+        </symbol>
+        <!-- Линия -->
+        <symbol id="icon-line" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round">
+            <line x1="5" y1="19" x2="19" y2="5" />
+            <circle cx="5" cy="19" r="1.5" fill="currentColor" />
+            <circle cx="19" cy="5" r="1.5" fill="currentColor" />
+        </symbol>
+        <!-- Метка -->
+        <symbol id="icon-marker" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+            <circle cx="12" cy="10" r="3" />
+        </symbol>
+        <!-- Ластик -->
+        <symbol id="icon-eraser" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21" />
+            <path d="M22 21H7" />
+            <path d="m5 11 9 9" />
+        </symbol>
+        <!-- Рука (Pan) -->
+        <symbol id="icon-pan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0" />
+            <path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2" />
+            <path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8" />
+            <path
+                d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15" />
+        </symbol>
+        <!-- Цель (target) -->
+        <symbol id="icon-target" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <circle cx="12" cy="12" r="6" />
+            <circle cx="12" cy="12" r="2" />
+        </symbol>
+        <!-- Крестик (close/delete) -->
+        <symbol id="icon-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+        </symbol>
+        <!-- Письмо -->
+        <symbol id="icon-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+            <polyline points="22,6 12,13 2,6" />
+        </symbol>
+        <!-- Геймпад -->
+        <symbol id="icon-gamepad" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="6" y1="11" x2="10" y2="11" />
+            <line x1="8" y1="9" x2="8" y2="13" />
+            <line x1="15" y1="12" x2="15.01" y2="12" />
+            <line x1="18" y1="10" x2="18.01" y2="10" />
+            <path
+                d="M17.32 5H6.68a4 4 0 0 0-3.978 3.59c-.006.052-.01.101-.017.152C2.604 9.416 2 14.456 2 16a3 3 0 0 0 3 3c1 0 1.5-.5 2-1l1.414-1.414A2 2 0 0 1 9.828 16h4.344a2 2 0 0 1 1.414.586L17 18c.5.5 1 1 2 1a3 3 0 0 0 3-3c0-1.545-.604-6.584-.685-7.258-.007-.05-.011-.1-.017-.151A4 4 0 0 0 17.32 5z" />
+        </symbol>
+        <!-- Ссылка -->
+        <symbol id="icon-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+        </symbol>
+        <!-- Выход -->
+        <symbol id="icon-logout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+            <polyline points="16 17 21 12 16 7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
+        </symbol>
+        <!-- Меню (бургер) -->
+        <symbol id="icon-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round">
+            <line x1="4" y1="7" x2="20" y2="7" />
+            <line x1="4" y1="12" x2="20" y2="12" />
+            <line x1="4" y1="17" x2="20" y2="17" />
+        </symbol>
+        <!-- Поделиться -->
+        <symbol id="icon-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="18" cy="5" r="3" />
+            <circle cx="6" cy="12" r="3" />
+            <circle cx="18" cy="19" r="3" />
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+        </symbol>
+        <!-- Помощь -->
+        <symbol id="icon-help" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+        </symbol>
+        <!-- Солнце -->
+        <symbol id="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round">
+            <circle cx="12" cy="12" r="4" />
+            <line x1="12" y1="2" x2="12" y2="5" />
+            <line x1="12" y1="19" x2="12" y2="22" />
+            <line x1="2" y1="12" x2="5" y2="12" />
+            <line x1="19" y1="12" x2="22" y2="12" />
+            <line x1="4.9" y1="4.9" x2="7" y2="7" />
+            <line x1="17" y1="17" x2="19.1" y2="19.1" />
+            <line x1="4.9" y1="19.1" x2="7" y2="17" />
+            <line x1="17" y1="7" x2="19.1" y2="4.9" />
+        </symbol>
+        <!-- Луна -->
+        <symbol id="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
+        </symbol>
+        <!-- Сбросить вид -->
+        <symbol id="icon-reset" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 2v6h6" />
+            <path d="M21 12A9 9 0 0 0 6 5.3L3 8" />
+            <path d="M21 22v-6h-6" />
+            <path d="M3 12a9 9 0 0 0 15 6.7l3-2.7" />
+        </symbol>
+    </svg>
+
     <div class="app">
 
         <aside class="panel">
             <div class="panel-header">
                 <h1 data-i18n="title">Миномётный калькулятор</h1>
                 <button class="menu-toggle" id="drawerToggle" title="Дополнительно" aria-label="Дополнительно">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round">
-                        <line x1="4" y1="7" x2="20" y2="7" />
-                        <line x1="4" y1="12" x2="20" y2="12" />
-                        <line x1="4" y1="17" x2="20" y2="17" />
+                    <svg width="16" height="16">
+                        <use href="#icon-menu" />
                     </svg>
                 </button>
             </div>
@@ -153,18 +286,26 @@
             <section>
                 <h2 data-i18n="posA">Огневая позиция (A)</h2>
                 <div class="coord-row">
-                    <label>X <input type="number" id="ax" placeholder="0.00" step="0.01" min="0" max="100"></label>
-                    <label>Y <input type="number" id="ay" placeholder="0.00" step="0.01" min="0" max="100"></label>
-                    <button class="clear" id="clearA" title="✕" aria-label="Очистить A">✕</button>
+                    <label>X <input type="number" id="ax" placeholder="0.00" step="0.01" min="0" max="160"></label>
+                    <label>Y <input type="number" id="ay" placeholder="0.00" step="0.01" min="0" max="160"></label>
+                    <button class="clear" id="clearA" title="Очистить A" aria-label="Очистить A">
+                        <svg width="14" height="14">
+                            <use href="#icon-x" />
+                        </svg>
+                    </button>
                 </div>
             </section>
 
             <section>
                 <h2 data-i18n="posB">Цель (B)</h2>
                 <div class="coord-row">
-                    <label>X <input type="number" id="bx" placeholder="0.00" step="0.01" min="0" max="100"></label>
-                    <label>Y <input type="number" id="by" placeholder="0.00" step="0.01" min="0" max="100"></label>
-                    <button class="clear" id="clearB" title="✕" aria-label="Очистить B">✕</button>
+                    <label>X <input type="number" id="bx" placeholder="0.00" step="0.01" min="0" max="160"></label>
+                    <label>Y <input type="number" id="by" placeholder="0.00" step="0.01" min="0" max="160"></label>
+                    <button class="clear" id="clearB" title="Очистить B" aria-label="Очистить B">
+                        <svg width="14" height="14">
+                            <use href="#icon-x" />
+                        </svg>
+                    </button>
                 </div>
             </section>
 
@@ -196,12 +337,41 @@
             <section class="draw-tools-section" id="drawToolsSection">
                 <h2 data-i18n="drawTools">Рисование</h2>
                 <div class="tool-grid">
-                    <button class="draw-tool" data-tool="pen" title="Карандаш">✏️</button>
-                    <button class="draw-tool" data-tool="line" title="Линейка">📏</button>
-                    <button class="draw-tool" data-tool="marker" title="Метка">📍</button>
-                    <button class="draw-tool" data-tool="eraser" title="Ластик">🧹</button>
-                    <button class="draw-tool active" data-tool="pan" title="Перемещение">✋</button>
+                    <button class="draw-tool" data-tool="pen" title="Карандаш" data-i18n-title="toolPen">
+                        <svg width="16" height="16">
+                            <use href="#icon-pen" />
+                        </svg>
+                    </button>
+                    <button class="draw-tool" data-tool="line" title="Линейка" data-i18n-title="toolLine">
+                        <svg width="16" height="16">
+                            <use href="#icon-line" />
+                        </svg>
+                    </button>
+                    <button class="draw-tool" data-tool="marker" title="Метка" data-i18n-title="toolMarker">
+                        <svg width="16" height="16">
+                            <use href="#icon-marker" />
+                        </svg>
+                    </button>
+                    <button class="draw-tool" data-tool="eraser" title="Ластик" data-i18n-title="toolEraser">
+                        <svg width="16" height="16">
+                            <use href="#icon-eraser" />
+                        </svg>
+                    </button>
+                    <button class="draw-tool active" data-tool="pan" title="Перемещение" data-i18n-title="toolPan">
+                        <svg width="16" height="16">
+                            <use href="#icon-pan" />
+                        </svg>
+                    </button>
                 </div>
+                <div class="width-row">
+                    <span class="width-label" data-i18n="lineWidth">Толщина линии</span>
+                    <div class="width-grid">
+                        <button class="width-opt active" data-width="1" title="1 px"><span class="w1"></span></button>
+                        <button class="width-opt" data-width="2" title="2 px"><span class="w2"></span></button>
+                        <button class="width-opt" data-width="4" title="4 px"><span class="w4"></span></button>
+                    </div>
+                </div>
+
                 <button class="view-reset" id="clearDrawingsBtn" data-i18n="clearDrawings">
                     Очистить рисунки
                 </button>
@@ -214,7 +384,12 @@
             </p>
 
             <div class="contact">
-                <span class="contact-label" data-i18n="contactLabel">✉️ Связь</span>
+                <span class="contact-label">
+                    <svg width="14" height="14" style="margin-right:4px;vertical-align:middle">
+                        <use href="#icon-mail" />
+                    </svg>
+                    <span data-i18n="contactLabel">Связь</span>
+                </span>
                 <a href="mailto:egor.silaev2003@yandex.ru" class="contact-email">egor.silaev2003@yandex.ru</a>
             </div>
 
@@ -255,60 +430,75 @@
             <div id="cursorCoords" class="cursor-coords"></div>
             <canvas id="map"></canvas>
             <div class="map-controls">
-                <button class="view-reset" id="createLobbyBtn">🎮 Создать лобби</button>
-                <button class="view-reset" id="joinLobbyBtn">🔗 Присоединиться</button>
+                <button class="view-reset" id="createLobbyBtn" data-i18n="createLobby">
+                    <svg width="14" height="14">
+                        <use href="#icon-gamepad" />
+                    </svg>
+                    Создать лобби
+                </button>
+                <button class="view-reset" id="joinLobbyBtn" data-i18n="joinLobby">
+                    <svg width="14" height="14">
+                        <use href="#icon-link" />
+                    </svg>
+                    Присоединиться
+                </button>
                 <button class="view-reset share-btn" id="shareBtn" title="Поделиться координатами"
                     aria-label="Поделиться">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="18" cy="5" r="3" />
-                        <circle cx="6" cy="12" r="3" />
-                        <circle cx="18" cy="19" r="3" />
-                        <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
-                        <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+                    <svg width="16" height="16">
+                        <use href="#icon-share" />
                     </svg>
                 </button>
                 <button class="view-reset help-toggle" id="helpToggle" title="Справка" aria-label="Справка">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-                        stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10" />
-                        <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
-                        <line x1="12" y1="17" x2="12.01" y2="17" />
+                    <svg width="16" height="16">
+                        <use href="#icon-help" />
                     </svg>
                 </button>
                 <button class="view-reset theme-toggle" id="themeToggle" title="Тема" aria-label="Переключить тему">
-                    <svg class="icon-sun" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2" stroke-linecap="round">
-                        <circle cx="12" cy="12" r="4" />
-                        <line x1="12" y1="2" x2="12" y2="5" />
-                        <line x1="12" y1="19" x2="12" y2="22" />
-                        <line x1="2" y1="12" x2="5" y2="12" />
-                        <line x1="19" y1="12" x2="22" y2="12" />
-                        <line x1="4.9" y1="4.9" x2="7" y2="7" />
-                        <line x1="17" y1="17" x2="19.1" y2="19.1" />
-                        <line x1="4.9" y1="19.1" x2="7" y2="17" />
-                        <line x1="17" y1="7" x2="19.1" y2="4.9" />
+                    <svg class="icon-sun" width="16" height="16">
+                        <use href="#icon-sun" />
                     </svg>
-                    <svg class="icon-moon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                        <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
+                    <svg class="icon-moon" width="16" height="16">
+                        <use href="#icon-moon" />
                     </svg>
                 </button>
-                <button class="view-reset" id="resetView" data-i18n="reset">Сбросить вид</button>
+                <button class="view-reset" id="resetView" data-i18n="reset">
+                    <svg width="14" height="14">
+                        <use href="#icon-reset" />
+                    </svg>
+                    Сбросить вид
+                </button>
             </div>
 
             <div id="ctxMenu" class="ctx-menu hidden">
-                <button data-action="setA" data-i18n="menuA">📍 Позиция миномёта (A)</button>
-                <button data-action="setB" data-i18n="menuB">🎯 Цель (B)</button>
-                <button data-action="delete" id="menuDelete" class="danger hidden" data-i18n="menuDel">✕ Удалить
-                    точку</button>
+                <button data-action="setA" data-i18n="menuA">
+                    <svg width="14" height="14" style="margin-right:6px;vertical-align:middle">
+                        <use href="#icon-marker" />
+                    </svg>
+                    Позиция миномёта (A)
+                </button>
+                <button data-action="setB" data-i18n="menuB">
+                    <svg width="14" height="14" style="margin-right:6px;vertical-align:middle">
+                        <use href="#icon-target" />
+                    </svg>
+                    Цель (B)
+                </button>
+                <button data-action="delete" id="menuDelete" class="danger hidden" data-i18n="menuDel">
+                    <svg width="14" height="14" style="margin-right:6px;vertical-align:middle">
+                        <use href="#icon-x" />
+                    </svg>
+                    Удалить точку
+                </button>
             </div>
         </main>
 
         <aside class="drawer" id="drawer">
             <div class="drawer-header">
                 <h2 data-i18n="extra">Дополнительно</h2>
-                <button class="clear" id="drawerClose" title="✕" aria-label="Закрыть">✕</button>
+                <button class="clear" id="drawerClose" title="Закрыть" aria-label="Закрыть">
+                    <svg width="14" height="14">
+                        <use href="#icon-x" />
+                    </svg>
+                </button>
             </div>
 
             <label class="switch-row">
@@ -318,10 +508,15 @@
             </label>
 
             <section class="lobby-section hidden" id="lobbySection">
-                <h3>Лобби</h3>
+                <h3 data-i18n="lobby">Лобби</h3>
                 <div id="lobbyInfo" class="lobby-info"></div>
                 <div id="lobbyPlayersList" class="lobby-players"></div>
-                <button id="leaveLobbyBtn" class="view-reset">Покинуть лобби</button>
+                <button id="leaveLobbyBtn" class="view-reset" data-i18n="leaveLobby">
+                    <svg width="14" height="14">
+                        <use href="#icon-logout" />
+                    </svg>
+                    Покинуть лобби
+                </button>
             </section>
         </aside>
         <div class="drawer-backdrop hidden" id="drawerBackdrop"></div>
@@ -330,7 +525,11 @@
             <div class="modal" role="dialog" aria-labelledby="helpTitle">
                 <div class="modal-header">
                     <h2 id="helpTitle" data-i18n="helpTitle">Как пользоваться калькулятором</h2>
-                    <button class="clear" id="helpClose" title="✕" aria-label="Закрыть">✕</button>
+                    <button class="clear" id="helpClose" title="Закрыть" aria-label="Закрыть">
+                        <svg width="14" height="14">
+                            <use href="#icon-x" />
+                        </svg>
+                    </button>
                 </div>
                 <div class="modal-body">
                     <p data-i18n="helpP1"><b>Установка точек.</b> Укажите свою позицию (точка A) и цель (точка B) —
@@ -338,8 +537,8 @@
                     <p data-i18n="helpP2"><b>Работа с картой.</b> Правый клик по карте открывает меню. Левая кнопка
                         мыши перемещает карту. Колесо мыши изменяет масштаб. На сенсорных экранах: один палец —
                         перемещение, два пальца — масштаб, долгое нажатие — контекстное меню.</p>
-                    <p data-i18n="helpP3"><b>Координаты.</b> X и Y вводятся в процентах карты (0–100). Значения можно
-                        ввести вручную или поставить точки прямо на карте.</p>
+                    <p data-i18n="helpP3"><b>Координаты.</b> X и Y вводятся в игровых координатах (0–160) — тех же, что
+                        показываются под курсором. Шаг изменения — 0.01 (стрелками в поле ввода).</p>
                     <p data-i18n="helpP4"><b>Результаты.</b> Дистанция, азимут от севера, угол ствола в mils, время
                         подлёта. Если цель вне досягаемости — соответствующее сообщение.</p>
                     <p data-i18n="helpP5"><b>Сохранение.</b> Все данные автоматически сохраняются и восстанавливаются
@@ -353,40 +552,43 @@
     </div>
 
     <!-- Конфиги -->
-    <script src="config/weapons.js"></script>
-    <script src="config/app.js"></script>
+    <script src="config/weapons.js" defer></script>
+    <script src="config/app.js" defer></script>
 
     <!-- Ядро -->
-    <script src="js/core/utils.js"></script>
-    <script src="js/core/calculator.js"></script>
+    <script src="js/core/utils.js" defer></script>
+    <script src="js/core/calculator.js" defer></script>
+
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <!-- Фичи -->
-    <script src="js/features/storage.js"></script>
-    <script src="js/features/share.js"></script>
-    <script src="js/features/points.js"></script>
-    <script src="js/features/analytics.js"></script>
-    <script src="js/features/lobby.js"></script>
+    <script src="js/features/lobby.js" defer></script>
+    <script src="js/features/storage.js" defer></script>
+    <script src="js/features/share.js" defer></script>
+    <script src="js/features/points.js" defer></script>
+    <script src="js/features/analytics.js" defer></script>
+
+    <script src="js/features/draw.js" defer></script>
+    <script src="js/features/weapons.js" defer></script>
 
     <!-- Карта -->
-    <script src="js/map/tiles.js"></script>
-    <script src="js/map/renderer.js"></script>
-    <script src="js/map/interactions.js"></script>
-    <script src="js/map/viewport.js"></script>
+    <script src="js/map/tiles.js" defer></script>
+    <script src="js/map/renderer.js" defer></script>
+    <script src="js/map/interactions.js" defer></script>
+    <script src="js/map/viewport.js" defer></script>
 
     <!-- UI -->
-    <script src="js/ui/panels.js"></script>
-    <script src="js/ui/inputs.js"></script>
-    <script src="js/ui/contextMenu.js"></script>
-    <script src="js/ui/results.js"></script>
-
-    <!-- Фичи -->
-    <script src="js/features/weapons.js"></script>
+    <script src="js/ui/panels.js" defer></script>
+    <script src="js/ui/inputs.js" defer></script>
+    <script src="js/ui/contextMenu.js" defer></script>
+    <script src="js/ui/results.js" defer></script>
 
     <!-- Локализация -->
-    <script src="js/locales/index.js"></script>
+    <script src="js/locales/index.js" defer></script>
 
     <!-- Главная логика -->
-    <script src="js/index.js"></script>
+    <script src="js/index.js" defer></script>
 </body>
 
 </html>

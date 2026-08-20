@@ -1,14 +1,14 @@
-// js/features/draw.js — Инструменты рисования (pen, line, marker, eraser)
-
-window.AppDraw = (function(utils) {
+// js/features/draw.js — Инструменты рисования (pen, line, marker) + ластик-удаление
+window.AppDraw = (function (utils) {
   const TOOLS = ['pen', 'line', 'marker', 'eraser', 'pan'];
   let currentTool = 'pan';
   let currentStroke = null;
   let isDrawing = false;
   let localDrawings = [];
+  let currentWidth = 1;   // толщина линии в экранных px (тонкая по умолчанию)
+  let mapSize = 16000;
 
-  const WIDTH_PEN = 2;
-  const WIDTH_ERASER = 10;
+  function configure(size) { mapSize = size; }
 
   function setTool(tool) {
     if (!TOOLS.includes(tool)) return;
@@ -18,7 +18,15 @@ window.AppDraw = (function(utils) {
     });
   }
 
+  function setWidth(w) {
+    currentWidth = Math.max(1, Math.min(6, Number(w) || 1));
+    document.querySelectorAll('.width-opt').forEach(btn => {
+      btn.classList.toggle('active', Number(btn.dataset.width) === currentWidth);
+    });
+  }
+
   function getTool() { return currentTool; }
+  function getWidth() { return currentWidth; }
   function getLocalDrawings() { return localDrawings; }
   function getCurrentStroke() { return currentStroke; }
   function isActive() { return isDrawing; }
@@ -32,7 +40,7 @@ window.AppDraw = (function(utils) {
 
   // ─── Начало stroke ───
   function startStroke(px, py) {
-    if (currentTool === 'pan') return;
+    if (currentTool === 'pan' || currentTool === 'eraser') return;
     isDrawing = true;
 
     if (currentTool === 'marker') {
@@ -42,7 +50,7 @@ window.AppDraw = (function(utils) {
         tool: 'marker',
         color: getMyColor(),
         points: [{ x: px, y: py }],
-        width: 3,
+        width: currentWidth,
         label: label || 'Метка'
       };
       finishStroke();
@@ -51,9 +59,9 @@ window.AppDraw = (function(utils) {
 
     currentStroke = {
       tool: currentTool,
-      color: currentTool === 'eraser' ? null : getMyColor(),
+      color: getMyColor(),
       points: [{ x: px, y: py }],
-      width: currentTool === 'eraser' ? WIDTH_ERASER : WIDTH_PEN
+      width: currentWidth
     };
   }
 
@@ -61,17 +69,13 @@ window.AppDraw = (function(utils) {
   function continueStroke(px, py) {
     if (!isDrawing || !currentStroke) return;
 
-    if (currentTool === 'pen' || currentTool === 'eraser') {
-      // Добавляем точку только если отдалена на 0.05% (оптимизация)
+    if (currentTool === 'pen') {
       const last = currentStroke.points[currentStroke.points.length - 1];
       if (Math.hypot(last.x - px, last.y - py) < 0.05) return;
       currentStroke.points.push({ x: px, y: py });
     } else if (currentTool === 'line') {
-      if (currentStroke.points.length === 1) {
-        currentStroke.points.push({ x: px, y: py });
-      } else {
-        currentStroke.points[1] = { x: px, y: py };
-      }
+      if (currentStroke.points.length === 1) currentStroke.points.push({ x: px, y: py });
+      else currentStroke.points[1] = { x: px, y: py };
     }
   }
 
@@ -81,19 +85,12 @@ window.AppDraw = (function(utils) {
     isDrawing = false;
 
     const minPoints = currentStroke.tool === 'marker' ? 1 : 2;
-    if (currentStroke.points.length < minPoints) {
-      currentStroke = null;
-      return;
-    }
+    if (currentStroke.points.length < minPoints) { currentStroke = null; return; }
 
-    // Отправляем в лобби или сохраняем локально
     if (window.AppLobby && window.AppLobby.isConnected()) {
       window.AppLobby.sendDrawing(
-        currentStroke.tool,
-        currentStroke.color,
-        currentStroke.points,
-        currentStroke.width,
-        currentStroke.label
+        currentStroke.tool, currentStroke.color, currentStroke.points,
+        currentStroke.width, currentStroke.label
       );
     } else {
       localDrawings.push({
@@ -104,13 +101,40 @@ window.AppDraw = (function(utils) {
       });
       if (localDrawings.length > 300) localDrawings.shift();
     }
-
     currentStroke = null;
   }
 
-  function cancelStroke() {
-    isDrawing = false;
-    currentStroke = null;
+  function cancelStroke() { isDrawing = false; currentStroke = null; }
+
+  // ─── Ластик: удаляет ТОЛЬКО свои штрихи (линии, линейки, метки) ───
+  function eraseAt(sx, sy, view) {
+    const connected = window.AppLobby && window.AppLobby.isConnected();
+    const strokes = connected ? window.AppLobby.getDrawings() : localDrawings;
+    const myId = connected ? window.AppLobby.getMyId() : 'local';
+    const R = 12; // радиус захвата в px
+    let removed = false;
+
+    for (let i = strokes.length - 1; i >= 0; i--) {
+      const st = strokes[i];
+      if (st.playerId !== myId) continue; // стираем только своё
+
+      let hit = false;
+      for (const p of st.points || []) {
+        const s = utils.worldToScreen(
+          utils.percentToMeters(p.x, mapSize),
+          utils.percentToMeters(p.y, mapSize),
+          view
+        );
+        if (Math.hypot(s.x - sx, s.y - sy) <= R) { hit = true; break; }
+      }
+
+      if (hit) {
+        const [del] = strokes.splice(i, 1);
+        if (connected && del.id) window.AppLobby.deleteDrawing(del.id);
+        removed = true;
+      }
+    }
+    return removed;
   }
 
   function clearDrawings() {
@@ -122,10 +146,9 @@ window.AppDraw = (function(utils) {
   }
 
   return {
-    setTool, getTool,
-    getLocalDrawings, getCurrentStroke,
-    isActive,
+    configure, setTool, setWidth, getTool, getWidth,
+    getLocalDrawings, getCurrentStroke, isActive,
     startStroke, continueStroke, finishStroke, cancelStroke,
-    clearDrawings
+    eraseAt, clearDrawings
   };
 })(window.AppUtils);
