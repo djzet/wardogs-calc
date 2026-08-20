@@ -1,6 +1,6 @@
 // js/map/renderer.js — Отрисовка карты
 
-window.MapRenderer = (function(utils, tiles) {
+window.MapRenderer = (function (utils, tiles) {
     const CANVAS_THEMES = {
         dark: {
             bg: '#10151b', mapBg: '#161d25',
@@ -102,6 +102,54 @@ window.MapRenderer = (function(utils, tiles) {
         }
     }
 
+    function drawLobbyDrawings(ctx, view, utils, theme, mapSize) {
+        const drawings = window.AppLobby.getDrawings();
+        const lobby = window.AppLobby;
+
+        drawings.forEach(stroke => {
+            if (!lobby.isPlayerVisible(stroke.playerId)) return;
+            if (!stroke.points || stroke.points.length < 2) return;
+
+            ctx.beginPath();
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.lineWidth = (stroke.width || 2) * Math.max(0.5, view.scale * 80);
+
+            if (stroke.tool === 'eraser') {
+                ctx.strokeStyle = theme.mapBg;
+                ctx.globalCompositeOperation = 'destination-out';
+            } else {
+                ctx.strokeStyle = stroke.color || '#fff';
+                ctx.globalCompositeOperation = 'source-over';
+            }
+
+            const first = stroke.points[0];
+            const s1 = utils.worldToScreen(
+                utils.percentToMeters(first.x, mapSize),
+                utils.percentToMeters(first.y, mapSize),
+                view
+            );
+            ctx.moveTo(s1.x, s1.y);
+
+            for (let i = 1; i < stroke.points.length; i++) {
+                const p = stroke.points[i];
+                const s = utils.worldToScreen(
+                    utils.percentToMeters(p.x, mapSize),
+                    utils.percentToMeters(p.y, mapSize),
+                    view
+                );
+                ctx.lineTo(s.x, s.y);
+            }
+            ctx.stroke();
+            ctx.globalCompositeOperation = 'source-over';
+        });
+    }
+
+    function drawLobbyCursors(ctx, view, utils, mapSize) {
+        // Курсоры хранятся отдельно? Пока пропустим или добавим простую реализацию:
+        // Можно хранить lastCursor в Map на клиенте, но для MVP можно без курсоров.
+    }
+
     function drawRangeCircle(ctx, view, pointA, weapon, STR) {
         if (!pointA) return;
         if (!weapon || !weapon.maxRangeKm) return;
@@ -138,8 +186,8 @@ window.MapRenderer = (function(utils, tiles) {
 
     function draw(ctx, canvas, opts) {
         const { view, MAP, ZONE, TOWERS, WEAPONS, currentWeapon,
-                pointA, pointB, theme, showTowers, selectedTower,
-                STR, towerIcon, TILES, onTileLoaded } = opts;
+            pointA, pointB, theme, showTowers, selectedTower,
+            STR, towerIcon, TILES, onTileLoaded } = opts;
 
         const c = getThemeColors(theme);
         const w = canvas.clientWidth, h = canvas.clientHeight;
@@ -152,7 +200,7 @@ window.MapRenderer = (function(utils, tiles) {
         ctx.fillRect(m0.x, m1.y, m1.x - m0.x, m0.y - m1.y);
 
         tiles.drawTiles(ctx, canvas, view, MAP, TILES, c, onTileLoaded);
-
+        drawDrawings(ctx, view, utils, c, MAP.size);
         const step = niceStep(view.scale), minor = step / 5;
         const a = utils.screenToWorld(0, 0, view), b = utils.screenToWorld(w, h, view);
         const minX = a.x, maxX = b.x, minY = b.y, maxY = a.y;
@@ -216,6 +264,12 @@ window.MapRenderer = (function(utils, tiles) {
 
         if (showTowers) TOWERS.forEach(p => drawTower(ctx, view, p, towerIcon, selectedTower, STR, MAP.size));
 
+        // ─── Рисунки лобби ───
+        if (window.AppLobby && window.AppLobby.isConnected()) {
+            drawLobbyDrawings(ctx, view, utils, theme, MAP.size);
+            drawLobbyCursors(ctx, view, utils, MAP.size);
+        }
+
         ctx.fillStyle = c.labels;
         ctx.font = '11px monospace';
         ctx.textAlign = 'start';
@@ -242,7 +296,218 @@ window.MapRenderer = (function(utils, tiles) {
 
         if (pointA) drawPoint(ctx, view, pointA, '#7bc95e', 'A');
         if (pointB) drawPoint(ctx, view, pointB, '#e05656', 'B');
+        drawTiles(ctx, view, c, mapSize);
+        drawMinorGrid(ctx, view, c, mapSize);   // мелкие квадратики — под major
+        drawGrid(ctx, view, c, mapSize);        // основная сетка
+        drawCornerCoords(ctx, view, c, mapSize);
     }
 
-    return { getThemeColors, niceStep, getTowerIconSize, draw };
+    function drawDrawings(ctx, view, utils, theme, mapSize) {
+        const remote = (window.AppLobby && window.AppLobby.isConnected())
+            ? window.AppLobby.getDrawings() : [];
+        const local = window.AppDraw ? window.AppDraw.getLocalDrawings() : [];
+        const strokes = window.AppLobby && window.AppLobby.isConnected() ? remote : local;
+
+        strokes.forEach(stroke => {
+            if (stroke.playerId !== 'local' && window.AppLobby &&
+                !window.AppLobby.isPlayerVisible(stroke.playerId)) return;
+            drawSingleStroke(ctx, view, utils, theme, mapSize, stroke, false);
+        });
+
+        const current = window.AppDraw ? window.AppDraw.getCurrentStroke() : null;
+        if (current) {
+            drawSingleStroke(ctx, view, utils, theme, mapSize, current, true);
+        }
+    }
+
+    function drawSingleStroke(ctx, view, utils, theme, mapSize, stroke, isPreview) {
+        if (!stroke.points || stroke.points.length === 0) return;
+
+        if (stroke.tool === 'marker') {
+            const p = stroke.points[0];
+            const wx = utils.percentToMeters(p.x, mapSize);
+            const wy = utils.percentToMeters(p.y, mapSize);
+            const s = utils.worldToScreen(wx, wy, view);
+            const scale = Math.max(0.6, view.scale * 80);
+
+            // Точка
+            ctx.fillStyle = stroke.color || '#fff';
+            ctx.beginPath();
+            ctx.arc(s.x, s.y, 6 * scale, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.strokeStyle = '#fff';
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+
+            // Подпись
+            if (stroke.label) {
+                ctx.font = `bold ${12 * scale}px sans-serif`;
+                const tw = ctx.measureText(stroke.label).width;
+                const pad = 4 * scale;
+                const h = 18 * scale;
+                const x = s.x + 10 * scale;
+                const y = s.y - 10 * scale;
+
+                ctx.fillStyle = 'rgba(0,0,0,0.6)';
+                ctx.fillRect(x - pad, y - h + pad, tw + pad * 2, h);
+                ctx.fillStyle = stroke.color || '#fff';
+                ctx.fillText(stroke.label, x, y);
+            }
+            return;
+        }
+
+        ctx.beginPath();
+        const first = stroke.points[0];
+        const s0 = utils.worldToScreen(
+            utils.percentToMeters(first.x, mapSize),
+            utils.percentToMeters(first.y, mapSize),
+            view
+        );
+        ctx.moveTo(s0.x, s0.y);
+
+        for (let i = 1; i < stroke.points.length; i++) {
+            const pt = stroke.points[i];
+            const s = utils.worldToScreen(
+                utils.percentToMeters(pt.x, mapSize),
+                utils.percentToMeters(pt.y, mapSize),
+                view
+            );
+            ctx.lineTo(s.x, s.y);
+        }
+
+        if (stroke.tool === 'eraser') {
+            ctx.strokeStyle = theme.mapBg;
+            ctx.lineWidth = (stroke.width || 10) * Math.max(0.5, view.scale * 80);
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+        } else {
+            ctx.strokeStyle = stroke.color || '#fff';
+            ctx.lineWidth = (stroke.width || 2) * Math.max(0.5, view.scale * 80);
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            if (isPreview) ctx.setLineDash([5, 5]);
+        }
+
+        ctx.stroke();
+        ctx.setLineDash([]);
+    }
+    function getGridSteps(scale) {
+        // major — основная сетка с подписями
+        // minor — мелкие квадратики внутри
+        if (scale > 0.15) return { major: 100, minor: 20 };
+        if (scale > 0.06) return { major: 250, minor: 50 };
+        if (scale > 0.025) return { major: 500, minor: 100 };
+        return { major: 1000, minor: 200 };
+    }
+    function drawMinorGrid(ctx, view, c, mapSize) {
+        const steps = getGridSteps(view.scale);
+        const minor = steps.minor;
+        const vb = getViewBox(view, c, mapSize);
+
+        const startX = Math.floor(vb.left / minor) * minor;
+        const endX = Math.ceil(vb.right / minor) * minor;
+        const startY = Math.floor(vb.top / minor) * minor;
+        const endY = Math.ceil(vb.bottom / minor) * minor;
+
+        ctx.save();
+        ctx.strokeStyle = themeColors.dim + '18'; // очень тусклые линии
+        ctx.lineWidth = 0.5 * dpr;
+
+        for (let x = startX; x <= endX; x += minor) {
+            const sx = (x - vb.left) * view.scale;
+            ctx.beginPath();
+            ctx.moveTo(sx, 0);
+            ctx.lineTo(sx, c.height);
+            ctx.stroke();
+        }
+
+        for (let y = startY; y <= endY; y += minor) {
+            const sy = (y - vb.top) * view.scale;
+            ctx.beginPath();
+            ctx.moveTo(0, sy);
+            ctx.lineTo(c.width, sy);
+            ctx.stroke();
+        }
+
+        ctx.restore();
+    }
+    function drawGrid(ctx, view, c, mapSize) {
+        const steps = getGridSteps(view.scale);
+        const step = steps.major;
+        const vb = getViewBox(view, c, mapSize);
+
+        const startX = Math.floor(vb.left / step) * step;
+        const endX = Math.ceil(vb.right / step) * step;
+        const startY = Math.floor(vb.top / step) * step;
+        const endY = Math.ceil(vb.bottom / step) * step;
+
+        ctx.save();
+
+        // Major линии
+        ctx.strokeStyle = themeColors.dim + '55';
+        ctx.lineWidth = 1 * dpr;
+
+        for (let x = startX; x <= endX; x += step) {
+            const sx = (x - vb.left) * view.scale;
+            ctx.beginPath();
+            ctx.moveTo(sx, 0);
+            ctx.lineTo(sx, c.height);
+            ctx.stroke();
+
+            // Подпись сверху и снизу
+            ctx.fillStyle = themeColors.muted;
+            ctx.font = `${11 * dpr}px sans-serif`;
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'top';
+            ctx.fillText(formatMeters(x), sx, 3 * dpr);
+
+            ctx.textBaseline = 'bottom';
+            ctx.fillText(formatMeters(x), sx, c.height - 3 * dpr);
+        }
+
+        for (let y = startY; y <= endY; y += step) {
+            const sy = (y - vb.top) * view.scale;
+            ctx.beginPath();
+            ctx.moveTo(0, sy);
+            ctx.lineTo(c.width, sy);
+            ctx.stroke();
+
+            ctx.fillStyle = themeColors.muted;
+            ctx.font = `${11 * dpr}px sans-serif`;
+            ctx.textAlign = 'left';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(formatMeters(y), 3 * dpr, sy);
+
+            ctx.textAlign = 'right';
+            ctx.fillText(formatMeters(y), c.width - 3 * dpr, sy);
+        }
+
+        ctx.restore();
+    }
+    function drawCornerCoords(ctx, view, c, mapSize) {
+        const vb = getViewBox(view, c, mapSize);
+
+        ctx.save();
+        ctx.font = `bold ${13 * dpr}px monospace`;
+        ctx.fillStyle = themeColors.text;
+        ctx.shadowColor = 'rgba(0,0,0,0.85)';
+        ctx.shadowBlur = 5 * dpr;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+
+        // Левый нижний угол: x=left, y=bottom
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'bottom';
+        const bl = `x${utils.gameCoord(vb.left)}   y${utils.gameCoord(vb.bottom)}`;
+        ctx.fillText(bl, 14 * dpr, c.height - 14 * dpr);
+
+        // Правый верхний угол: x=right, y=top
+        ctx.textAlign = 'right';
+        ctx.textBaseline = 'top';
+        const tr = `x${utils.gameCoord(vb.right)}   y${utils.gameCoord(vb.top)}`;
+        ctx.fillText(tr, c.width - 14 * dpr, 14 * dpr);
+
+        ctx.restore();
+    }
+    return { getThemeColors, niceStep, getTowerIconSize, draw, getGridSteps };
 })(window.AppUtils, window.MapTiles);

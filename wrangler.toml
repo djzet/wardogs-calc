@@ -1,0 +1,11 @@
+name = "wardogs-lobby"
+main = "wardogs-lobby.js"
+compatibility_date = "2026-08-20"
+
+[[durable_objects.bindings]]
+name = "LOBBY"
+class_name = "Lobby"
+
+[[migrations]]
+tag = "v1"
+new_classes = ["Lobby"]

@@ -327,3 +327,50 @@ input[type="number"]:invalid {
     outline: none;
     border-color: var(--accent);
 }
+
+.draw-tools-section {
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid var(--border);
+}
+
+.draw-tools-section h2 {
+    font-size: 14px;
+    color: var(--muted);
+    margin-bottom: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tool-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.draw-tool {
+    height: 36px;
+    border: 1px solid var(--border);
+    background: var(--field);
+    color: var(--text);
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all .15s ease;
+    user-select: none;
+}
+
+.draw-tool:hover {
+    background: var(--hover);
+    border-color: var(--dim);
+}
+
+.draw-tool.active {
+    border-color: var(--accent);
+    background: rgba(159, 211, 86, 0.12);
+    box-shadow: 0 0 0 1px var(--accent);
+}

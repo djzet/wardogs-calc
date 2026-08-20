@@ -1,6 +1,6 @@
 // js/core/utils.js — Чистые утилиты (без зависимостей)
 
-window.AppUtils = (function() {
+window.AppUtils = (function () {
     const NBSP = '\u00A0';
 
     function clamp(v, min, max) {
@@ -50,6 +50,11 @@ window.AppUtils = (function() {
         return fmtWithNbsp(d) + NBSP + str.u_m;
     }
 
+    function gameCoord(meters) {
+        // Игровые координаты: метры / 100 (как на скриншотах x23.30, y129.60)
+        return (meters / 100).toFixed(2);
+    }
+
     return {
         NBSP,
         clamp,
@@ -60,6 +65,7 @@ window.AppUtils = (function() {
         screenToWorld,
         fmtWithNbsp,
         fmtCoord,
-        fmtDist
+        fmtDist,
+        gameCoord
     };
 })();

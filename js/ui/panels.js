@@ -1,6 +1,6 @@
 // js/ui/panels.js — Drawer, help-модалка, темы, вышки
 
-window.UIPanels = (function(storage) {
+window.UIPanels = (function (storage) {
     let theme = storage.loadTheme('dark');
     let showTowers = storage.loadTowers();
     let onChange = null;
@@ -41,6 +41,75 @@ window.UIPanels = (function(storage) {
     function openHelp(state) {
         document.getElementById('helpModal').classList.toggle('hidden', !state);
     }
+
+    function renderLobbyPlayers() {
+        const list = document.getElementById('lobbyPlayersList');
+        const info = document.getElementById('lobbyInfo');
+        const section = document.getElementById('lobbySection');
+        if (!window.AppLobby.isConnected()) {
+            section.classList.add('hidden');
+            return;
+        }
+
+        section.classList.remove('hidden');
+        const code = window.AppLobby.getCode();
+        const players = window.AppLobby.getPlayers();
+        const myId = window.AppLobby.getMyId();
+
+        info.innerHTML = `<span class="lobby-code">Код: <b>${code}</b></span>`;
+
+        list.innerHTML = '';
+        Object.values(players).forEach(p => {
+            const isMe = p.playerId === myId;
+            const isHidden = !window.AppLobby.isPlayerVisible(p.playerId);
+
+            const row = document.createElement('label');
+            row.className = 'player-row';
+            row.innerHTML = `
+      <span class="player-color" style="background:${p.color}"></span>
+      <span class="player-name">${p.name} ${isMe ? '(вы)' : ''}</span>
+      ${!isMe ? `<input type="checkbox" ${!isHidden ? 'checked' : ''} data-pid="${p.playerId}">` : ''}
+    `;
+
+            const cb = row.querySelector('input');
+            if (cb) {
+                cb.addEventListener('change', (e) => {
+                    window.AppLobby.togglePlayerVisibility(p.playerId, e.target.checked);
+                    renderMap();
+                });
+            }
+            list.appendChild(row);
+        });
+    }
+
+    // Кнопки в панели
+    document.getElementById('createLobbyBtn').addEventListener('click', async () => {
+        const code = await AppLobby.create(AppPoints.getA(), AppPoints.getB(), AppWeapons.get());
+        showToast(`Лобби создано: ${code}`, 'success');
+        renderLobbyPlayers();
+    });
+
+    document.getElementById('joinLobbyBtn').addEventListener('click', () => {
+        const code = prompt('Введите код лобби:');
+        if (!code) return;
+        AppLobby.join(code.trim().toUpperCase()).then(res => {
+            if (res.ok) {
+                AppPoints.assign(res.pointA, res.pointB);
+                if (res.weapon) AppWeapons.set(res.weapon);
+                UIInputs.sync(); UIResults.update(); renderMap(); saveState();
+                showToast('Подключено к лобби', 'success');
+                renderLobbyPlayers();
+            } else {
+                showToast('Лобби не найдено', 'error');
+            }
+        });
+    });
+
+    document.getElementById('leaveLobbyBtn').addEventListener('click', () => {
+        AppLobby.leave();
+        renderLobbyPlayers();
+        renderMap();
+    });
 
     function bind() {
         document.getElementById('drawerToggle').onclick = () => openDrawer(true);

@@ -1,6 +1,6 @@
 // js/map/interactions.js — Обработка пользовательских взаимодействий
 
-window.MapInteractions = (function() {
+window.MapInteractions = (function () {
     let pointers = new Map();
     let pinch = null;
     let longPressTimer = null;
@@ -30,7 +30,7 @@ window.MapInteractions = (function() {
     function handlePointerDown(e, canvas, opts) {
         const { view, hitPoint, findTowerAt, openMenuAt, LONG_PRESS_MS, utils } = opts;
         const p = canvasPos(e, canvas);
-        
+
         if (e.pointerType !== 'mouse') lastTouchTs = performance.now();
 
         try { canvas.setPointerCapture(e.pointerId); } catch (_) { }
@@ -81,6 +81,19 @@ window.MapInteractions = (function() {
             return;
         }
 
+        // ─── Рисование ───
+        const drawTool = window.AppDraw ? window.AppDraw.getTool() : 'pan';
+        if (drawTool !== 'pan' && e.button === 0) {
+            stopLongPress();
+            const wpt = utils.screenToWorld(p.x, p.y, view);
+            const px = utils.metersToPercent(wpt.x, MAP.size);
+            const py = utils.metersToPercent(wpt.y, MAP.size);
+            window.AppDraw.startStroke(px, py);
+            dragging = { mode: 'draw' };
+            canvas.style.cursor = drawTool === 'eraser' ? 'cell' : 'crosshair';
+            return;
+        }
+
         dragging = { mode: 'pan', startX: p.x, startY: p.y, ox: view.ox, oy: view.oy };
         canvas.style.cursor = 'grabbing';
     }
@@ -89,7 +102,7 @@ window.MapInteractions = (function() {
         const { view, renderMap, debouncedSaveView, hitPoint, findTowerAt, setPoint, utils, TAP_THRESHOLD, MAP } = opts;
         const p = canvasPos(e, canvas);
         const tracked = pointers.has(e.pointerId);
-        
+
         if (tracked) {
             pointers.set(e.pointerId, p);
             if (e.pointerType !== 'mouse') lastTouchTs = performance.now();
@@ -105,6 +118,23 @@ window.MapInteractions = (function() {
             view.oy = mid.y + pinch.anchor.y * newScale;
             renderMap();
             debouncedSaveView();
+            return;
+        }
+
+        // Обновляем координаты курсора (если есть элемент #cursorCoords)
+        const cursorCoords = document.getElementById('cursorCoords');
+        if (cursorCoords) {
+            const wpt = utils.screenToWorld(p.x, p.y, view);
+            cursorCoords.textContent = `x${utils.gameCoord(wpt.x)}  y${utils.gameCoord(wpt.y)}`;
+        }
+        // ─── Рисование в процессе ───
+        if (dragging && dragging.mode === 'draw') {
+            stopLongPress();
+            const wpt = utils.screenToWorld(p.x, p.y, view);
+            const px = utils.metersToPercent(wpt.x, MAP.size);
+            const py = utils.metersToPercent(wpt.y, MAP.size);
+            window.AppDraw.continueStroke(px, py);
+            renderMap();
             return;
         }
 
@@ -144,7 +174,7 @@ window.MapInteractions = (function() {
 
     function handlePointerUp(e, canvas, opts) {
         const { view, renderMap, findTowerAt, selectedTower, setSelectedTower } = opts;
-        
+
         if (!pointers.has(e.pointerId)) return;
         pointers.delete(e.pointerId);
         try { canvas.releasePointerCapture(e.pointerId); } catch (_) { }
@@ -160,6 +190,14 @@ window.MapInteractions = (function() {
             } else {
                 dragging = null;
             }
+            return;
+        }
+        // ─── Завершение рисования ───
+        if (dragging && dragging.mode === 'draw') {
+            window.AppDraw.finishStroke();
+            dragging = null;
+            const tool = window.AppDraw ? window.AppDraw.getTool() : 'pan';
+            canvas.style.cursor = tool === 'pan' ? 'crosshair' : 'default';
             return;
         }
 
@@ -186,6 +224,7 @@ window.MapInteractions = (function() {
         stopLongPress();
         longPressFired = false;
         canvas.style.cursor = 'crosshair';
+        if (window.AppDraw) window.AppDraw.cancelStroke();
     }
 
     function handleWheel(e, canvas, opts) {

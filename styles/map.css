@@ -136,3 +136,20 @@ body.light .theme-toggle .icon-moon {
     border-color: var(--accent);
     color: var(--accent);
 }
+
+.cursor-coords {
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    font-family: monospace;
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--text);
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+    pointer-events: none;
+    z-index: 10;
+    background: rgba(0, 0, 0, 0.3);
+    padding: 4px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.5px;
+}

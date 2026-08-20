@@ -193,6 +193,20 @@
                 </div>
             </section>
 
+            <section class="draw-tools-section" id="drawToolsSection">
+                <h2 data-i18n="drawTools">Рисование</h2>
+                <div class="tool-grid">
+                    <button class="draw-tool" data-tool="pen" title="Карандаш">✏️</button>
+                    <button class="draw-tool" data-tool="line" title="Линейка">📏</button>
+                    <button class="draw-tool" data-tool="marker" title="Метка">📍</button>
+                    <button class="draw-tool" data-tool="eraser" title="Ластик">🧹</button>
+                    <button class="draw-tool active" data-tool="pan" title="Перемещение">✋</button>
+                </div>
+                <button class="view-reset" id="clearDrawingsBtn" data-i18n="clearDrawings">
+                    Очистить рисунки
+                </button>
+            </section>
+
             <p class="hint" data-i18n="hint">
                 ПКМ по карте — поставить или удалить точку.<br>
                 ЛКМ — двигать карту (или саму точку).<br>
@@ -238,8 +252,11 @@
         </aside>
 
         <main class="map-wrap">
+            <div id="cursorCoords" class="cursor-coords"></div>
             <canvas id="map"></canvas>
             <div class="map-controls">
+                <button class="view-reset" id="createLobbyBtn">🎮 Создать лобби</button>
+                <button class="view-reset" id="joinLobbyBtn">🔗 Присоединиться</button>
                 <button class="view-reset share-btn" id="shareBtn" title="Поделиться координатами"
                     aria-label="Поделиться">
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -299,6 +316,13 @@
                 <input type="checkbox" id="towersToggle" checked>
                 <span class="switch"></span>
             </label>
+
+            <section class="lobby-section hidden" id="lobbySection">
+                <h3>Лобби</h3>
+                <div id="lobbyInfo" class="lobby-info"></div>
+                <div id="lobbyPlayersList" class="lobby-players"></div>
+                <button id="leaveLobbyBtn" class="view-reset">Покинуть лобби</button>
+            </section>
         </aside>
         <div class="drawer-backdrop hidden" id="drawerBackdrop"></div>
 
@@ -341,6 +365,7 @@
     <script src="js/features/share.js"></script>
     <script src="js/features/points.js"></script>
     <script src="js/features/analytics.js"></script>
+    <script src="js/features/lobby.js"></script>
 
     <!-- Карта -->
     <script src="js/map/tiles.js"></script>
