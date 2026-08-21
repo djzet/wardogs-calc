@@ -3,7 +3,7 @@
 [Русский](README.md) · [English](README.en.md) · [Deutsch](README.de.md) · [Français](README.fr.md) · [Español](README.es.md) · [Polski](README.pl.md) · [Українська](README.uk.md) · [Türkçe](README.tr.md) · [中文](README.zh.md)
 
 Unofficial interactive mortar and artillery calculator for the tactical shooter
-**WARDOGS**. Distance, azimuth, elevation (mils) and flight time — in two clicks
+**WARDOGS**. Distance, azimuth, elevation (mils) — in two clicks
 on a 16×16 km map.
 
 **Live Demo:** https://djzet.github.io/wardogs-calc/
@@ -15,7 +15,7 @@ on a 16×16 km map.
 ## Features
 
 - Interactive map with tile zoom and pan
-- Distance, azimuth, elevation (mils), flight time
+- Distance, azimuth, elevation (mils)
 - Mortar (700 m) and artillery (2.5 km)
 - Share links, auto-save, themes
 - 9 languages, mobile version

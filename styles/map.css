@@ -1,5 +1,11 @@
 /* styles/map.css — карта, кнопки управления, контекстное меню, toast */
 
+#map {
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
 .map-wrap {
     flex: 1;
     position: relative;
@@ -68,7 +74,6 @@ body.light .theme-toggle .icon-moon {
     display: block;
 }
 
-/* Контекстное меню */
 .ctx-menu {
     position: absolute;
     z-index: 10;
@@ -105,7 +110,6 @@ body.light .theme-toggle .icon-moon {
     color: var(--danger-hover);
 }
 
-/* Toast-уведомления */
 .toast {
     position: absolute;
     top: 56px;
@@ -157,7 +161,6 @@ body.light .theme-toggle .icon-moon {
 
 .cursor-coords span {
     display: block;
-    /* каждая координата на своей строке */
 }
 
 .cursor-coords.visible {

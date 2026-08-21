@@ -19,6 +19,8 @@
     "clearDrawings": "清除绘画",
     "markerPrompt": "标记名称：",
     "lineWidth": "线条粗细",
+    "hostName": "房主",
+    "playerName": "玩家",
     "createLobby": "创建大厅",
     "joinLobby": "加入",
     "leaveLobby": "离开大厅",

@@ -2,14 +2,11 @@
 
 window.AppWeapons = (function(storage) {
     let currentWeapon = null;
-
     function init(defaultWeapon, onChange) {
         currentWeapon = storage.loadWeapon(defaultWeapon);
         bind(onChange);
     }
-
     function get() { return currentWeapon; }
-
     function set(w) {
         currentWeapon = w;
         storage.saveWeapon(w);
@@ -17,7 +14,6 @@ window.AppWeapons = (function(storage) {
             r.checked = r.value === w;
         });
     }
-
     function bind(onChange) {
         const radios = document.querySelectorAll('input[name="weapon"]');
         radios.forEach(radio => {
@@ -29,6 +25,5 @@ window.AppWeapons = (function(storage) {
             });
         });
     }
-
     return { init, get, set };
 })(window.AppStorage);

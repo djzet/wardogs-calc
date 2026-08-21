@@ -3,7 +3,7 @@
 [Русский](README.md) · [English](README.en.md) · [Deutsch](README.de.md) · [Français](README.fr.md) · [Español](README.es.md) · [Polski](README.pl.md) · [Українська](README.uk.md) · [Türkçe](README.tr.md) · [中文](README.zh.md)
 
 Inoffizieller interaktiver Mörser- und Artillerie-Rechner für den Taktik-Shooter
-**WARDOGS**. Distanz, Azimut, Erhöhung (mils) und Flugzeit — mit zwei Klicks
+**WARDOGS**. Distanz, Azimut, Erhöhung (mils) — mit zwei Klicks
 auf der 16×16-km-Karte.
 
 **Live-Demo:** https://djzet.github.io/wardogs-calc/
@@ -15,7 +15,7 @@ auf der 16×16-km-Karte.
 ## Funktionen
 
 - Interaktive Karte mit Kachel-Zoom und Pan
-- Distanz, Azimut, Erhöhung (mils), Flugzeit
+- Distanz, Azimut, Erhöhung (mils)
 - Mörser (700 m) und Artillerie (2,5 km)
 - Share-Links, Autospeichern, Themes
 - 9 Sprachen, mobile Version

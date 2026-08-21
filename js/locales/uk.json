@@ -19,6 +19,8 @@
     "clearDrawings": "Очистити малюнки",
     "markerPrompt": "Назва мітки:",
     "lineWidth": "Товщина лінії",
+    "hostName": "Хост",
+    "playerName": "Гравець",
     "createLobby": "Створити лобі",
     "joinLobby": "Приєднатися",
     "leaveLobby": "Вийти з лобі",

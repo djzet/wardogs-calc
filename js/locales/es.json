@@ -19,6 +19,8 @@
     "clearDrawings": "Borrar dibujos",
     "markerPrompt": "Nombre de la marca:",
     "lineWidth": "Grosor de línea",
+    "hostName": "Host",
+    "playerName": "Jugador",
     "createLobby": "Crear lobby",
     "joinLobby": "Unirse",
     "leaveLobby": "Salir del lobby",

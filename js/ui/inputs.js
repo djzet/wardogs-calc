@@ -5,27 +5,21 @@ window.UIInputs = (function (points, utils) {
     let timer = null;
     let debounceMs = 80;
     let mapSize = 16000;
-
     function init(opts) {
         inputs = opts.inputs;
         debounceMs = opts.debounceMs || 80;
         mapSize = opts.mapSize;
-
-        // Лимиты по размеру карты: 16000 м → 0–160, шаг 0.01
         const maxGame = String(mapSize / 100);
         Object.values(inputs).forEach(i => {
             i.min = '0';
             i.max = maxGame;
             i.step = '0.01';
         });
-
         bind();
     }
-
     function setField(el, val) {
         if (document.activeElement !== el) el.value = val;
     }
-
     function sync() {
         const A = points.getA(), B = points.getB();
         if (A) {
@@ -41,23 +35,19 @@ window.UIInputs = (function (points, utils) {
             setField(inputs.bx, ''); setField(inputs.by, '');
         }
     }
-
     function onInput() {
         clearTimeout(timer);
         timer = setTimeout(() => {
             points.applyFromInputs(inputs.ax, inputs.ay, inputs.bx, inputs.by);
         }, debounceMs);
     }
-
     function onBlur() {
         clearTimeout(timer);
         points.applyFromInputs(inputs.ax, inputs.ay, inputs.bx, inputs.by);
     }
-
     function bind() {
         Object.values(inputs).forEach(i => i.addEventListener('input', onInput));
         Object.values(inputs).forEach(i => i.addEventListener('blur', onBlur));
     }
-
     return { init, sync };
 })(window.AppPoints, window.AppUtils);

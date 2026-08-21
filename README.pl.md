@@ -3,7 +3,7 @@
 [Русский](README.md) · [English](README.en.md) · [Deutsch](README.de.md) · [Français](README.fr.md) · [Español](README.es.md) · [Polski](README.pl.md) · [Українська](README.uk.md) · [Türkçe](README.tr.md) · [中文](README.zh.md)
 
 Nieoficjalny interaktywny kalkulator moździerza i artylerii dla taktycznej
-strzelanki **WARDOGS**. Dystans, azymut, elewacja (mils) i czas lotu —
+strzelanki **WARDOGS**. Dystans, azymut, elewacja (mils) —
 w dwa kliknięcia na mapie 16×16 km.
 
 **Demo:** https://djzet.github.io/wardogs-calc/
@@ -15,7 +15,7 @@ w dwa kliknięcia na mapie 16×16 km.
 ## Funkcje
 
 - Interaktywna mapa z zoomem kafelkowym i panowaniem
-- Dystans, azymut, elewacja (mils), czas lotu
+- Dystans, azymut, elewacja (mils)
 - Moździerz (700 m) i artyleria (2,5 km)
 - Linki udostępniania, autozapis, motywy
 - 9 języków, wersja mobilna

@@ -1,18 +1,18 @@
 // js/ui/contextMenu.js — Контекстное меню карты
 
-window.UIContextMenu = (function(utils) {
+window.UIContextMenu = (function (utils) {
     let menu = null;
     let menuWorld = null;
     let menuPointKey = null;
     let deps = null;
-
     function init(d) {
         deps = d;
         menu = document.getElementById('ctxMenu');
+        if (!menu) return;
         bind();
     }
-
     function openMenuAt(sx, sy) {
+        if (!menu) return;
         const view = deps.getView();
         menuWorld = utils.screenToWorld(sx, sy, view);
         menuPointKey = deps.hitPoint(sx, sy);
@@ -26,12 +26,11 @@ window.UIContextMenu = (function(utils) {
         menu.style.left = left + 'px';
         menu.style.top = top + 'px';
     }
-
-    function hideMenu() { menu.classList.add('hidden'); }
-
+    function hideMenu() { if (menu) menu.classList.add('hidden'); }
     function bind() {
         menu.addEventListener('click', e => {
-            const action = e.target.dataset.action;
+            const btn = e.target.closest('button[data-action]');
+            const action = btn ? btn.dataset.action : null;
             if (!action) return;
             if (action === 'setA') deps.setPoint('A', menuWorld.x, menuWorld.y);
             if (action === 'setB') deps.setPoint('B', menuWorld.x, menuWorld.y);
@@ -39,6 +38,5 @@ window.UIContextMenu = (function(utils) {
             hideMenu();
         });
     }
-
     return { init, openMenuAt, hideMenu };
 })(window.AppUtils);

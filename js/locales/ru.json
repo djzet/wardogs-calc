@@ -24,6 +24,8 @@
     "toolMarker": "Метка",
     "toolEraser": "Ластик",
     "toolPan": "Перемещение",
+    "hostName": "Хост",
+    "playerName": "Игрок",
     "createLobby": "Создать лобби",
     "joinLobby": "Присоединиться",
     "leaveLobby": "Покинуть лобби",

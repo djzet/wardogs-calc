@@ -1,8 +1,7 @@
-// config/weapons.js — Данные оружия WARDOGS (улучшенная версия)
+// config/weapons.js — Данные оружия WARDOGS
 
 window.CONFIG_WEAPONS = {
     default: 'mortar',
-
     weapons: {
         mortar: {
             id: 'mortar',
@@ -16,24 +15,13 @@ window.CONFIG_WEAPONS = {
                 pl: 'Moździerz',
                 tr: 'Havan',
                 zh: '迫击炮',
-                pt: 'Morteiro',
-                cat: 'MEOWTAR'
             },
-
-            // Диапазоны (в км для удобства, конвертируем в метры при использовании)
             minRangeKm: 0.132,
             maxRangeKm: 0.684,
-
-            // Диапазоны углов возвышения
-            minElevationMil: 150,
+            minElevationMil: 290,
             maxElevationMil: 900,
-
-            // Параметры расчёта
             step: 50,
-            v0: 290 / (22 * Math.cos(700 / 1000)),
             rangeColor: '#5ba8d3',
-
-            // Таблица для точной интерполяции (наша фича)
             table: [
                 { mils: 290, dist: 700 },
                 { mils: 340, dist: 650 },
@@ -51,7 +39,6 @@ window.CONFIG_WEAPONS = {
                 { mils: 900, dist: 110 },
             ]
         },
-
         artillery: {
             id: 'artillery',
             names: {
@@ -64,20 +51,14 @@ window.CONFIG_WEAPONS = {
                 pl: 'Artyleria',
                 tr: 'Topçu',
                 zh: '火炮',
-                pt: 'Artilharia',
-                cat: 'Artilleria'
             },
 
             minRangeKm: 0.78,
             maxRangeKm: 2.629,
-
-            minElevationMil: 30,
-            maxElevationMil: 610,
-
+            minElevationMil: 290,
+            maxElevationMil: 1000,
             step: 10,
-            v0: 2500 / (12 * Math.cos(290 / 1000)),
             rangeColor: '#5ba8d3',
-
             table: [
                 { mils: 290, dist: 2500 },
                 { mils: 900, dist: 2352 },

@@ -5,14 +5,11 @@ window.AppPoints = (function (utils) {
     let pointB = null;
     let mapSize = 16000;
     let onChange = null;
-
     function configure(opts) {
         mapSize = opts.mapSize;
         onChange = opts.onChange || null;
     }
-
     function emit() { if (onChange) onChange(); }
-
     function getA() { return pointA; }
     function getB() { return pointB; }
 
@@ -24,29 +21,24 @@ window.AppPoints = (function (utils) {
         if (key === 'A') pointA = p; else pointB = p;
         emit();
     }
-
     function assign(a, b) {
         pointA = a;
         pointB = b;
     }
-
-    // Поля ввода в игровых координатах (метры / 100, 0–160)
     function readPoint(ix, iy) {
         const gx = parseFloat(ix.value), gy = parseFloat(iy.value);
         if (isNaN(gx) || isNaN(gy)) return null;
         const maxGame = mapSize / 100;
         return {
-            x: utils.clamp(gx, 0, maxGame) * 100,   // игровая координата → метры
+            x: utils.clamp(gx, 0, maxGame) * 100,
             y: utils.clamp(gy, 0, maxGame) * 100
         };
     }
-
     function applyFromInputs(ax, ay, bx, by) {
         pointA = readPoint(ax, ay);
         pointB = readPoint(bx, by);
         emit();
     }
-
     function hitPoint(sx, sy, view) {
         for (const [key, p] of [['A', pointA], ['B', pointB]]) {
             if (!p) continue;
@@ -55,6 +47,5 @@ window.AppPoints = (function (utils) {
         }
         return null;
     }
-
     return { configure, getA, getB, setPoint, assign, applyFromInputs, hitPoint };
 })(window.AppUtils);
