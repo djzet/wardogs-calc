@@ -34,10 +34,10 @@ jobs:
               c = c.split('__SUPABASE_URL__').join(process.env.SUPABASE_URL);
               c = c.split('__SUPABASE_KEY__').join(process.env.SUPABASE_KEY);
               fs.writeFileSync(f, c);
-              console.log('✅ Supabase credentials injected');
+              console.log('Supabase credentials injected');
             "
           else
-            echo "⚠️  Secrets not found — placeholders remain (OK for forks)"
+            echo "Secrets not found — placeholders remain (OK for forks)"
           fi
 
       - name: Setup Pages

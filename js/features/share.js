@@ -1,6 +1,6 @@
 // js/features/share.js — Шаринг ссылок и toast-уведомления
 
-window.AppShare = (function(utils) {
+window.AppShare = (function (utils) {
     let toastTimer = null;
     function generateUrl(pointA, pointB, currentWeapon, mapSize) {
         const params = new URLSearchParams();
@@ -37,7 +37,8 @@ window.AppShare = (function(utils) {
             toast = document.createElement('div');
             toast.id = 'toast';
             toast.className = 'toast';
-            document.querySelector('.map-wrap').appendChild(toast);
+            const wrap = document.querySelector('.map-wrap') || document.body;
+            wrap.appendChild(toast);
         }
         toast.textContent = message;
         toast.className = 'toast ' + type;
