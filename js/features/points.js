@@ -26,7 +26,8 @@ window.AppPoints = (function (utils) {
         pointB = b;
     }
     function readPoint(ix, iy) {
-        const gx = parseFloat(ix.value), gy = parseFloat(iy.value);
+        const gx = parseFloat(String(ix.value).replace(',', '.'));
+        const gy = parseFloat(String(iy.value).replace(',', '.'));
         if (isNaN(gx) || isNaN(gy)) return null;
         const maxGame = mapSize / 100;
         return {

@@ -112,7 +112,13 @@ window.MapInteractions = (function () {
         const cursorCoords = document.getElementById('cursorCoords');
         if (cursorCoords) {
             const wpt = utils.screenToWorld(p.x, p.y, view);
-            cursorCoords.innerHTML = `<span>x${utils.gameCoord(wpt.x)}</span><span>y${utils.gameCoord(wpt.y)}</span>`;
+            cursorCoords.textContent = '';
+            const xSpan = document.createElement('span');
+            xSpan.textContent = `x${utils.gameCoord(wpt.x)}`;
+            const ySpan = document.createElement('span');
+            ySpan.textContent = `y${utils.gameCoord(wpt.y)}`;
+            cursorCoords.appendChild(xSpan);
+            cursorCoords.appendChild(ySpan);
             const wrap = canvas.parentElement.getBoundingClientRect();
             let lx = p.x + 14;
             let ly = p.y + 18;
