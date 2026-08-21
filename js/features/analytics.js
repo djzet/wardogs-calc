@@ -1,4 +1,4 @@
-// js/features/analytics.js — Трекинг событий (Яндекс.Метрика / GA)
+// js/features/analytics.js — Трекинг событий
 
 window.AppAnalytics = (function() {
     function sendDiscordEvent(source) {
@@ -13,7 +13,6 @@ window.AppAnalytics = (function() {
         });
         if (typeof ym === 'function') ym(111625912, 'reachGoal', 'discord_qr_click');
     }
-
     function init() {
         document.getElementById('discordQr').addEventListener('click', () => {
             sendDiscordEvent('Discord QR');
@@ -22,6 +21,5 @@ window.AppAnalytics = (function() {
             sendDiscordEvent('Discord Button');
         });
     }
-
     return { init, sendDiscordEvent };
 })();

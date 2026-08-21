@@ -19,6 +19,8 @@
     "clearDrawings": "Wyczyść rysunki",
     "markerPrompt": "Nazwa znacznika:",
     "lineWidth": "Grubość linii",
+    "hostName": "Host",
+    "playerName": "Gracz",
     "createLobby": "Utwórz lobby",
     "joinLobby": "Dołącz",
     "leaveLobby": "Opuść lobby",

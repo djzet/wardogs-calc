@@ -19,6 +19,8 @@
     "clearDrawings": "Effacer les dessins",
     "markerPrompt": "Nom du marqueur :",
     "lineWidth": "Épaisseur du trait",
+    "hostName": "Hôte",
+    "playerName": "Joueur",
     "createLobby": "Créer un lobby",
     "joinLobby": "Rejoindre",
     "leaveLobby": "Quitter le lobby",

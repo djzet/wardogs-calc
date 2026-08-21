@@ -19,6 +19,8 @@
     "clearDrawings": "Zeichnungen löschen",
     "markerPrompt": "Markierungsname:",
     "lineWidth": "Linienstärke",
+    "hostName": "Host",
+    "playerName": "Spieler",
     "createLobby": "Lobby erstellen",
     "joinLobby": "Beitreten",
     "leaveLobby": "Lobby verlassen",

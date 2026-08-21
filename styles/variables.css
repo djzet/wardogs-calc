@@ -2,8 +2,6 @@
 
 :root {
     color-scheme: dark;
-    /* нативные элементы (стрелки, скроллбары, селекты) в тёмной теме */
-
     --bg: #12151a;
     --panel: #1a1f27;
     --border: #2c3440;
@@ -23,20 +21,15 @@
     --discord: #5865F2;
     --discord-hover: #4752C4;
     --warn: #e8c35a;
-
-    /* Размеры и радиусы */
     --radius-sm: 6px;
     --radius-md: 8px;
     --radius-lg: 10px;
-    --panel-width: 320px;
+    --panel-width: 400px;
     --drawer-width: 260px;
 }
 
-/* Светлая тема */
 body.light {
     color-scheme: light;
-    /* нативные элементы в светлой теме */
-
     --bg: #eef1f5;
     --panel: #ffffff;
     --border: #d7dde5;

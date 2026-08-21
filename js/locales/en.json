@@ -19,6 +19,8 @@
     "clearDrawings": "Clear drawings",
     "markerPrompt": "Marker name:",
     "lineWidth": "Line width",
+    "hostName": "Host",
+    "playerName": "Player",
     "createLobby": "Create Lobby",
     "joinLobby": "Join",
     "leaveLobby": "Leave Lobby",

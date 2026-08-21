@@ -37,7 +37,6 @@
     background: var(--hover);
 }
 
-/* Координаты */
 .coord-row {
     display: grid;
     grid-template-columns: 1fr 1fr auto;
@@ -97,7 +96,6 @@ input[type="number"]:invalid {
     color: var(--danger);
 }
 
-/* Результаты */
 .result {
     background: var(--field);
     border: 1px solid var(--border);
@@ -134,7 +132,6 @@ input[type="number"]:invalid {
     color: var(--warn);
 }
 
-/* Настройки */
 .controls-section {
     background: var(--field);
     border: 1px solid var(--border);
@@ -202,7 +199,6 @@ input[type="number"]:invalid {
     line-height: 1.6;
 }
 
-/* Контакты */
 .contact {
     background: var(--field);
     border: 1px solid var(--border);
@@ -234,7 +230,6 @@ input[type="number"]:invalid {
     text-decoration: underline;
 }
 
-/* Discord */
 .discord-block {
     display: flex;
     flex-direction: column;
@@ -300,7 +295,6 @@ input[type="number"]:invalid {
     flex-shrink: 0;
 }
 
-/* Переключатель языка */
 .translate-widget {
     margin-top: auto;
     padding-top: 16px;
@@ -378,7 +372,6 @@ input[type="number"]:invalid {
     box-shadow: 0 0 0 1px var(--accent);
 }
 
-/* Лобби */
 .lobby-section {
     background: var(--field);
     border: 1px solid var(--border);
@@ -416,7 +409,6 @@ input[type="number"]:invalid {
     text-align: center;
 }
 
-/* Выбор толщины линии */
 .width-row {
     display: flex;
     align-items: center;

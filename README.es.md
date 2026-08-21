@@ -3,7 +3,7 @@
 [Русский](README.md) · [English](README.en.md) · [Deutsch](README.de.md) · [Français](README.fr.md) · [Español](README.es.md) · [Polski](README.pl.md) · [Українська](README.uk.md) · [Türkçe](README.tr.md) · [中文](README.zh.md)
 
 Calculadora interactiva no oficial de mortero y artillería para el shooter
-táctico **WARDOGS**. Distancia, azimut, elevación (mils) y tiempo de vuelo —
+táctico **WARDOGS**. Distancia, azimut, elevación (mils) —
 en dos clics sobre un mapa de 16×16 km.
 
 **Demo:** https://djzet.github.io/wardogs-calc/
@@ -15,7 +15,7 @@ en dos clics sobre un mapa de 16×16 km.
 ## Características
 
 - Mapa interactivo con zoom de mosaicos y pan
-- Distancia, azimut, elevación (mils), tiempo de vuelo
+- Distancia, azimut, elevación (mils)
 - Mortero (700 m) y artillería (2,5 km)
 - Enlaces para compartir, autoguardado, temas
 - 9 idiomas, versión móvil

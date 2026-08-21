@@ -19,6 +19,8 @@
     "clearDrawings": "Çizimleri temizle",
     "markerPrompt": "İşaret adı:",
     "lineWidth": "Çizgi kalınlığı",
+    "hostName": "Host",
+    "playerName": "Oyuncu",
     "createLobby": "Lobi oluştur",
     "joinLobby": "Katıl",
     "leaveLobby": "Lobiden ayrıl",

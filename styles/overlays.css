@@ -1,6 +1,5 @@
 /* styles/overlays.css — drawer, модальные окна, backdrop, переключатели */
 
-/* Drawer */
 .drawer {
     position: fixed;
     top: 0;
@@ -43,7 +42,6 @@
     -webkit-backdrop-filter: blur(2px);
 }
 
-/* Switch */
 .switch-row {
     display: flex;
     align-items: center;
@@ -89,7 +87,6 @@
     background: #fff;
 }
 
-/* Модальные окна */
 .modal-backdrop {
     position: fixed;
     inset: 0;

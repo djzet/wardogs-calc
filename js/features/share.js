@@ -2,7 +2,6 @@
 
 window.AppShare = (function(utils) {
     let toastTimer = null;
-
     function generateUrl(pointA, pointB, currentWeapon, mapSize) {
         const params = new URLSearchParams();
         if (pointA) {
@@ -16,7 +15,6 @@ window.AppShare = (function(utils) {
         params.set('w', currentWeapon);
         return location.origin + location.pathname + '?' + params.toString();
     }
-
     async function copyToClipboard(text) {
         try {
             await navigator.clipboard.writeText(text);
@@ -33,7 +31,6 @@ window.AppShare = (function(utils) {
             return true;
         }
     }
-
     function showToast(message, type = 'success') {
         let toast = document.getElementById('toast');
         if (!toast) {
@@ -51,11 +48,9 @@ window.AppShare = (function(utils) {
             toast.classList.remove('show');
         }, 2500);
     }
-
     function parseSharedParams(mapSize) {
         const params = new URLSearchParams(location.search);
         const result = { applied: false, pointA: null, pointB: null, weapon: null };
-
         if (params.has('ax') && params.has('ay')) {
             const ax = parseFloat(params.get('ax'));
             const ay = parseFloat(params.get('ay'));
@@ -67,7 +62,6 @@ window.AppShare = (function(utils) {
                 result.applied = true;
             }
         }
-
         if (params.has('bx') && params.has('by')) {
             const bx = parseFloat(params.get('bx'));
             const by = parseFloat(params.get('by'));
@@ -79,7 +73,6 @@ window.AppShare = (function(utils) {
                 result.applied = true;
             }
         }
-
         if (params.has('w')) {
             const w = params.get('w');
             if (w === 'mortar' || w === 'artillery') {
@@ -87,10 +80,8 @@ window.AppShare = (function(utils) {
                 result.applied = true;
             }
         }
-
         return result;
     }
-
     return {
         generateUrl,
         copyToClipboard,
