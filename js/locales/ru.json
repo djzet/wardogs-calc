@@ -70,5 +70,8 @@
     "weaponNames": {
         "mortar": "Миномёт",
         "artillery": "Артиллерия"
-    }
+    },
+    "mapLabel": "Карта",
+    "mapBakurani": "Bakurani",
+    "mapOzeti": "Ozeti"
 }

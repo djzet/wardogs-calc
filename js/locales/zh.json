@@ -70,5 +70,8 @@
     "weaponNames": {
         "mortar": "迫击炮",
         "artillery": "火炮"
-    }
+    },
+    "mapLabel": "地图",
+    "mapBakurani": "Bakurani",
+    "mapOzeti": "Ozeti"
 }

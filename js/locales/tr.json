@@ -70,5 +70,8 @@
     "weaponNames": {
         "mortar": "Havan",
         "artillery": "Topçu"
-    }
+    },
+    "mapLabel": "Harita",
+    "mapBakurani": "Bakurani",
+    "mapOzeti": "Ozeti"
 }

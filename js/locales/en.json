@@ -70,5 +70,8 @@
     "weaponNames": {
         "mortar": "Mortar",
         "artillery": "Artillery"
-    }
+    },
+    "mapLabel": "Map",
+    "mapBakurani": "Bakurani",
+    "mapOzeti": "Ozeti"
 }

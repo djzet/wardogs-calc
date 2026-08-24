@@ -14,6 +14,7 @@ window.LocaleManager = (function () {
             time: 'Время подлёта',
             controlsTitle: 'Настройки',
             weaponType: 'Тип орудия',
+            mapLabel: 'Карта',
             weaponMortar: 'Миномёт (700 м)',
             weaponArtillery: 'Артиллерия (>2 км)',
             hint: 'ПКМ по карте — поставить или удалить точку.<br>ЛКМ — двигать карту.<br>Колесо мыши — масштаб.',

@@ -20,7 +20,7 @@ window.CONFIG_APP = {
         maxZoom: 5,
         size: 256,
         cacheMax: 500,
-        path: (z, x, y) => `maps/tiles/zoom_${z}/${x}_${y}.webp`,
+        path: (z, x, y) => `maps/bakurani/tiles/zoom_${z}/${x}_${y}.webp`
     },
     timing: {
         inputDebounceMs: 80,

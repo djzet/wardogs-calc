@@ -6,6 +6,16 @@ window.MapTiles = (function() {
     function configure(max) {
         cacheMax = max;
     }
+    function clearCache() {
+        tileCache.forEach((t) => {
+            if (t && t.img) {
+                t.img.src = '';
+                t.img.onload = null;
+                t.img.onerror = null;
+            }
+        });
+        tileCache.clear();
+    }
     function getTile(z, x, y, tilesConfig, onLoaded) {
         const key = `${z}/${x}_${y}`;
         let t = tileCache.get(key);
@@ -62,5 +72,5 @@ window.MapTiles = (function() {
             }
         }
     }
-    return { configure, getTile, drawTiles };
+    return { configure, clearCache, getTile, drawTiles };
 })();

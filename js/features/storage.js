@@ -5,6 +5,7 @@ window.AppStorage = (function(utils) {
     const WEAPON_KEY = 'wardogs_weapon';
     const THEME_KEY = 'wardogs_theme';
     const TOWERS_KEY = 'wardogs_towers';
+    const MAP_KEY = 'wardogs_map';
     function saveState(pointA, pointB, view, mapSize) {
         const state = {
             pointA: pointA ? {
@@ -69,10 +70,17 @@ window.AppStorage = (function(utils) {
     function loadTowers() {
         return localStorage.getItem(TOWERS_KEY) !== '0';
     }
+    function saveMap(mapId) {
+        localStorage.setItem(MAP_KEY, mapId);
+    }
+    function loadMap(defaultMap) {
+        return localStorage.getItem(MAP_KEY) || defaultMap;
+    }
     return {
         saveState, loadState,
         saveWeapon, loadWeapon,
         saveTheme, loadTheme,
-        saveTowers, loadTowers
+        saveTowers, loadTowers,
+        saveMap, loadMap
     };
 })(window.AppUtils);
