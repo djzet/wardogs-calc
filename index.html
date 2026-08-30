@@ -65,12 +65,7 @@
         viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%231a1f27'/>
         <circle cx='32' cy='32' r='22' fill='none' stroke='%239fd356' stroke-width='3'/>
     </svg>">
-    <link rel="stylesheet" href="styles/variables.css">
-    <link rel="stylesheet" href="styles/base.css">
-    <link rel="stylesheet" href="styles/panel.css">
-    <link rel="stylesheet" href="styles/map.css">
-    <link rel="stylesheet" href="styles/overlays.css">
-    <link rel="stylesheet" href="styles/mobile.css">
+    <!-- CSS подключается из src/main.js (Vite) -->
     <script type="text/javascript">
         if (location.protocol === 'http:' || location.protocol === 'https:') {
             (function (m, e, t, r, i, k, a) {
@@ -475,36 +470,10 @@
             </div>
         </div>
     </div>
-    <!-- Конфиги -->
-    <script src="config/app.js" defer></script>
-    <script src="config/weapons.js" defer></script>
-    <!-- Ядро -->
-    <script src="js/core/utils.js" defer></script>
-    <script src="js/core/calculator.js" defer></script>
-    <!-- Supabase SDK -->
+    <!-- Supabase SDK (lobby) -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-    <!-- Фичи -->
-    <script src="js/features/lobby.js" defer></script>
-    <script src="js/features/storage.js" defer></script>
-    <script src="js/features/share.js" defer></script>
-    <script src="js/features/points.js" defer></script>
-    <script src="js/features/analytics.js" defer></script>
-    <script src="js/features/draw.js" defer></script>
-    <script src="js/features/weapons.js" defer></script>
-    <!-- Карта -->
-    <script src="js/map/tiles.js" defer></script>
-    <script src="js/map/renderer.js" defer></script>
-    <script src="js/map/interactions.js" defer></script>
-    <script src="js/map/viewport.js" defer></script>
-    <!-- UI -->
-    <script src="js/ui/panels.js" defer></script>
-    <script src="js/ui/inputs.js" defer></script>
-    <script src="js/ui/contextMenu.js" defer></script>
-    <script src="js/ui/results.js" defer></script>
-    <!-- Локализация -->
-    <script src="js/locales/index.js" defer></script>
-    <!-- Главная логика -->
-    <script src="js/index.js" defer></script>
+    <!-- Vite entry: CSS + все модули -->
+    <script type="module" src="/src/main.js"></script>
 </body>
 
 </html>

@@ -34,7 +34,7 @@ const out = { dist: el('dist'), az: el('azimuth'), el: el('elevation') };
 let selectedTower = null;
 let view;
 const towerIcon = new Image();
-towerIcon.src = 'assets/icons/tower.webp';
+towerIcon.src = window.AppUtils.assetUrl('assets/icons/tower.webp');
 towerIcon.onload = () => renderMap();
 MapTiles.configure(TILES.cacheMax || TILE_CACHE_MAX);
 AppDraw.configure(MAP.size);
@@ -79,7 +79,11 @@ function switchMap(mapId) {
     AppStorage.saveMap(mapId);
     MapTiles.clearCache();
     MapTiles.configure(TILES.cacheMax || TILE_CACHE_MAX);
-    AppDraw.configure(MAP.size);
+    if (window.AppDraw) {
+        AppDraw.cancelStroke();
+        AppDraw.clearDrawings();
+        AppDraw.configure(MAP.size);
+    }
     MapViewport.setMapSize(MAP.size);
     AppPoints.configure({ mapSize: MAP.size, onChange: onPointsChanged });
     MapViewport.resetView();
@@ -197,13 +201,16 @@ window.addEventListener('keydown', e => {
     if (e.key === 'Escape') { UIContextMenu.hideMenu(); UIPanels.openHelp(false); }
 });
 el('shareBtn').addEventListener('click', async () => {
-    const url = AppShare.generateUrl(AppPoints.getA(), AppPoints.getB(), AppWeapons.get(), MAP.size);
+    const url = AppShare.generateUrl(AppPoints.getA(), AppPoints.getB(), AppWeapons.get(), MAP.size, currentMapId);
     await AppShare.copyToClipboard(url);
     AppShare.showToast(STR.shareCopied, 'success');
 });
 function applySharedParams() {
-    const parsed = AppShare.parseSharedParams(MAP.size);
+    const parsed = AppShare.parseSharedParams(MAP.size, MAPS);
     if (!parsed.applied) return;
+    if (parsed.mapId && parsed.mapId !== currentMapId) {
+        switchMap(parsed.mapId);
+    }
     AppPoints.assign(parsed.pointA || AppPoints.getA(), parsed.pointB || AppPoints.getB());
     if (parsed.weapon) AppWeapons.set(parsed.weapon);
     UIInputs.sync(); UIResults.update(); renderMap(); saveState();

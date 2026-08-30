@@ -53,6 +53,7 @@ window.CONFIG_WEAPONS = {
                 zh: '火炮',
             },
 
+            // Диапазон совпадает с измеренной table (2138–2500 м)
             minRangeKm: 2.138,
             maxRangeKm: 2.500,
             minElevationMil: 290,

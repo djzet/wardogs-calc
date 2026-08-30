@@ -17,7 +17,9 @@ window.MapTiles = (function() {
         tileCache.clear();
     }
     function getTile(z, x, y, tilesConfig, onLoaded) {
-        const key = `${z}/${x}_${y}`;
+        // mapId в ключе — чтобы тайлы разных карт не пересекались в кэше
+        const mapId = tilesConfig.mapId || 'default';
+        const key = `${mapId}/${z}/${x}_${y}`;
         let t = tileCache.get(key);
         if (t) {
             tileCache.delete(key);
@@ -28,7 +30,8 @@ window.MapTiles = (function() {
         t = { img, loaded: false, error: false };
         img.onload = () => { t.loaded = true; onLoaded && onLoaded(); };
         img.onerror = () => { t.error = true; };
-        img.src = tilesConfig.path(z, x, y);
+        const rel = tilesConfig.path(z, x, y);
+        img.src = (window.AppUtils && window.AppUtils.assetUrl) ? window.AppUtils.assetUrl(rel) : rel;
         tileCache.set(key, t);
         if (tileCache.size > cacheMax) {
             const oldestKey = tileCache.keys().next().value;
