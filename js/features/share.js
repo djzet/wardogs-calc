@@ -2,7 +2,7 @@
 
 window.AppShare = (function (utils) {
     let toastTimer = null;
-    function generateUrl(pointA, pointB, currentWeapon, mapSize) {
+    function generateUrl(pointA, pointB, currentWeapon, mapSize, mapId) {
         const params = new URLSearchParams();
         if (pointA) {
             params.set('ax', utils.metersToPercent(pointA.x, mapSize).toFixed(2));
@@ -13,6 +13,7 @@ window.AppShare = (function (utils) {
             params.set('by', utils.metersToPercent(pointB.y, mapSize).toFixed(2));
         }
         params.set('w', currentWeapon);
+        if (mapId) params.set('map', mapId);
         return location.origin + location.pathname + '?' + params.toString();
     }
     async function copyToClipboard(text) {
@@ -49,9 +50,13 @@ window.AppShare = (function (utils) {
             toast.classList.remove('show');
         }, 2500);
     }
-    function parseSharedParams(mapSize) {
+    function parseSharedParams(mapSize, knownMaps) {
         const params = new URLSearchParams(location.search);
-        const result = { applied: false, pointA: null, pointB: null, weapon: null };
+        const result = { applied: false, pointA: null, pointB: null, weapon: null, mapId: null };
+        if (params.has('map') && knownMaps && knownMaps[params.get('map')]) {
+            result.mapId = params.get('map');
+            result.applied = true;
+        }
         if (params.has('ax') && params.has('ay')) {
             const ax = parseFloat(params.get('ax'));
             const ay = parseFloat(params.get('ay'));

@@ -14,6 +14,7 @@ window.LocaleManager = (function () {
             time: 'Время подлёта',
             controlsTitle: 'Настройки',
             weaponType: 'Тип орудия',
+            mapLabel: 'Карта',
             weaponMortar: 'Миномёт (700 м)',
             weaponArtillery: 'Артиллерия (>2 км)',
             hint: 'ПКМ по карте — поставить или удалить точку.<br>ЛКМ — двигать карту.<br>Колесо мыши — масштаб.',
@@ -89,7 +90,8 @@ window.LocaleManager = (function () {
             locale = DEFAULT_LOCALE;
         }
         try {
-            const response = await fetch(`js/locales/${locale}.json`);
+            const base = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.BASE_URL) || '/';
+            const response = await fetch(`${base}locales/${locale}.json`);
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             translations = await response.json();
             currentLocale = locale;

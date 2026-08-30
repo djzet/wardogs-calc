@@ -326,17 +326,19 @@ window.MapRenderer = (function (utils, tiles) {
         ctx.lineWidth = 1.5;
         ctx.strokeRect(m0.x, m1.y, m1.x - m0.x, m0.y - m1.y);
         ctx.lineWidth = 1;
-        const zc = utils.worldToScreen(ZONE.cx, ZONE.cy, view);
-        ctx.beginPath();
-        ctx.arc(zc.x, zc.y, ZONE.r * view.scale, 0, Math.PI * 2);
-        ctx.fillStyle = 'rgba(159, 211, 86, 0.05)';
-        ctx.fill();
-        ctx.strokeStyle = 'rgba(124, 180, 60, 0.55)';
-        ctx.setLineDash([10, 6]);
-        ctx.lineWidth = 1.5;
-        ctx.stroke();
-        ctx.setLineDash([]);
-        ctx.lineWidth = 1;
+        if (ZONE && ZONE.r > 0) {
+            const zc = utils.worldToScreen(ZONE.cx, ZONE.cy, view);
+            ctx.beginPath();
+            ctx.arc(zc.x, zc.y, ZONE.r * view.scale, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(159, 211, 86, 0.05)';
+            ctx.fill();
+            ctx.strokeStyle = 'rgba(124, 180, 60, 0.55)';
+            ctx.setLineDash([10, 6]);
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+            ctx.setLineDash([]);
+            ctx.lineWidth = 1;
+        }
         if (showTowers) TOWERS.forEach(p => drawTower(ctx, view, p, towerIcon, selectedTower, STR, MAP.size));
         drawDrawings(ctx, view, MAP.size, STR);
         if (pointA && pointB) {

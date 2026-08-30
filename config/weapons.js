@@ -16,8 +16,8 @@ window.CONFIG_WEAPONS = {
                 tr: 'Havan',
                 zh: '迫击炮',
             },
-            minRangeKm: 0.132,
-            maxRangeKm: 0.684,
+            minRangeKm: 0.110,
+            maxRangeKm: 0.700,
             minElevationMil: 290,
             maxElevationMil: 900,
             step: 50,
@@ -53,8 +53,9 @@ window.CONFIG_WEAPONS = {
                 zh: '火炮',
             },
 
-            minRangeKm: 0.78,
-            maxRangeKm: 2.629,
+            // Диапазон совпадает с измеренной table (2138–2500 м)
+            minRangeKm: 2.138,
+            maxRangeKm: 2.500,
             minElevationMil: 290,
             maxElevationMil: 1000,
             step: 10,

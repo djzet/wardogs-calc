@@ -43,6 +43,13 @@ window.AppUtils = (function () {
     function gameCoord(meters) {
         return (meters / 100).toFixed(2).replaceAll('-0.00', '0.00');
     }
+    /** Путь относительно base (Vite: './' или '/wardogs-calc/') */
+    function assetUrl(path) {
+        const base = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.BASE_URL) || './';
+        const rel = String(path).replace(/^\//, '');
+        // './' + 'maps/...' → './maps/...' ; '/wardogs-calc/' + ... → абсолютный от корня сайта
+        return base.endsWith('/') ? base + rel : base + '/' + rel;
+    }
     return {
         NBSP,
         clamp,
@@ -53,6 +60,7 @@ window.AppUtils = (function () {
         fmtWithNbsp,
         fmtCoord,
         fmtDist,
-        gameCoord
+        gameCoord,
+        assetUrl
     };
 })();

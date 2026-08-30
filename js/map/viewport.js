@@ -34,5 +34,8 @@ window.MapViewport = (function() {
     function restore(v) {
         if (v) { view.scale = v.scale; view.ox = v.ox; view.oy = v.oy; }
     }
-    return { init, get, resize, resetView, debouncedSave, restore };
+    function setMapSize(size) {
+        mapSize = size;
+    }
+    return { init, get, resize, resetView, debouncedSave, restore, setMapSize };
 })();

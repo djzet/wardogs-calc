@@ -1,37 +1,39 @@
 # Руководство для разработчиков
 
-## Локальный запуск
-
-Проект — статический сайт, сборка не требуется. Любой локальный сервер:
+## Локальный запуск (Vite)
 
 ```bash
-# Python
-python -m http.server 8000
-
-# Node
-npx serve .
+npm install
+npm run dev          # http://localhost:5173
+npm run build        # → dist/ (base = /wardogs-calc/)
+npm run preview      # проверка production-сборки
 ```
 
-Или расширение **Live Server** в VSCode. Открой `http://localhost:8000`.
+> **Важно:** не открывай `index.html` через `file://` — `fetch()` переводов блокируется.
 
-> **Важно:** не открывай `index.html` двойным кликом (`file://`) — `fetch()` переводов блокируется браузером.
+## Деплой (GitHub Pages)
+
+Workflow `.github/workflows/deploy.yml`: push в `main` → `npm run build` → publish `dist/`.  
+Сайт: https://djzet.github.io/wardogs-calc/
+
+В настройках репозитория: **Settings → Pages → Source: GitHub Actions**.
 
 ## Структура проекта
 
 ```
 wardogs-calc/
-├── config/
-│   ├── app.js              # карта, зона, вышки, тайлы, тайминги
-│   └── weapons.js          # оружие: таблицы mils/dist, диапазоны, имена
-├── js/
-│   ├── core/               # utils (математика), calculator (расчёты)
-│   ├── features/           # storage, share, points, analytics, weapons
-│   ├── map/                # tiles, renderer, interactions, viewport
-│   ├── ui/                 # panels, inputs, contextMenu, results
-│   ├── locales/            # index.js (менеджер) + 9 JSON-переводов
-│   └── index.js            # координация модулей (~140 строк)
-├── maps/tiles/zoom_0..5/   # пирамида тайлов карты
-├── styles/                 # 6 CSS-модулей
+├── src/main.js             # entry Vite (импорт CSS + всех JS)
+├── public/                 # статика as-is → корень dist
+│   ├── assets/             # иконки, preview
+│   ├── locales/            # *.json переводов
+│   ├── robots.txt
+│   └── sitemap.xml
+├── config/                 # app.js, weapons.js
+├── js/                     # core, features, map, ui, locales, index.js
+├── maps/                   # тайлы (dev middleware + copy в dist)
+├── styles/                 # CSS (импорт из main.js)
+├── vite.config.js          # base: /wardogs-calc/
+├── package.json
 └── index.html
 ```
 

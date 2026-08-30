@@ -4,11 +4,8 @@
 
 const CONFIG = window.CONFIG_APP;
 const WEAPONS = window.CONFIG_WEAPONS.weapons;
-const MAP = CONFIG.map;
-const ZONE = CONFIG.zone;
-const TOWERS = CONFIG.towers;
-const TILES = CONFIG.tiles;
-const TILE_CACHE_MAX = CONFIG.tiles.cacheMax;
+const MAPS = CONFIG.maps;
+const TILE_CACHE_MAX = 500;
 const INPUT_DEBOUNCE_MS = CONFIG.timing.inputDebounceMs;
 const TAP_THRESHOLD = CONFIG.timing.tapThreshold;
 const LONG_PRESS_MS = CONFIG.timing.longPressMs;
@@ -18,6 +15,15 @@ const STR = new Proxy({}, {
 });
 window.I18N = {};
 function el(id) { return document.getElementById(id); }
+
+let currentMapId = AppStorage.loadMap(CONFIG.defaultMap);
+if (!MAPS[currentMapId]) currentMapId = CONFIG.defaultMap;
+let mapCfg = MAPS[currentMapId];
+let MAP = { size: mapCfg.size };
+let ZONE = mapCfg.zone;
+let TOWERS = mapCfg.towers;
+let TILES = mapCfg.tiles;
+
 const canvas = el('map');
 canvas.addEventListener('mousedown', e => {
     if (e.button === 1) e.preventDefault();
@@ -28,10 +34,11 @@ const out = { dist: el('dist'), az: el('azimuth'), el: el('elevation') };
 let selectedTower = null;
 let view;
 const towerIcon = new Image();
-towerIcon.src = 'assets/icons/tower.webp';
+towerIcon.src = window.AppUtils.assetUrl('assets/icons/tower.webp');
 towerIcon.onload = () => renderMap();
-MapTiles.configure(TILE_CACHE_MAX);
+MapTiles.configure(TILES.cacheMax || TILE_CACHE_MAX);
 AppDraw.configure(MAP.size);
+
 function renderMap() {
     MapRenderer.draw(ctx, canvas, {
         view, MAP, ZONE, TOWERS, WEAPONS,
@@ -59,6 +66,35 @@ function onPointsChanged() {
         });
     }
 }
+
+function switchMap(mapId) {
+    if (!MAPS[mapId] || mapId === currentMapId) return;
+    currentMapId = mapId;
+    mapCfg = MAPS[mapId];
+    MAP = { size: mapCfg.size };
+    ZONE = mapCfg.zone;
+    TOWERS = mapCfg.towers;
+    TILES = mapCfg.tiles;
+    selectedTower = null;
+    AppStorage.saveMap(mapId);
+    MapTiles.clearCache();
+    MapTiles.configure(TILES.cacheMax || TILE_CACHE_MAX);
+    if (window.AppDraw) {
+        AppDraw.cancelStroke();
+        AppDraw.clearDrawings();
+        AppDraw.configure(MAP.size);
+    }
+    MapViewport.setMapSize(MAP.size);
+    AppPoints.configure({ mapSize: MAP.size, onChange: onPointsChanged });
+    MapViewport.resetView();
+    UIInputs.sync();
+    UIResults.update();
+    renderMap();
+    saveState();
+    const sel = el('mapSelect');
+    if (sel) sel.value = mapId;
+}
+
 MapViewport.init({ canvas, renderMap, saveState, mapSize: MAP.size });
 view = MapViewport.get();
 AppPoints.configure({ mapSize: MAP.size, onChange: onPointsChanged });
@@ -139,7 +175,9 @@ canvas.addEventListener('pointerleave', () => {
     if (cc) cc.classList.remove('visible');
 });
 window.addEventListener('pointermove', e => MapInteractions.handlePointerMove(e, canvas, {
-    view, mapSize: MAP.size, renderMap, debouncedSaveView: () => MapViewport.debouncedSave(),
+    get view() { return view; },
+    get mapSize() { return MAP.size; },
+    renderMap, debouncedSaveView: () => MapViewport.debouncedSave(),
     hitPoint: (sx, sy) => AppPoints.hitPoint(sx, sy, view), findTowerAt,
     setPoint: (k, x, y) => AppPoints.setPoint(k, x, y),
     utils: window.AppUtils, TAP_THRESHOLD
@@ -163,19 +201,30 @@ window.addEventListener('keydown', e => {
     if (e.key === 'Escape') { UIContextMenu.hideMenu(); UIPanels.openHelp(false); }
 });
 el('shareBtn').addEventListener('click', async () => {
-    const url = AppShare.generateUrl(AppPoints.getA(), AppPoints.getB(), AppWeapons.get(), MAP.size);
+    const url = AppShare.generateUrl(AppPoints.getA(), AppPoints.getB(), AppWeapons.get(), MAP.size, currentMapId);
     await AppShare.copyToClipboard(url);
     AppShare.showToast(STR.shareCopied, 'success');
 });
 function applySharedParams() {
-    const parsed = AppShare.parseSharedParams(MAP.size);
+    const parsed = AppShare.parseSharedParams(MAP.size, MAPS);
     if (!parsed.applied) return;
+    if (parsed.mapId && parsed.mapId !== currentMapId) {
+        switchMap(parsed.mapId);
+    }
     AppPoints.assign(parsed.pointA || AppPoints.getA(), parsed.pointB || AppPoints.getB());
     if (parsed.weapon) AppWeapons.set(parsed.weapon);
     UIInputs.sync(); UIResults.update(); renderMap(); saveState();
     setTimeout(() => AppShare.showToast(STR.shareApplied, 'success'), 400);
     history.replaceState({}, '', location.pathname);
 }
+
+// Map selector
+const mapSelect = el('mapSelect');
+if (mapSelect) {
+    mapSelect.value = currentMapId;
+    mapSelect.addEventListener('change', () => switchMap(mapSelect.value));
+}
+
 MapViewport.resize();
 const loadedState = AppStorage.loadState(MAP.size);
 if (loadedState) {
