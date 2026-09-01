@@ -1,35 +1,48 @@
-/* styles/base.css — reset, типографика, layout, утилиты */
+/**
+ * styles/base.css — Reset, типографика, базовый layout и утилиты
+ *
+ * Минимальный CSS reset + глобальные стили:
+ * - box-sizing: border-box для всех элементов
+ * - 100% высота html/body
+ * - Системный шрифт (Segoe UI → system-ui → sans-serif)
+ * - Класс .hidden для скрытия элементов
+ * - Focus-visible для accessibility
+ */
 
+/* ═══════════════ CSS RESET ═══════════════ */
 * {
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
+    box-sizing: border-box; /* Ширина = content + padding + border */
 }
 
+/* ═══════════════ БАЗОВЫЕ РАЗМЕРЫ ═══════════════ */
 html,
 body {
     height: 100%;
-    overscroll-behavior: none;
+    overscroll-behavior: none; /* Предотвращаем pull-to-refresh на мобильных */
 }
 
 body {
     font-family: "Segoe UI", system-ui, sans-serif;
     background: var(--bg);
     color: var(--text);
-    -webkit-tap-highlight-color: transparent;
-    padding-top: env(safe-area-inset-top);
+    -webkit-tap-highlight-color: transparent; /* Убираем подсветку при tap на iOS */
+    padding-top: env(safe-area-inset-top);     /* Безопасная зона для notch/Dynamic Island */
     padding-bottom: env(safe-area-inset-bottom);
 }
 
+/* ═══════════════ ГЛАВНЫЙ LAYOUT ═══════════════ */
 .app {
     display: flex;
     height: 100vh;
-    height: 100dvh;
+    height: 100dvh; /* dynamic viewport height — учитывает адресную строку на мобильных */
 }
 
+/* ═══════════════ ТИПОГРАФИКА ═══════════════ */
 h1 {
     font-size: 18px;
-    color: var(--accent);
+    color: var(--accent); /* Зелёный заголовок */
 }
 
 h2 {
@@ -40,10 +53,14 @@ h2 {
     margin-bottom: 8px;
 }
 
+/* ═══════════════ УТИЛИТЫ ═══════════════ */
+
+/* Скрытие элемента с сохранением в DOM */
 .hidden {
     display: none !important;
 }
 
+/* Accessibility: контур фокуса для клавиатурной навигации */
 button:focus-visible,
 input:focus-visible,
 select:focus-visible {
@@ -51,15 +68,18 @@ select:focus-visible {
     outline-offset: 2px;
 }
 
+/* SVG по центру строки */
 svg {
     vertical-align: middle;
 }
 
+/* Иконки инструментов рисования — фиксированный размер */
 .draw-tool svg {
     width: 16px;
     height: 16px;
 }
 
+/* Кнопка сброса вида — отступ иконки */
 .view-reset svg {
     margin-right: 4px;
 }

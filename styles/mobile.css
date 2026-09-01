@@ -1,31 +1,54 @@
-/* styles/mobile.css — мобильная адаптация */
+/**
+ * styles/mobile.css — Мобильная адаптация (responsive)
+ *
+ * Адаптация для экранов шириной ≤ 800px:
+ * - Панель переносится вниз (column layout)
+ * - Карта получает минимум 55% высоты
+ * - Уменьшаются отступы и размеры кнопок
+ * - Увеличиваются touch-target для кистей рисования
+ * - Подсказка переключается на touch-инструкции
+ */
 
 @media (max-width: 800px) {
+
+    /* Вертикальная раскладка: панель сверху, карта снизу */
     .app {
         flex-direction: column;
     }
 
+    /* Панель: на всю ширину, макс. 45% высоты */
     .panel {
         width: 100%;
         max-height: 45vh;
         border-right: none;
         border-bottom: 1px solid var(--border);
+        padding: 14px;
+        gap: 14px;
     }
 
+    /* Карта: занимает минимум 55% высоты */
     .map-wrap {
         flex: 1;
         min-height: 55vh;
     }
 
+    /* Уменьшаем шрифт результатов */
     .result div {
         font-size: 13px;
     }
 
+    /* Уменьшаем отступ результатов */
+    .result {
+        padding: 10px 12px;
+    }
+
+    /* Drawer: на всю ширину, макс. 320px */
     .drawer {
         width: 100%;
         max-width: 320px;
     }
 
+    /* Кнопки управления: компактнее, с переносом строк */
     .map-controls {
         top: 8px;
         right: 8px;
@@ -43,5 +66,141 @@
     .help-toggle {
         width: 32px;
         padding: 5px 0;
+    }
+
+    /* ═══════════════ Touch-friendly инструменты ═══════════════ */
+
+    /* Увеличиваем кнопки инструментов для touch (40px вместо 36px) */
+    .draw-tool {
+        height: 40px;
+    }
+
+    /* Увеличиваем кнопки толщины линии (36px вместо 24px) */
+    .width-opt {
+        height: 36px;
+    }
+
+    /* Увеличиваем кнопку очистки для touch */
+    .clear-drawings-btn {
+        height: 44px;
+        font-size: 14px;
+    }
+
+    /* ═══════════════ Компактные секции ═══════════════ */
+
+    /* Уменьшаем секцию настроек */
+    .controls-section {
+        padding: 10px 12px;
+    }
+
+    /* Компактные radio-кнопки */
+    .radio-option {
+        padding: 3px 0;
+    }
+
+    /* QR-код Discord: уменьшаем на узких экранах */
+    .discord-qr img {
+        width: 160px;
+        height: 160px;
+    }
+
+    /* Компактный contact */
+    .contact {
+        padding: 8px 10px;
+    }
+
+    /* ═══════════════ Touch-подсказки ═══════════════ */
+
+    /* Скрываем десктопную подсказку на touch-устройствах */
+    .hint-desktop {
+        display: none !important;
+    }
+
+    /* Показываем touch-подсказку */
+    .hint-touch {
+        display: block !important;
+    }
+
+    /* ═══════════════ Активное состояние (tap feedback) ═══════════════ */
+
+    .draw-tool:active {
+        background: var(--hover);
+        border-color: var(--dim);
+    }
+
+    .draw-tool.active:active {
+        background: rgba(159, 211, 86, 0.2);
+        border-color: var(--accent);
+    }
+
+    .width-opt:active {
+        background: var(--hover);
+    }
+
+    .width-opt.active:active {
+        border-color: var(--accent);
+    }
+
+    .clear-drawings-btn:active {
+        background: var(--hover);
+        border-color: var(--dim);
+    }
+
+    .view-reset:active {
+        background: var(--hover);
+    }
+
+    .clear:active {
+        color: var(--danger);
+    }
+
+    .ctx-menu button:active {
+        background: var(--hover);
+    }
+}
+
+/* ═══════════════ Маленькие экраны ≤ 360px ═══════════════ */
+@media (max-width: 360px) {
+    .panel {
+        padding: 10px;
+        gap: 10px;
+    }
+
+    .result {
+        padding: 8px 10px;
+    }
+
+    .result div {
+        font-size: 12px;
+    }
+
+    .coord-row {
+        gap: 6px;
+    }
+
+    input[type="number"] {
+        padding: 6px 8px;
+        font-size: 14px;
+    }
+
+    .discord-qr img {
+        width: 140px;
+        height: 140px;
+    }
+}
+
+/* ═══════════════ Альбомная ориентация на мобильных ═══════════════ */
+@media (max-width: 800px) and (orientation: landscape) {
+    .panel {
+        max-height: 50vh;
+    }
+
+    .map-wrap {
+        min-height: 50vh;
+    }
+
+    /* В альбоме скрываем менее важные секции для экономии места */
+    .discord-block {
+        display: none;
     }
 }

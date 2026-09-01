@@ -1,35 +1,54 @@
-// Entry point — порядок импортов = порядок зависимостей (side-effect IIFE → window.*)
+/**
+ *
+ * Порядок импортов критически важен — он определяет порядок инициализации
+ * модулей, так как они используют IIFE + window.* (side-effect imports).
+ *
+ * Цепочка зависимостей:
+ *   CSS → конфиги → утилиты → калькулятор → фичи → карта → UI → локализация → index.js (init)
+ */
 
-import '../styles/variables.css';
-import '../styles/base.css';
-import '../styles/panel.css';
-import '../styles/map.css';
-import '../styles/overlays.css';
-import '../styles/mobile.css';
+// ═══════════════════════════════════════════════════════════
+//  CSS-переменные и стили (подключаются первыми)
+// ═══════════════════════════════════════════════════════════
+import '../styles/variables.css';  /** CSS-переменные (цвета, размеры, темы) */
+import '../styles/base.css';       /** Reset, типографика, базовый layout */
+import '../styles/panel.css';      /** Левая панель: координаты, результаты, настройки */
+import '../styles/map.css';        /** Карта, кнопки управления, контекстное меню, toast */
+import '../styles/overlays.css';   /** Drawer, модальные окна, переключатели */
+import '../styles/mobile.css';     /** Мобильная адаптация (max-width: 800px) */
 
-import '../config/app.js';
-import '../config/weapons.js';
+// ═══════════════════════════════════════════════════════════
+//  Конфигурация: настройки карт + баллистические таблицы
+//  (объединены в один файл: CONFIG_APP + CONFIG_WEAPONS)
+// ═══════════════════════════════════════════════════════════
+import '../config/index.js';       /** Настройки карт, таймингов, темы + баллистика */
 
-import '../js/core/utils.js';
-import '../js/core/calculator.js';
+// ═══════════════════════════════════════════════════════════
+//  Ядро: утилиты и калькулятор (объединены в один файл)
+// ═══════════════════════════════════════════════════════════
+import '../js/core/core.js';       /** Математика, координаты, форматирование + расчёт */
 
-import '../js/features/storage.js';
-import '../js/features/share.js';
-import '../js/features/points.js';
-import '../js/features/analytics.js';
-import '../js/features/draw.js';
-import '../js/features/weapons.js';
-import '../js/features/lobby.js';
+// ═══════════════════════════════════════════════════════════
+//  Фичи: хранение, шаринг, точки, оружие
+// ═══════════════════════════════════════════════════════════
+import '../js/features/state.js';     /** storage + points + weapons + share */
+import '../js/features/features.js';  /** draw tools */
+import '../js/features/analytics.js'; /** GTM + Яндекс.Метрика */
 
-import '../js/map/tiles.js';
-import '../js/map/renderer.js';
-import '../js/map/interactions.js';
-import '../js/map/viewport.js';
+// ═══════════════════════════════════════════════════════════
+//  Карта: тайлы, рендерер, взаимодействия, камера
+//  (объединены в один файл: tiles + renderer + interactions + viewport)
+// ═══════════════════════════════════════════════════════════
+import '../js/map/map.js';          /** Вся логика карты */
 
-import '../js/ui/panels.js';
-import '../js/ui/inputs.js';
-import '../js/ui/contextMenu.js';
-import '../js/ui/results.js';
+// ═══════════════════════════════════════════════════════════
+//  UI: панели, поля ввода, контекстное меню, результаты
+//  (объединены в один файл: panels + inputs + contextMenu + results)
+// ═══════════════════════════════════════════════════════════
+import '../js/ui/ui.js';           /** Весь UI */
 
-import '../js/locales/index.js';
-import '../js/index.js';
+// ═══════════════════════════════════════════════════════════
+//  Локализация и главный модуль
+// ═══════════════════════════════════════════════════════════
+import '../js/locales.js';         /** i18n менеджер (9 языков) */
+import '../js/index.js';           /** Главный модуль: init, привязка событий */

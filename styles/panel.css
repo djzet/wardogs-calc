@@ -1,15 +1,28 @@
-/* styles/panel.css — левая панель: координаты, результаты, настройки, Discord */
+/**
+ * styles/panel.css — Левая панель: координаты, результаты, настройки, рисование
+ *
+ * Секции:
+ * 1. Основная панель и заголовок
+ * 2. Поля ввода координат (A и B)
+ * 3. Панель результатов
+ * 4. Секция настроек (оружие, карта)
+ * 5. Инструменты рисования
+ * 6. Discord-блок (QR, кнопка)
+ * 7. Селектор языка
+ */
+
+/* ═══════════════ ОСНОВНАЯ ПАНЕЛЬ ═══════════════ */
 
 .panel {
-    width: var(--panel-width);
-    flex-shrink: 0;
+    width: var(--panel-width);  /* 400px (desktop) */
+    flex-shrink: 0;             /* Не сжимается */
     background: var(--panel);
     border-right: 1px solid var(--border);
     padding: 20px;
     display: flex;
     flex-direction: column;
     gap: 18px;
-    overflow-y: auto;
+    overflow-y: auto;           /* Скролл если контент не влезает */
 }
 
 .panel-header {
@@ -19,6 +32,7 @@
     gap: 8px;
 }
 
+/* Кнопка-бургер для открытия drawer */
 .menu-toggle {
     background: none;
     border: 1px solid var(--border);
@@ -32,14 +46,15 @@
     justify-content: center;
     cursor: pointer;
 }
-
 .menu-toggle:hover {
     background: var(--hover);
 }
 
+/* ═══════════════ ПОЛЯ ВВОДА КООРДИНАТ ═══════════════ */
+
 .coord-row {
     display: grid;
-    grid-template-columns: 1fr 1fr auto;
+    grid-template-columns: 1fr 1fr auto; /* X | Y | [очистить] */
     gap: 8px;
     align-items: flex-end;
 }
@@ -52,6 +67,7 @@
     color: var(--muted);
 }
 
+/* Стилизация числовых полей ввода */
 input[type="number"] {
     width: 100%;
     background: var(--field);
@@ -62,26 +78,26 @@ input[type="number"] {
     font-size: 15px;
 }
 
+/* Стрелки вверх/вниз (WebKit) — всегда видимы */
 input[type="number"]::-webkit-inner-spin-button {
     -webkit-appearance: inner-spin-button;
     opacity: 1;
     cursor: pointer;
     height: 26px;
 }
-
 input[type="number"]::-webkit-outer-spin-button {
-    -webkit-appearance: none;
+    -webkit-appearance: none; /* Скрываем внешние стрелки */
 }
 
 input[type="number"]:focus {
     outline: none;
     border-color: var(--accent);
 }
-
 input[type="number"]:invalid {
-    border-color: var(--danger);
+    border-color: var(--danger); /* Красная граница при невалидном значении */
 }
 
+/* Кнопка очистки координаты */
 .clear {
     background: none;
     border: none;
@@ -91,10 +107,14 @@ input[type="number"]:invalid {
     padding: 8px 2px;
     line-height: 1;
 }
-
 .clear:hover {
-    color: var(--danger);
+    color: var(--danger); /* Красный при наведении */
 }
+.clear:active {
+    color: var(--danger); /* Красный при нажатии (touch feedback) */
+}
+
+/* ═══════════════ ПАНЕЛЬ РЕЗУЛЬТАТОВ ═══════════════ */
 
 .result {
     background: var(--field);
@@ -113,24 +133,25 @@ input[type="number"]:invalid {
 }
 
 .result span {
-    color: var(--muted);
+    color: var(--muted);  /* Название параметра (слева) */
     flex-shrink: 0;
 }
 
 .result b {
-    color: var(--accent);
-    font-variant-numeric: tabular-nums;
+    color: var(--accent); /* Значение (справа) — зелёный */
+    font-variant-numeric: tabular-nums; /* Моноширинные цифры */
     text-align: right;
     word-break: break-word;
 }
 
 .result b.oor {
-    color: var(--danger);
+    color: var(--danger); /* "Вне досягаемости" — красный */
+}
+.result b.warn {
+    color: var(--warn);   /* "Слишком близко" — жёлтый */
 }
 
-.result b.warn {
-    color: var(--warn);
-}
+/* ═══════════════ СЕКЦИЯ НАСТРОЕК ═══════════════ */
 
 .controls-section {
     background: var(--field);
@@ -138,7 +159,6 @@ input[type="number"]:invalid {
     border-radius: var(--radius-md);
     padding: 12px 14px;
 }
-
 .controls-section h2 {
     margin-bottom: 12px;
 }
@@ -146,7 +166,6 @@ input[type="number"]:invalid {
 .control-group {
     margin-bottom: 14px;
 }
-
 .control-group:last-child {
     margin-bottom: 0;
 }
@@ -161,12 +180,12 @@ input[type="number"]:invalid {
     font-weight: 600;
 }
 
+/* Radio-кнопки выбора оружия */
 .radio-group {
     display: flex;
     flex-direction: column;
     gap: 4px;
 }
-
 .radio-option {
     display: flex;
     align-items: center;
@@ -174,30 +193,30 @@ input[type="number"]:invalid {
     cursor: pointer;
     padding: 4px 0;
 }
-
 .radio-option input[type="radio"] {
     width: 16px;
     height: 16px;
     cursor: pointer;
-    accent-color: var(--accent);
+    accent-color: var(--accent); /* Цвет выбранного radio */
     margin: 0;
 }
-
 .radio-option input[type="radio"]:disabled {
     cursor: not-allowed;
 }
-
 .radio-option span {
     font-size: 13px;
     color: var(--text);
     cursor: pointer;
 }
 
+/* Подсказка */
 .hint {
     font-size: 12px;
     color: var(--dim);
     line-height: 1.6;
 }
+
+/* ═══════════════ СЕКЦИЯ КОНТАКТА / DISCORD ═══════════════ */
 
 .contact {
     background: var(--field);
@@ -208,14 +227,12 @@ input[type="number"]:invalid {
     flex-direction: column;
     gap: 4px;
 }
-
 .contact-label {
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: .06em;
     color: var(--muted);
 }
-
 .contact-email {
     color: var(--accent);
     text-decoration: none;
@@ -224,7 +241,6 @@ input[type="number"]:invalid {
     word-break: break-all;
     transition: color .15s ease;
 }
-
 .contact-email:hover {
     color: var(--accent-hover);
     text-decoration: underline;
@@ -236,6 +252,7 @@ input[type="number"]:invalid {
     gap: 10px;
 }
 
+/* QR-код Discord */
 .discord-qr {
     display: flex;
     flex-direction: column;
@@ -248,24 +265,22 @@ input[type="number"]:invalid {
     padding: 10px;
     transition: border-color .15s ease;
 }
-
 .discord-qr:hover {
     border-color: var(--accent);
 }
-
 .discord-qr img {
     width: 200px;
     height: 200px;
     border-radius: var(--radius-sm);
-    background: #fff;
+    background: #fff;      /* Белый фон под QR */
     padding: 6px;
 }
-
 .discord-qr span {
     font-size: 12px;
     color: var(--muted);
 }
 
+/* Кнопка Discord */
 .discord-btn {
     display: flex;
     align-items: center;
@@ -280,37 +295,34 @@ input[type="number"]:invalid {
     font-size: 14px;
     font-weight: 600;
     transition: background .15s ease, transform .1s ease;
-    box-shadow: 0 2px 8px rgba(88, 101, 242, .3);
+    box-shadow: 0 2px 8px rgba(88, 101, 242, .3); /* Тень Discord */
 }
-
 .discord-btn:hover {
     background: var(--discord-hover);
 }
-
 .discord-btn:active {
-    transform: translateY(1px);
+    transform: translateY(1px); /* Эффект нажатия */
 }
-
 .discord-btn svg {
     flex-shrink: 0;
 }
 
+/* ═══════════════ СЕЛЕКТОР ЯЗЫКА ═══════════════ */
+
 .translate-widget {
-    margin-top: auto;
+    margin-top: auto;     /* Прижат к низу панели */
     padding-top: 16px;
     border-top: 1px solid var(--border);
     display: flex;
     flex-direction: column;
     gap: 6px;
 }
-
 .translate-widget label {
     font-size: 12px;
     text-transform: uppercase;
     letter-spacing: .06em;
     color: var(--muted);
 }
-
 .translate-widget select {
     background: var(--field);
     border: 1px solid var(--border);
@@ -320,31 +332,18 @@ input[type="number"]:invalid {
     font-size: 14px;
     cursor: pointer;
 }
-
 .translate-widget select:focus {
     outline: none;
     border-color: var(--accent);
 }
 
-.draw-tools-section {
-    margin-top: 14px;
-    padding-top: 14px;
-    border-top: 1px solid var(--border);
-}
+/* ═══════════════ ИНСТРУМЕНТЫ РИСОВАНИЯ ═══════════════ */
 
-.draw-tools-section h2 {
-    font-size: 14px;
-    color: var(--muted);
-    margin-bottom: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
+/* Сетка кнопок инструментов (5 в ряд) */
 .tool-grid {
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 6px;
-    margin-bottom: 10px;
 }
 
 .draw-tool {
@@ -360,77 +359,24 @@ input[type="number"]:invalid {
     justify-content: center;
     user-select: none;
 }
-
 .draw-tool:hover {
     background: var(--hover);
     border-color: var(--dim);
 }
-
 .draw-tool.active {
     border-color: var(--accent);
-    background: rgba(159, 211, 86, 0.12);
-    box-shadow: 0 0 0 1px var(--accent);
+    background: rgba(159, 211, 86, 0.12); /* Полупрозрачный зелёный */
+    box-shadow: 0 0 0 1px var(--accent);   /* Внешний accent-контур */
 }
 
-.lobby-section {
-    background: var(--field);
-    border: 1px solid var(--border);
-    border-radius: var(--radius-md);
-    padding: 12px 14px;
-    margin-top: 8px;
-}
-
-.lobby-section h3 {
-    margin: 0 0 10px 0;
-    font-size: 14px;
-    color: var(--text);
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-}
-
-.lobby-info {
-    font-size: 13px;
-    color: var(--muted);
-    margin-bottom: 10px;
-    font-family: monospace;
-}
-
-.lobby-players {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    margin-bottom: 12px;
-    max-height: 150px;
-    overflow-y: auto;
-}
-
-.lobby-section .view-reset {
-    width: 100%;
-    text-align: center;
-}
-
-.width-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 8px;
-    margin-bottom: 10px;
-}
-
-.width-label {
-    font-size: 11px;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: .06em;
-}
+/* ═══════════════ ТОЛЩИНА ЛИНИИ ═══════════════ */
 
 .width-grid {
-    display: flex;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
     gap: 6px;
 }
-
 .width-opt {
-    width: 32px;
     height: 24px;
     border: 1px solid var(--border);
     background: var(--field);
@@ -441,34 +387,81 @@ input[type="number"]:invalid {
     justify-content: center;
     color: var(--text);
 }
-
 .width-opt span {
     display: block;
     width: 16px;
     background: currentColor;
     border-radius: 1px;
 }
-
-.width-opt .w1 {
-    height: 1px;
-}
-
-.width-opt .w2 {
-    height: 2px;
-}
-
-.width-opt .w4 {
-    height: 4px;
-}
-
-.width-opt:hover {
-    background: var(--hover);
-}
-
+.width-opt .w1 { height: 1px; }
+.width-opt .w2 { height: 2px; }
+.width-opt .w3 { height: 3px; }
+.width-opt .w4 { height: 4px; }
+.width-opt:hover { background: var(--hover); }
 .width-opt.active {
     border-color: var(--accent);
     box-shadow: 0 0 0 1px var(--accent);
 }
+
+/* ═══════════════ КНОПКА ОЧИСТКИ РИСУНКОВ ═══════════════ */
+
+.clear-drawings-btn {
+    width: 100%;
+    height: 40px;
+    background: var(--field);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    color: var(--text);
+    font-size: 13px;
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+}
+.clear-drawings-btn:hover {
+    background: var(--hover);
+    border-color: var(--dim);
+}
+.clear-drawings-btn:active {
+    background: var(--hover);
+    border-color: var(--dim);
+}
+
+/* ═══════════════ СЕКЦИЯ ЛОББИ (мультиплеер) ═══════════════ */
+
+.lobby-section {
+    background: var(--field);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: 12px 14px;
+    margin-top: 8px;
+}
+.lobby-section h3 {
+    margin: 0 0 10px 0;
+    font-size: 14px;
+    color: var(--text);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+.lobby-info {
+    font-size: 13px;
+    color: var(--muted);
+    margin-bottom: 10px;
+    font-family: monospace;
+}
+.lobby-players {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 12px;
+    max-height: 150px;
+    overflow-y: auto;
+}
+.lobby-section .view-reset {
+    width: 100%;
+    text-align: center;
+}
+
+/* ═══════════════ СЕЛЕКТОР КАРТЫ ═══════════════ */
+
 .map-select {
     width: 100%;
     margin-top: 6px;
