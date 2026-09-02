@@ -89,6 +89,13 @@ body.light .map-controls {
     background: var(--hover);
 }
 
+/* Убираем hover-эффект на touch (мешает :active) */
+@media (pointer: coarse) {
+    .view-reset:hover {
+        background: transparent;
+    }
+}
+
 /* Активное состояние для touch */
 .view-reset:active {
     transform: scale(0.95);
@@ -208,6 +215,25 @@ body.light .theme-toggle .icon-moon {
     color: var(--accent);
 }
 
+/* На мобильных toast — fixed чтобы не зависеть от overflow:hidden в map-wrap */
+@media (max-width: 800px) {
+    .toast {
+        position: fixed;
+        top: auto;
+        bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%) translateY(20px);
+        max-width: calc(100vw - 32px);
+        text-align: center;
+        border-radius: var(--radius-md);
+        z-index: 50;
+    }
+    .toast.show {
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
 /* ═══════════════ TOOLTIP КООРДИНАТ ПОД КУРСОРОМ ═══════════════ */
 
 .cursor-coords {
@@ -237,4 +263,12 @@ body.light .theme-toggle .icon-moon {
 
 .cursor-coords.visible {
     display: block;
+}
+
+/* На мобильных — tooltip координат крупнее для читаемости */
+@media (max-width: 800px) {
+    .cursor-coords {
+        font-size: 11px;
+        padding: 3px 7px;
+    }
 }

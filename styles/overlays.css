@@ -39,6 +39,13 @@
     transform: translateX(0);
 }
 
+/* На мобильных drawer — bottom sheet (translateY вместо translateX) */
+@media (max-width: 800px) {
+    .drawer.open {
+        transform: translateY(0);
+    }
+}
+
 /* ═══════════════ HEADER DRAWER ═══════════════ */
 
 /* Заголовок drawer: flex для разнесения h2 и кнопки "X" */

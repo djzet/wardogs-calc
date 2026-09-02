@@ -80,7 +80,7 @@
     display: grid;
     grid-template-columns: 1fr 1fr auto; /* X | Y | [очистить] */
     gap: 8px;
-    align-items: flex-end;
+    align-items: stretch;
 }
 
 .coord-row label {
@@ -90,6 +90,15 @@
     font-size: 13px;
     color: var(--muted);
     font-feature-settings: "tnum";
+    background: var(--field);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 4px 8px 2px;
+    transition: border-color var(--transition-fast, 0.15s);
+}
+
+.coord-row label:focus-within {
+    border-color: var(--accent);
 }
 
 /* Стилизация числовых полей ввода */
@@ -159,6 +168,7 @@ input[type="number"]:invalid {
     top: 0;
     z-index: 2;
     transition: background var(--transition-fast, 0.15s);
+    position: relative;         /* Контекст для ::after pseudo-element */
 }
 
 .result div {
