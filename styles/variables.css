@@ -107,6 +107,26 @@
     --point-b-bg: rgba(232, 195, 90, 0.06);
     --point-b-border: rgba(232, 195, 90, 0.25);
 
+    /* === Canvas: цвета для отрисовки карты === */
+    --canvas-bg: #10151b;
+    /* Фон за пределами карты */
+    --canvas-map-bg: #161d25;
+    /* Фон области карты */
+    --canvas-grid-minor: rgba(255, 255, 255, 0.10);
+    /* Мелкая сетка */
+    --canvas-grid-major: rgba(255, 255, 255, 0.28);
+    /* Крупная сетка */
+    --canvas-axes: rgba(255, 255, 255, 0.35);
+    /* Оси координат */
+    --canvas-dim: rgba(6, 8, 12, 0.55);
+    /* Затемнение за картой */
+    --canvas-border: #46536b;
+    /* Граница карты */
+    --canvas-labels: #5c6875;
+    /* Подписи координат */
+    --canvas-line: #e8c35a;
+    /* Линия A→B */
+
     /* === Транзишны === */
     --transition-fast: 0.15s ease;
     --transition-normal: 0.25s ease;
@@ -147,6 +167,16 @@ body.light {
     --warn: #8a6d00;
     /* Тёмно-жёлтый для светлой темы */
 
+    --canvas-bg: #dfe5ec;
+    --canvas-map-bg: #f2f5f8;
+    --canvas-grid-minor: rgba(15, 25, 40, 0.12);
+    --canvas-grid-major: rgba(15, 25, 40, 0.30);
+    --canvas-axes: rgba(15, 25, 40, 0.40);
+    --canvas-dim: rgba(255, 255, 255, 0.6);
+    --canvas-border: #7d8896;
+    --canvas-labels: #5c6875;
+    --canvas-line: #8a6d00;
+
     --point-a: #3d8c0f;
     --point-a-bg: rgba(61, 140, 15, 0.06);
     --point-a-border: rgba(61, 140, 15, 0.2);
@@ -156,34 +186,13 @@ body.light {
 }
 
 /* ═══════════════ АВТО-ТЕМА ПО СИСТЕМНЫМ НАСТРОЙКАМ ═══════════════ */
-/* Если пользователь ещё не переключал тему вручную,
-   следуем системным настройкам ОС */
+/* Переменные темы применяются через JS (ui.js → applyThemeClass()),
+   который добавляет класс body.light при prefers-color-scheme: light.
+   Здесь только color-scheme для корректного отображения
+   системных элементов (скроллбар, формы) до запуска JS. */
 @media (prefers-color-scheme: light) {
     :root:not([data-theme-manual]) {
         color-scheme: light;
-        --bg: #eef1f5;
-        --panel: #ffffff;
-        --field: #f6f8fa;
-        --border: #d7dde5;
-        --text: #1d2530;
-        --muted: #5c6875;
-        --dim: #6b7684;
-        --accent: #4e8f1d;
-        --accent-hover: #3f7517;
-        --danger: #c23b3b;
-        --danger-hover: #e04444;
-        --menu: #ffffff;
-        --menu-border: #c9d1db;
-        --hover: #e8edf3;
-        --btn-bg: rgba(255, 255, 255, .92);
-        --btn-text: #333c47;
-        --warn: #8a6d00;
-        --point-a: #3d8c0f;
-        --point-a-bg: rgba(61, 140, 15, 0.06);
-        --point-a-border: rgba(61, 140, 15, 0.2);
-        --point-b: #7a5c00;
-        --point-b-bg: rgba(122, 92, 0, 0.06);
-        --point-b-border: rgba(122, 92, 0, 0.2);
     }
 }
 

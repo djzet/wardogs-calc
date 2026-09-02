@@ -3,10 +3,11 @@
  * Поддерживает 9 языков: ru, en, de, fr, es, pl, uk, tr, zh.
  *
  * Работа:
- * 1. Загружает JSON-файл перевода из /locales/{lang}.json
- * 2. При ошибке загрузки — использует встроенный fallback (только ru)
- * 3. Применяет переводы к DOM через data-i18n / data-i18n-title
- * 4. Сохраняет выбор языка в localStorage
+ * 1. Если доступны инлайненные переводы (build) — использует их мгновенно
+ * 2. Иначе загружает JSON-файл перевода из /locales/{lang}.json (dev)
+ * 3. При ошибке загрузки — использует встроенный fallback (только ru)
+ * 4. Применяет переводы к DOM через data-i18n / data-i18n-title
+ * 5. Сохраняет выбор языка в localStorage
  *
  * Экспорт: window.LocaleManager
  */
@@ -106,6 +107,18 @@ window.LocaleManager = (function () {
         }
     };
 
+    /**
+     * Whitelist-based XSS sanitizer.
+     * Allows only safe HTML tags: <b>, <strong>, <em>, <br>, <code>.
+     * Strips everything else to prevent injection from compromised locale files.
+     *
+     * @param {string} str — raw translation string potentially containing HTML
+     * @returns {string} sanitized string with only whitelisted tags
+     */
+    function safeHTML(str) {
+        return str.replace(/<(?!\/?(b|strong|em|br|code)\b)[^>]*>/gi, '');
+    }
+
     /** Текущий активный язык */
     let currentLocale = DEFAULT_LOCALE;
 
@@ -126,8 +139,11 @@ window.LocaleManager = (function () {
     let onLocaleChange = null;
 
     /**
-     * Загружает переводы для указанного языка из JSON-файла.
-     * При ошибке использует fallback (встроенные русские переводы).
+     * Загружает переводы для указанного языка.
+     * Приоритет:
+     *   1. window.__INLINED_LOCALES__ (build-only, Vite плагин inlineLocales)
+     *   2. fetch() из public/locales/{lang}.json (dev-режим)
+     *   3. FALLBACK_TRANSLATIONS (офлайн / ошибка сервера)
      *
      * @param {string} locale — код языка ('ru', 'en', ...)
      * @returns {Promise<object>} объект перевода
@@ -136,6 +152,19 @@ window.LocaleManager = (function () {
         if (!SUPPORTED_LOCALES.includes(locale)) {
             locale = DEFAULT_LOCALE;
         }
+
+        /** Путь 1: инлайненные переводы (build-режим, −9 HTTP-запросов) */
+        const inlined = window.__INLINED_LOCALES__;
+        if (inlined && inlined[locale]) {
+            translations = inlined[locale];
+            currentLocale = locale;
+            document.documentElement.lang = currentLocale;
+            loaded = true;
+            try { localStorage.setItem('wardogs_lang', locale); } catch (e) { }
+            return translations;
+        }
+
+        /** Путь 2: fetch из public/locales/ (dev-режим) */
         try {
             const base = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.BASE_URL) || './';
             const response = await fetch(`${base}locales/${locale}.json`);
@@ -147,6 +176,7 @@ window.LocaleManager = (function () {
             try { localStorage.setItem('wardogs_lang', locale); } catch (e) { }
             return translations;
         } catch (error) {
+            /** Путь 3: встроенный fallback (только ru) */
             console.warn(`Failed to load locale ${locale}, using fallback:`, error.message);
             translations = FALLBACK_TRANSLATIONS[locale] || FALLBACK_TRANSLATIONS[DEFAULT_LOCALE];
             currentLocale = locale;
@@ -211,7 +241,7 @@ window.LocaleManager = (function () {
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const translation = t(el.dataset.i18n);
             if (typeof translation === 'string' && translation.includes('<')) {
-                el.innerHTML = translation; /** С HTML (например, helpP2 с <br>) */
+                el.innerHTML = safeHTML(translation); /** С HTML (например, helpP2 с <br>) */
             } else {
                 el.textContent = translation;
             }
