@@ -14,17 +14,21 @@
 * {
     margin: 0;
     padding: 0;
-    box-sizing: border-box; /* Ширина = content + padding + border */
+    box-sizing: border-box;
+    /* Ширина = content + padding + border */
 }
 
 /* ═══════════════ БАЗОВЫЕ РАЗМЕРЫ ═══════════════ */
 html {
-    height: 100%;              /* Фоллбэк высоты для мобильных браузеров без dvh */
-    overscroll-behavior: none; /* Предотвращаем pull-to-refresh */
+    height: 100%;
+    /* Фоллбэк высоты для мобильных браузеров без dvh */
+    overscroll-behavior: none;
+    /* Предотвращаем pull-to-refresh */
 }
 
 body {
-    overscroll-behavior: none; /* Предотвращаем pull-to-refresh */
+    overscroll-behavior: none;
+    /* Предотвращаем pull-to-refresh */
 }
 
 body {
@@ -33,10 +37,13 @@ body {
     line-height: 1.5;
     background: var(--bg);
     color: var(--text);
-    -webkit-tap-highlight-color: transparent; /* Убираем подсветку при tap на iOS */
-    -webkit-font-smoothing: antialiased;     /* Сглаживание шрифтов */
+    -webkit-tap-highlight-color: transparent;
+    /* Убираем подсветку при tap на iOS */
+    -webkit-font-smoothing: antialiased;
+    /* Сглаживание шрифтов */
     -moz-osx-font-smoothing: grayscale;
-    padding-top: env(safe-area-inset-top);     /* Безопасная зона для notch/Dynamic Island */
+    padding-top: env(safe-area-inset-top);
+    /* Безопасная зона для notch/Dynamic Island */
     padding-bottom: env(safe-area-inset-bottom);
 }
 
@@ -44,14 +51,16 @@ body {
 .app {
     display: flex;
     height: 100vh;
-    height: 100dvh; /* dynamic viewport height — учитывает адресную строку на мобильных */
+    height: 100dvh;
+    /* dynamic viewport height — учитывает адресную строку на мобильных */
 }
 
 /* ═══════════════ ТИПОГРАФИКА ═══════════════ */
 h1 {
     font-size: var(--font-h1, 18px);
     font-weight: 600;
-    color: var(--accent); /* Зелёный заголовок */
+    color: var(--accent);
+    /* Зелёный заголовок */
     line-height: 1.3;
 }
 
@@ -67,7 +76,8 @@ h2 {
 
 /* ═══════════════ ПРЕДОТВРАЩЕНИЕ СКРОЛЛА ═══════════════ */
 body.modal-open {
-    overflow: hidden; /* Блокируем скролл когда открыта модалка */
+    overflow: hidden;
+    /* Блокируем скролл когда открыта модалка */
 }
 
 /* ═══════════════ УТИЛИТЫ ═══════════════ */
@@ -152,6 +162,7 @@ svg {
 
 /* ═══════════════ REDUCED MOTION ═══════════════ */
 @media (prefers-reduced-motion: reduce) {
+
     *,
     *::before,
     *::after {
@@ -168,13 +179,16 @@ svg {
     width: 6px;
     height: 6px;
 }
+
 ::-webkit-scrollbar-track {
     background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
     background: var(--border);
     border-radius: 3px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
     background: var(--dim);
 }
@@ -189,16 +203,20 @@ svg {
 body.light .panel {
     box-shadow: 2px 0 16px rgba(0, 0, 0, 0.06);
 }
+
 body.light .result {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
+
 body.light .controls-section {
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
 }
+
 body.light .section-point-a {
     border-left-color: var(--point-a);
     background: var(--point-a-bg);
 }
+
 body.light .section-point-b {
     border-left-color: var(--point-b);
     background: var(--point-b-bg);
@@ -206,6 +224,7 @@ body.light .section-point-b {
 
 /* ═══════════════ ПЕЧАТЬ ═══════════════ */
 @media print {
+
     .map-controls,
     .drawer,
     .drawer-backdrop,

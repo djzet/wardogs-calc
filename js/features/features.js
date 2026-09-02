@@ -172,7 +172,7 @@ window.AppDraw = (function (utils) {
     localDrawings.push({
       ...currentStroke,
       id: (crypto.randomUUID && crypto.randomUUID()) ||
-           ('id_' + Date.now().toString(36) + Math.random().toString(36).slice(2)),
+        ('id_' + Date.now().toString(36) + Math.random().toString(36).slice(2)),
       playerId: 'local',
       createdAt: Date.now()
     });

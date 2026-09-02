@@ -11,7 +11,7 @@
  * Экспорт: window.AppStorage
  */
 
-window.AppStorage = (function(utils) {
+window.AppStorage = (function (utils) {
 
     /** Ключи localStorage для каждого типа данных */
     const STATE_KEY = 'wardogs_mortar_state';   /** Точки A/B + view камеры */
@@ -281,7 +281,7 @@ window.AppPoints = (function (utils) {
  * Экспорт: window.AppWeapons
  */
 
-window.AppWeapons = (function(storage) {
+window.AppWeapons = (function (storage) {
 
     /** Текущий ID выбранного оружия ('mortar' | 'artillery') */
     let currentWeapon = null;
