@@ -348,8 +348,11 @@ el('clearDrawingsBtn').addEventListener('click', () => {
 /** Blur окна → сброс всех состояний */
 window.addEventListener('blur', () => MapInteractions.handleBlur(canvas));
 
-/** Resize окна → инвалидация кеша wrapRect (для tooltip координат) */
-window.addEventListener('resize', () => MapInteractions.invalidateWrapRect());
+/** Resize окна → инвалидация кеша wrapRect и canvasRect (для tooltip координат и pointer-событий) */
+window.addEventListener('resize', () => {
+    MapInteractions.invalidateWrapRect();
+    MapInteractions.invalidateCanvasRect();
+});
 
 /** Pointer leave canvas → скрытие tooltip координат (из кеша MapInteractions) */
 canvas.addEventListener('pointerleave', () => {

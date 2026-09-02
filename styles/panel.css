@@ -14,15 +14,16 @@
 /* ═══════════════ ОСНОВНАЯ ПАНЕЛЬ ═══════════════ */
 
 .panel {
-    width: var(--panel-width);  /* 400px (desktop) */
+    width: var(--panel-width);  /* Fluid: 340/400/440/480px по экрану */
     flex-shrink: 0;             /* Не сжимается */
     background: var(--panel);
     border-right: 1px solid var(--border);
-    padding: 20px;
+    padding: var(--pad-panel, 20px);
     display: flex;
     flex-direction: column;
-    gap: 18px;
+    gap: var(--gap-panel, 18px);
     overflow-y: auto;           /* Скролл если контент не влезает */
+    overscroll-behavior: contain; /* Не пробрасываем скролл на карту */
 }
 
 .panel-header {
@@ -38,13 +39,14 @@
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     color: var(--text);
-    width: 32px;
-    height: 32px;
+    width: 34px;
+    height: 34px;
     flex-shrink: 0;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
+    transition: background var(--transition-fast, 0.15s);
 }
 .menu-toggle:hover {
     background: var(--hover);
@@ -70,12 +72,14 @@
 /* Стилизация числовых полей ввода */
 input[type="number"] {
     width: 100%;
+    min-height: var(--touch-min, 40px); /* Удобно набирать на телефоне */
     background: var(--field);
     border: 1px solid var(--border);
     color: var(--text);
     padding: 8px 10px;
     border-radius: var(--radius-sm);
-    font-size: 15px;
+    font-size: var(--font-body, 15px);
+    transition: border-color var(--transition-fast, 0.15s);
 }
 
 /* Стрелки вверх/вниз (WebKit) — всегда видимы */
@@ -102,10 +106,15 @@ input[type="number"]:invalid {
     background: none;
     border: none;
     color: var(--dim);
-    font-size: 16px;
+    font-size: 18px;
     cursor: pointer;
     padding: 8px 2px;
     line-height: 1;
+    min-width: 36px;
+    min-height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 .clear:hover {
     color: var(--danger); /* Красный при наведении */
@@ -123,13 +132,18 @@ input[type="number"]:invalid {
     padding: 14px;
     display: grid;
     gap: 10px;
+    position: sticky;           /* Результаты всегда на виду при скролле */
+    top: 0;
+    z-index: 2;
+    transition: background var(--transition-fast, 0.15s);
 }
 
 .result div {
     display: flex;
     justify-content: space-between;
-    font-size: 14px;
+    font-size: var(--font-result, 14px);
     gap: 12px;
+    align-items: baseline;
 }
 
 .result span {
@@ -157,7 +171,14 @@ input[type="number"]:invalid {
     background: var(--field);
     border: 1px solid var(--border);
     border-radius: var(--radius-md);
-    padding: 12px 14px;
+    padding: var(--pad-section, 12px 14px);
+}
+
+/* Секции настроек сворачиваемые на маленьких экранах */
+@media (max-width: 800px) {
+    .controls-section {
+        padding: 10px 12px;
+    }
 }
 .controls-section h2 {
     margin-bottom: 12px;
@@ -317,6 +338,11 @@ input[type="number"]:invalid {
     flex-direction: column;
     gap: 6px;
 }
+
+.translate-widget select {
+    width: 100%;
+    min-height: var(--touch-min, 40px);
+}
 .translate-widget label {
     font-size: 12px;
     text-transform: uppercase;
@@ -363,6 +389,12 @@ input[type="number"]:invalid {
     background: var(--hover);
     border-color: var(--dim);
 }
+
+@media (hover: hover) and (pointer: fine) {
+    .draw-tool {
+        height: 36px;
+    }
+}
 .draw-tool.active {
     border-color: var(--accent);
     background: rgba(159, 211, 86, 0.12); /* Полупрозрачный зелёный */
@@ -377,7 +409,8 @@ input[type="number"]:invalid {
     gap: 6px;
 }
 .width-opt {
-    height: 24px;
+    height: 28px;
+    min-height: 28px;
     border: 1px solid var(--border);
     background: var(--field);
     border-radius: var(--radius-sm);
@@ -386,6 +419,7 @@ input[type="number"]:invalid {
     align-items: center;
     justify-content: center;
     color: var(--text);
+    transition: background var(--transition-fast, 0.15s), border-color var(--transition-fast, 0.15s);
 }
 .width-opt span {
     display: block;
@@ -407,14 +441,20 @@ input[type="number"]:invalid {
 
 .clear-drawings-btn {
     width: 100%;
-    height: 40px;
+    height: var(--touch-min, 44px);
     background: var(--field);
     border: 1px solid var(--border);
     border-radius: var(--radius-sm);
     color: var(--text);
     font-size: 13px;
     cursor: pointer;
-    transition: background .15s, border-color .15s;
+    transition: background var(--transition-fast, 0.15s), border-color var(--transition-fast, 0.15s);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .clear-drawings-btn {
+        height: 40px;
+    }
 }
 .clear-drawings-btn:hover {
     background: var(--hover);

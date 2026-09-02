@@ -9,26 +9,67 @@
 
 | 桌面版 | 移动版 |
 | :-: | :-: |
-| ![desktop](docs/screenshots/desktop.png) | ![mobile](docs/screenshots/mobile.png) |
+| ![desktop](assets/screenshots/desktop.png) | ![mobile](assets/screenshots/mobile.png) |
 
 ## 功能
 
 - 支持瓦片缩放和平移的交互式地图
-- 距离、方位角、仰角(mils)
-- 迫击炮(700 m)与火炮(2.5 km)
-- 分享链接、自动保存、主题
-- 9 种语言、移动版
+- 距离、方位角、仰角(mils)计算
+- 迫击炮(700 m)与火炮(>2 km)
+- 两张地图：Bakurani 和 Ozeti（16×16 km）
+- 绘图工具：铅笔、直尺、标记、橡皮擦
+- Bakurani 地图上的塔楼和区域
+- 坐标快速传递的分享链接
+- 设置和点位自动保存到 localStorage
+- 深色和浅色主题
+- 9 种界面语言（ru, en, de, fr, es, pl, uk, tr, zh）
+- 移动设备响应式设计
 
-完整列表见 [docs/features.md](docs/features.md)。
+## 快速开始
 
-## 文档 (RU)
+```bash
+# 安装依赖
+npm install
 
-- [development.md](docs/development.md) — 运行与架构
-- [features.md](docs/features.md) — 功能与武器数据
-- [localization.md](docs/localization.md) — 翻译
-- [contributing.md](docs/contributing.md) — 如何贡献
+# 启动开发服务器 (http://localhost:5173)
+npm run dev
 
-## 联系
+# 构建生产版本 (dist/)
+npm run build
+
+# 预览构建 (http://localhost:4173)
+npm run preview
+```
+
+## 项目结构
+
+```
+wardogs-calc/
+├── assets/           # 图标和截图
+├── config/           # 地图设置和弹道数据表
+├── js/
+│   ├── core/         # 数学、坐标、计算器
+│   ├── features/     # 存储、分享、点位、武器、分析
+│   ├── map/          # 瓦片、渲染器、交互、视角
+│   ├── ui/           # 面板、输入框、上下文菜单
+│   ├── locales.js    # 本地化管理器（9种语言）
+│   └── index.js      # 主模块：初始化、事件绑定
+├── maps/             # 地图瓦片（Bakurani、Ozeti）
+├── public/           # 静态文件：语言包、robots.txt、sitemap
+├── src/main.js       # Vite 入口点
+├── styles/           # CSS：变量、基础、面板、地图、移动端
+├── index.html        # 主标记
+└── vite.config.js    # Vite 配置 + 地图插件
+```
+
+## 技术栈
+
+- **Vite** — 构建工具和开发服务器
+- **Vanilla JS** — 无框架（IIFE + window.*）
+- **Canvas API** — 地图渲染和绘图工具
+- **CSS Variables** — 主题切换
+
+## 联系方式
 
 - egor.silaev2003@yandex.ru
 - [Wardogs CIS](https://discord.gg/kwxrTCJxre)

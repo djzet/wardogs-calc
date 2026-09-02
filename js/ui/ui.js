@@ -47,6 +47,16 @@ window.UIPanels = (function (storage) {
         renderMap = opts.renderMap || null;
         bind();
         applyThemeClass();
+        /** Если тема сохранена пользователем — помечаем ручной выбор */
+        if (storage.loadTheme(null)) {
+            document.documentElement.setAttribute('data-theme-manual', '');
+        } else {
+            /** Тема не выбрана — определяем по системным настройкам */
+            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
+                theme = 'light';
+                applyThemeClass();
+            }
+        }
     }
 
     /** Возвращает текущую тему. @returns {'dark'|'light'} */
@@ -68,6 +78,9 @@ window.UIPanels = (function (storage) {
         theme = (theme === 'dark') ? 'light' : 'dark';
         storage.saveTheme(theme);
         applyThemeClass();
+        /** Помечаем что пользователь явно выбрал тему —
+         *  отключаем автоопределение prefers-color-scheme */
+        document.documentElement.setAttribute('data-theme-manual', '');
         emit();
     }
 

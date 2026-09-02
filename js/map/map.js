@@ -265,10 +265,16 @@ window.MapRenderer = (function (utils, tiles) {
      * Возвращает шаги сетки в зависимости от масштаба.
      * Чем дальше (меньше scale) — тем реже сетка.
      *
+     * - scale < 0.01  — далёкий зум: крупная сетка 2000 м, мелкая 200 м
+     * - scale < 0.1   — средний зум: классические 1000 / 100 м
+     * - scale >= 0.1  — близкий зум: мелкая сетка 50 м для детализации
+     *
      * @param {number} scale — текущий масштаб камеры
      * @returns {{major: number, minor: number}} шаги в метрах
      */
     function getGridSteps(scale) {
+        if (scale < 0.01) return { major: 2000, minor: 200 };
+        if (scale >= 0.1) return { major: 1000, minor: 50 };
         return { major: 1000, minor: 100 };
     }
 
@@ -857,6 +863,9 @@ window.MapInteractions = (function () {
     /** Кеш rect'а map-wrap — обновляется при resize, не при каждом pointermove */
     let _wrapRect = null;
 
+    /** Кеш rect'а canvas — обновляется при resize, не при каждом pointermove (hot path) */
+    let _canvasRect = null;
+
     /**
      * Инициализирует кеш DOM-элементов.
      * Вызывается один раз из init или при первом pointermove.
@@ -875,7 +884,7 @@ window.MapInteractions = (function () {
      * Обновляет кеш rect'а map-wrap.
      * Вызывается при resize (через resize observer илиручной инвалидации).
      */
-    function invalidateWrapRect() { _wrapRect = null; }
+    function invalidateWrapRect() { _wrapRect = null; invalidateCanvasRect(); }
 
     /** Возвращает кешированный rect map-wrap (без reflow на каждом move) */
     function getWrapRect(canvas) {
@@ -884,13 +893,21 @@ window.MapInteractions = (function () {
     }
 
     /**
+     * Инвалидирует кеш rect'а canvas.
+     * Вызывается при resize и blur — при следующем pointermove rect будет запрошен заново.
+     */
+    function invalidateCanvasRect() { _canvasRect = null; }
+
+    /**
      * Конвертирует координаты pointer-события в координаты canvas.
+     * Использует кеш _canvasRect чтобы избежать reflow 60×/сек при pan/draw.
      * @param {PointerEvent} e — событие указателя
      * @param {HTMLCanvasElement} canvas
      * @returns {{x: number, y: number}} координаты внутри canvas
      */
     function canvasPos(e, canvas) {
-        const r = canvas.getBoundingClientRect();
+        if (!_canvasRect) _canvasRect = canvas.getBoundingClientRect();
+        const r = _canvasRect;
         return { x: e.clientX - r.left, y: e.clientY - r.top };
     }
 
@@ -963,7 +980,10 @@ window.MapInteractions = (function () {
         if (pointers.size === 2) {
             stopLongPress();
             dragging = null;
-            const [p1, p2] = [...pointers.values()];
+            /** Извлекаем два pointer'а без spread — итератор не аллоцирует массив */
+            const _it = pointers.values();
+            const p1 = _it.next().value;
+            const p2 = _it.next().value;
             const mid = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
             pinch = {
                 dist: Math.hypot(p1.x - p2.x, p1.y - p2.y) || 1, /** Расстояние между пальцами */
@@ -1046,7 +1066,10 @@ window.MapInteractions = (function () {
 
         /** Pinch-to-zoom: вычисляем новый масштаб и смещение */
         if (pinch && pointers.size >= 2) {
-            const [p1, p2] = [...pointers.values()];
+            /** Извлекаем два pointer'а без spread — итератор не аллоцирует массив */
+            const _it = pointers.values();
+            const p1 = _it.next().value;
+            const p2 = _it.next().value;
             const mid = { x: (p1.x + p2.x) / 2, y: (p1.y + p2.y) / 2 };
             const dist = Math.hypot(p1.x - p2.x, p1.y - p2.y) || 1;
             const newScale = utils.clamp(pinch.scale * dist / pinch.dist, MIN_SCALE, MAX_SCALE);
@@ -1162,7 +1185,8 @@ window.MapInteractions = (function () {
             pinch = null;
             /** Если остался 1 палец — переходим в pan */
             if (pointers.size === 1) {
-                const [rest] = [...pointers.values()];
+                /** Извлекаем единственный pointer без spread — итератор не аллоцирует массив */
+                const rest = pointers.values().next().value;
                 dragging = { mode: 'pan', startX: rest.x, startY: rest.y, ox: view.ox, oy: view.oy };
             } else {
                 dragging = null;
@@ -1215,6 +1239,7 @@ window.MapInteractions = (function () {
         dragging = null;
         stopLongPress();
         longPressFired = false;
+        invalidateCanvasRect();
         const tool = window.AppDraw ? window.AppDraw.getTool() : 'pan';
         canvas.style.cursor = tool === 'eraser' ? 'cell' : (tool === 'pan' ? 'grab' : 'crosshair');
         if (window.AppDraw) window.AppDraw.cancelStroke();
@@ -1269,7 +1294,7 @@ window.MapInteractions = (function () {
     return {
         handlePointerDown, handlePointerMove, handlePointerUp,
         handleBlur, handleWheel, handleContextMenu,
-        invalidateWrapRect, getCursorCoordsEl
+        invalidateWrapRect, invalidateCanvasRect, getCursorCoordsEl
     };
 })();
 

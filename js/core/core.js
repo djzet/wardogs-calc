@@ -148,7 +148,7 @@ window.AppUtils = (function () {
      * @returns {string} строка с координатой, например "82.40"
      */
     function gameCoord(meters) {
-        return (meters / 100).toFixed(2).replaceAll('-0.00', '0.00');
+        return (meters / 100).toFixed(2).replace(/^-0\.00$/, '0.00');
     }
 
     /**
@@ -212,19 +212,34 @@ window.AppCalculator = (function (utils) {
         /** Расстояние больше максимального — выходим за пределы таблицы */
         if (dist > table[0].dist) return null;
 
-        /** Ищем интервал [p1, p2] такой, что dist лежит между ними */
-        for (let i = 0; i < table.length - 1; i++) {
-            const p1 = table[i];
-            const p2 = table[i + 1];
+        /** Расстояние меньше минимального — выходим за пределы таблицы */
+        if (dist < table[table.length - 1].dist) return null;
 
-            if (dist <= p1.dist && dist >= p2.dist) {
-                const range = p1.dist - p2.dist;
-                /** Параметр интерполяции t ∈ [0, 1] */
-                const t = range > 0 ? (p1.dist - dist) / range : 0;
-                return p1.mils + t * (p2.mils - p1.mils);
+        /**
+         * Бинарный поиск интервала [table[lo], table[hi]],
+         * между которыми лежит dist.
+         * Таблица отсортирована по убыванию dist,
+         * поэтому lo — левая (большая) граница, hi — правая (меньшая).
+         */
+        let lo = 0;
+        let hi = table.length - 1;
+
+        while (lo < hi - 1) {
+            const mid = (lo + hi) >> 1;
+            if (dist >= table[mid].dist) {
+                hi = mid;
+            } else {
+                lo = mid;
             }
         }
-        return null;
+
+        /** Интерполяция между найденными узлами таблицы */
+        const p1 = table[lo];
+        const p2 = table[hi];
+        const range = p1.dist - p2.dist;
+        /** Параметр интерполяции t ∈ [0, 1] */
+        const t = range > 0 ? (p1.dist - dist) / range : 0;
+        return p1.mils + t * (p2.mils - p1.mils);
     }
 
     /**

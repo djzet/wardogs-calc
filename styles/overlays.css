@@ -17,18 +17,21 @@
     top: 0;
     left: 0;
     height: 100%;
+    height: 100dvh;
     width: var(--drawer-width);   /* 260px из variables.css */
     background: var(--panel);
     border-right: 1px solid var(--border);
     box-shadow: 8px 0 24px rgba(0, 0, 0, .25);
     z-index: 30;                  /* Выше backdrop (25), но ниже модалок (40) */
     transform: translateX(-100%); /* Скрыт за левым краем по умолчанию */
-    transition: transform .25s ease;
+    will-change: transform;       /* GPU-ускорение анимации translateX */
+    transition: transform var(--transition-normal, 0.25s) ease;
     padding: 20px;
     display: flex;
     flex-direction: column;
     gap: 16px;
     overflow-y: auto;             /* Скролл если содержимое не влезает */
+    overscroll-behavior: contain; /* Не пробрасываем скролл */
 }
 
 /* Активное состояние: drawer сдвинут в видимую область */
@@ -84,11 +87,12 @@
 .switch {
     width: 38px;
     height: 20px;
+    min-width: 38px;
     flex-shrink: 0;
     background: var(--border);    /* Серый по умолчанию (выкл) */
     border-radius: 10px;          /* Полная скруглённость */
     position: relative;
-    transition: .2s;              /* Плавная анимация переключения */
+    transition: var(--transition-fast, 0.2s);  /* Плавная анимация переключения */
 }
 
 /* Ползунок toggle (кружок) */
@@ -145,8 +149,10 @@
     width: 100%;
     max-width: 560px;             /* Ограничение ширины на десктопе */
     max-height: 80vh;            /* Не больше 80% высоты экрана */
+    max-height: 80dvh;
     display: flex;
     flex-direction: column;
+    margin: auto;                 /* Центрируем вертикально */
 }
 
 /* Шапка модалки: заголовок + кнопка закрытия */

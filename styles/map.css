@@ -44,6 +44,9 @@ canvas {
     display: flex;
     gap: 8px;
     z-index: 5;              /* Выше canvas, но ниже модалок */
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    max-width: calc(100% - 24px);
 }
 
 .view-reset {
@@ -56,10 +59,18 @@ canvas {
     font-size: 13px;
     backdrop-filter: blur(6px);     /* Размытие фона */
     -webkit-backdrop-filter: blur(6px);
+    transition: background var(--transition-fast, 0.15s);
+    white-space: nowrap;
 }
 
 .view-reset:hover {
     background: var(--hover);
+}
+
+/* Активное состояние для touch */
+.view-reset:active {
+    background: var(--hover);
+    transform: scale(0.97);
 }
 
 /* Кнопки переключения темы и справки — квадратные */
@@ -69,7 +80,15 @@ canvas {
     align-items: center;
     justify-content: center;
     width: 36px;
+    min-width: 36px;
     padding: 6px 0;
+    transition: background var(--transition-fast, 0.15s);
+}
+
+.theme-toggle:active,
+.help-toggle:active {
+    background: var(--hover);
+    transform: scale(0.97);
 }
 
 /* По умолчанию: показываем солнце, скрываем луну (тёмная тема) */
@@ -144,14 +163,16 @@ body.light .theme-toggle .icon-moon {
     opacity: 0;
     transform: translateY(-10px);   /* Сдвиг вверх при скрытии */
     pointer-events: none;            /* Не перехватывает клики */
-    transition: opacity .25s ease, transform .25s ease;
+    transition: opacity var(--transition-normal, 0.25s), transform var(--transition-normal, 0.25s);
     z-index: 20;
-    max-width: 280px;
+    max-width: calc(100vw - 24px);  /* Не выходит за экран */
+    word-break: break-word;
 }
 
 .toast.show {
     opacity: 1;
     transform: translateY(0);        /* Появление снизу */
+    will-change: opacity, transform; /* GPU-ускорение анимации появления */
 }
 
 .toast.success {
