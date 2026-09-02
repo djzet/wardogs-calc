@@ -22,11 +22,13 @@
     /* ═══════════════ ПАНЕЛЬ: оптимизированный размер ═══════════════ */
     .panel {
         width: 100%;
-        max-height: 42vh;          /* Уменьшено: 42% вместо 50% — больше места для карты */
+        max-height: 42vh;
+        /* Уменьшено: 42% вместо 50% — больше места для карты */
         border-right: none;
         border-bottom: 1px solid var(--border);
         padding: 12px 14px;
-        gap: 10px;                 /* Уменьшен gap между секциями */
+        gap: 10px;
+        /* Уменьшен gap между секциями */
         overscroll-behavior-y: contain;
         -webkit-overflow-scrolling: touch;
         scroll-behavior: smooth;
@@ -49,9 +51,11 @@
     /* ═══════════════ СЕКЦИИ A/B: компактнее ═══════════════ */
     .section-point-a,
     .section-point-b {
-        border-left-width: 2px;     /* Тоньше бордер */
+        border-left-width: 2px;
+        /* Тоньше бордер */
         padding-left: calc(10px - 2px);
-        background: transparent;    /* Убираем фон — экономия визуального пространства */
+        background: transparent;
+        /* Убираем фон — экономия визуального пространства */
     }
 
     .section-point-a h2,
@@ -73,7 +77,8 @@
     input[type="number"] {
         min-height: 40px;
         padding: 8px 6px;
-        font-size: 16px; /* Минимум 16px чтобы iOS не зумил при фокусе */
+        font-size: 16px;
+        /* Минимум 16px чтобы iOS не зумил при фокусе */
     }
 
     .clear {
@@ -196,7 +201,8 @@
     /* ═══════════════ КАРТА: больше пространства ═══════════════ */
     .map-wrap {
         flex: 1;
-        min-height: 58vh;          /* Минимум 58% высоты экрана для карты */
+        min-height: 58vh;
+        /* Минимум 58% высоты экрана для карты */
     }
 
     /* ═══════════════ SCROLL AFFORDANCE: градиент-индикатор ═══════════════ */
@@ -267,8 +273,13 @@
     }
 
     @keyframes slideUp {
-        from { transform: translateY(100%); }
-        to   { transform: translateY(0); }
+        from {
+            transform: translateY(100%);
+        }
+
+        to {
+            transform: translateY(0);
+        }
     }
 
     .ctx-menu button {
@@ -333,7 +344,8 @@
     }
 
     .modal-input {
-        font-size: 16px; /* iOS: 16px чтобы не зумил */
+        font-size: 16px;
+        /* iOS: 16px чтобы не зумил */
     }
 
     .modal-btn {
@@ -388,13 +400,15 @@
     }
 
     .hint {
-        display: none; /* Скрываем generic hint — место на вес золота */
+        display: none;
+        /* Скрываем generic hint — место на вес золота */
     }
 
     /* ═══════════════ ACTIVE STATES:햅tic-like feedback ═══════════════ */
     .draw-tool {
         transition: transform 0.1s ease, background 0.15s ease, border-color 0.15s ease;
     }
+
     .draw-tool:active {
         background: var(--hover);
         border-color: var(--dim);
@@ -410,6 +424,7 @@
     .width-opt {
         transition: transform 0.1s ease, background 0.15s ease;
     }
+
     .width-opt:active {
         background: var(--hover);
         transform: scale(0.9);
@@ -423,6 +438,7 @@
     .clear-drawings-btn {
         transition: transform 0.1s ease, background 0.15s ease;
     }
+
     .clear-drawings-btn:active {
         background: var(--hover);
         border-color: var(--dim);
@@ -442,6 +458,7 @@
     .radio-option {
         transition: transform 0.12s ease, border-color 0.2s ease, background 0.2s ease;
     }
+
     .radio-option:active {
         transform: scale(0.95);
     }
@@ -457,6 +474,7 @@
         gap: 6px;
         align-items: stretch;
     }
+
     .coord-row label {
         background: var(--field);
         border: 1px solid var(--border);
@@ -464,6 +482,7 @@
         padding: 2px 6px;
         transition: border-color 0.15s ease;
     }
+
     .coord-row label:focus-within {
         border-color: var(--accent);
     }
@@ -488,6 +507,7 @@
     .help-toggle {
         transition: transform 0.1s ease, background 0.15s ease;
     }
+
     .theme-toggle:active,
     .help-toggle:active {
         transform: scale(0.88);
@@ -742,8 +762,10 @@
 /* ═══════════════ ПЛАНШЕТЫ В ПОРТРЕТЕ ≤ 1024px ═══════════════ */
 @media (max-width: 1024px) and (min-width: 801px) {
     .panel {
-        width: var(--panel-width); /* 340px из variables */
-        max-height: none;          /* Панель не ограничена по высоте */
+        width: var(--panel-width);
+        /* 340px из variables */
+        max-height: none;
+        /* Панель не ограничена по высоте */
     }
 
     .map-controls {
@@ -758,6 +780,7 @@
 
 /* ═══════════════ АЛЬБОМНАЯ ОРИЕНТАЦИЯ НА МОБИЛЬНЫХ ═══════════════ */
 @media (max-width: 800px) and (orientation: landscape) {
+
     /* В альбоме — горизонтальная раскладка как на десктопе */
     .app {
         flex-direction: row;
@@ -943,6 +966,7 @@
 
 /* ═══════════════ TOUCH-УСТРОЙСТВА ═══════════════ */
 @media (pointer: coarse) {
+
     /* Все кликабельные элементы — минимум 44px (WCAG 2.5.5) */
     .draw-tool {
         min-height: 44px;
@@ -1020,13 +1044,15 @@
         min-width: 48px;
         border-radius: 13px;
     }
+
     .switch::after {
         width: 22px;
         height: 22px;
         top: 2px;
         left: 2px;
     }
-    .switch-row input:checked + .switch::after {
+
+    .switch-row input:checked+.switch::after {
         left: 24px;
     }
 }
@@ -1063,6 +1089,7 @@
         --border: #333333;
         --text: #ffffff;
     }
+
     .result {
         background: var(--field);
         border-color: var(--border);

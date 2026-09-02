@@ -12,27 +12,36 @@
 /* ═══════════════ CANVAS И ОБЁРТКА КАРТЫ ═══════════════ */
 
 #map {
-    touch-action: none;       /* Отключаем стандартные touch-действия браузера */
-    user-select: none;        /* Запрет выделения текста */
+    touch-action: none;
+    /* Отключаем стандартные touch-действия браузера */
+    user-select: none;
+    /* Запрет выделения текста */
     -webkit-user-select: none;
 }
 
 .map-wrap {
-    flex: 1;                  /* Занимает всё оставшееся пространство */
-    position: relative;       /* Контекст позиционирования для overlay-элементов */
-    overflow: hidden;          /* Скрываем содержимое за пределами */
+    flex: 1;
+    /* Занимает всё оставшееся пространство */
+    position: relative;
+    /* Контекст позиционирования для overlay-элементов */
+    overflow: hidden;
+    /* Скрываем содержимое за пределами */
     background: var(--bg);
 }
 
 canvas {
-    display: block;           /* Убираем нижний отступ inline-элемента */
+    display: block;
+    /* Убираем нижний отступ inline-элемента */
     width: 100%;
     height: 100%;
-    cursor: crosshair;        /* Курсор по умолчанию (рисование) */
-    touch-action: none;       /* Отключаем touch-жесты браузера */
+    cursor: crosshair;
+    /* Курсор по умолчанию (рисование) */
+    touch-action: none;
+    /* Отключаем touch-жесты браузера */
     -webkit-user-select: none;
     user-select: none;
-    -webkit-touch-callout: none; /* Отключаем callout на iOS */
+    -webkit-touch-callout: none;
+    /* Отключаем callout на iOS */
 }
 
 /* ═══════════════ КНОПКИ УПРАВЛЕНИЯ (поверх карты) ═══════════════ */
@@ -43,7 +52,8 @@ canvas {
     right: 12px;
     display: flex;
     gap: 6px;
-    z-index: 5;              /* Выше canvas, но ниже модалок */
+    z-index: 5;
+    /* Выше canvas, но ниже модалок */
     flex-wrap: wrap;
     justify-content: flex-end;
     max-width: calc(100% - 24px);
@@ -54,6 +64,7 @@ canvas {
     border-radius: var(--radius-md);
     padding: 5px;
 }
+
 body.light .map-controls {
     background: rgba(255, 255, 255, 0.65);
     border: 1px solid rgba(0, 0, 0, 0.08);
@@ -67,7 +78,8 @@ body.light .map-controls {
     border-radius: var(--radius-sm);
     cursor: pointer;
     font-size: 13px;
-    backdrop-filter: blur(6px);     /* Размытие фона */
+    backdrop-filter: blur(6px);
+    /* Размытие фона */
     -webkit-backdrop-filter: blur(6px);
     transition: background var(--transition-fast, 0.15s), transform 0.15s ease;
     white-space: nowrap;
@@ -77,9 +89,11 @@ body.light .map-controls {
     .view-reset:hover {
         background: rgba(255, 255, 255, 0.1);
     }
+
     body.light .view-reset:hover {
         background: rgba(0, 0, 0, 0.06);
     }
+
     .view-reset:hover {
         transform: translateY(-1px);
     }
@@ -130,6 +144,7 @@ body.light .map-controls {
 .theme-toggle .icon-sun {
     display: block;
 }
+
 .theme-toggle .icon-moon {
     display: none;
 }
@@ -138,6 +153,7 @@ body.light .map-controls {
 body.light .theme-toggle .icon-sun {
     display: none;
 }
+
 body.light .theme-toggle .icon-moon {
     display: block;
 }
@@ -176,6 +192,7 @@ body.light .theme-toggle .icon-moon {
 .ctx-menu button.danger {
     color: var(--danger);
 }
+
 .ctx-menu button.danger:hover {
     color: var(--danger-hover);
 }
@@ -196,18 +213,23 @@ body.light .theme-toggle .icon-moon {
     -webkit-backdrop-filter: blur(6px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, .2);
     opacity: 0;
-    transform: translateY(-10px);   /* Сдвиг вверх при скрытии */
-    pointer-events: none;            /* Не перехватывает клики */
+    transform: translateY(-10px);
+    /* Сдвиг вверх при скрытии */
+    pointer-events: none;
+    /* Не перехватывает клики */
     transition: opacity var(--transition-normal, 0.25s), transform var(--transition-normal, 0.25s);
     z-index: 20;
-    max-width: calc(100vw - 24px);  /* Не выходит за экран */
+    max-width: calc(100vw - 24px);
+    /* Не выходит за экран */
     word-break: break-word;
 }
 
 .toast.show {
     opacity: 1;
-    transform: translateY(0);        /* Появление снизу */
-    will-change: opacity, transform; /* GPU-ускорение анимации появления */
+    transform: translateY(0);
+    /* Появление снизу */
+    will-change: opacity, transform;
+    /* GPU-ускорение анимации появления */
 }
 
 .toast.success {
@@ -229,6 +251,7 @@ body.light .theme-toggle .icon-moon {
         border-radius: var(--radius-md);
         z-index: 50;
     }
+
     .toast.show {
         transform: translateX(-50%) translateY(0);
     }
@@ -244,8 +267,10 @@ body.light .theme-toggle .icon-moon {
     font-size: 12px;
     font-weight: bold;
     color: #fff;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9); /* Тень для читаемости */
-    pointer-events: none;    /* Не мешает кликам */
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+    /* Тень для читаемости */
+    pointer-events: none;
+    /* Не мешает кликам */
     z-index: 10;
     background: rgba(0, 0, 0, 0.45);
     backdrop-filter: blur(4px);
@@ -254,11 +279,13 @@ body.light .theme-toggle .icon-moon {
     border-radius: var(--radius-sm);
     letter-spacing: 0.5px;
     font-feature-settings: "tnum";
-    display: none;           /* Скрыт по умолчанию, показывается через .visible */
+    display: none;
+    /* Скрыт по умолчанию, показывается через .visible */
 }
 
 .cursor-coords span {
-    display: block;          /* X и Y на разных строках */
+    display: block;
+    /* X и Y на разных строках */
 }
 
 .cursor-coords.visible {

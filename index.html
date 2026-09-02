@@ -5,11 +5,12 @@
     <meta charset="UTF-8">
     <meta name="google-site-verification" content="eLUkt4ZGLPy8nqABEciogXldGDTLMdS-mFYlpXLf2eY" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="theme-color" content="#1a1f27">
     <!-- Preconnect для ускорения загрузки внешних ресурсов -->
     <link rel="preconnect" href="https://mc.yandex.ru">
-    <!-- Preload критических изображений для первого рендера -->
-    <link rel="preload" as="image" href="assets/icons/tower.webp">
+    <!-- theme-color для адресной строки браузера -->
+    <meta name="theme-color" content="#1a1f27" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#1a1f27" media="(prefers-color-scheme: light)">
+
     <!-- Primary SEO Meta Tags -->
     <title>WARDOGS — миномётный и артиллерийский калькулятор</title>
     <meta name="title" content="WARDOGS — миномётный и артиллерийский калькулятор">
@@ -68,17 +69,25 @@
         <circle cx='32' cy='32' r='22' fill='none' stroke='%239fd356' stroke-width='3'/>
     </svg>">
     <!-- CSS подключается из src/main.js (Vite) -->
+    <!-- Yandex.Metrika counter -->
     <script type="text/javascript">
-        if (location.protocol === 'http:' || location.protocol === 'https:') {
-            (function (m, e, t, r, i, k, a) {
-                m[i] = m[i] || function () { (m[i].a = m[i].a || []).push(arguments) };
-                m[i].l = 1 * new Date();
-                for (var j = 0; j < document.scripts.length; j++) { if (document.scripts[j].src === r) { return; } }
-                k = e.createElement(t), a = e.getElementsByTagName(t)[0], k.async = 1, k.src = r, a.parentNode.insertBefore(k, a)
-            })(window, document, 'script', 'https://mc.yandex.ru/metrika/tag.js?id=111625912', 'ym');
+        (function (m, e, t, r, i, k, a) {
+            m[i] = m[i] || function () { (m[i].a = m[i].a || []).push(arguments) };
+            m[i].l = 1 * new Date();
+            for (var j = 0; j < document.scripts.length; j++) { if (document.scripts[j].src === r) { return; } }
+            k = e.createElement(t), a = e.getElementsByTagName(t)[0], k.async = 1, k.src = r, a.parentNode.insertBefore(k, a)
+        })(window, document, 'script', 'https://mc.yandex.ru/metrika/tag.js?id=111625912', 'ym');
 
-            ym(111625912, 'init', { ssr: true, webvisor: true, clickmap: true, ecommerce: "dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce: true, trackLinks: true });
-        }
+        ym(111625912, 'init', { ssr: true, webvisor: true, clickmap: true, ecommerce: "dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce: true, trackLinks: true });
+    </script>
+    <!-- /Yandex.Metrika counter -->
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-GBQ6J5K0DN"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', 'G-GBQ6J5K0DN');
     </script>
     <script type="application/ld+json">
     {
@@ -130,9 +139,106 @@
     ]
     }
     </script>
+    <script type="application/ld+json">
+    {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+        {
+        "@type": "Question",
+        "name": "Как рассчитать миномёт в WARDOGS?",
+        "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Откройте калькулятор WARDOGS, введите координаты огневой позиции (точка A) и цели (точка B) на интерактивной карте или через поля ввода. Калькулятор автоматически рассчитает дистанцию, азимут и угол возвышения в mils."
+        }
+        },
+        {
+        "@type": "Question",
+        "name": "Какой максимальный радиус миномёта в WARDOGS?",
+        "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Максимальная дальность миномёта в WARDOGS составляет 700 метров. Для целей дальше 700 м используйте артиллерию, которая стреляет на расстояние более 2 км."
+        }
+        },
+        {
+        "@type": "Question",
+        "name": "Какие карты поддерживаются в калькуляторе WARDOGS?",
+        "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Калькулятор поддерживает две карты: Bakurani и Ozeti. Обе карты размером 16×16 км с интерактивным тайловым зумом и панорамированием."
+        }
+        },
+        {
+        "@type": "Question",
+        "name": "Как рассчитать азимут и угол возвышения миномёта?",
+        "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Азимут — это направление от огневой позиции до цели, измеренное от севера по часовой стрелке. Угол возвышения (mils) — угол наклона ствола миномёта для попадания в цель. Калькулятор WARDOGS рассчитывает оба значения автоматически."
+        }
+        },
+        {
+        "@type": "Question",
+        "name": "Сколько mils в градусе в WARDOGS?",
+        "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "В системе измерения, используемой в WARDOGS и военном деле, один полный круг равен 6400 mils (мин). 1 градус ≈ 17.78 mils. Калькулятор автоматически конвертирует значения."
+        }
+        },
+        {
+        "@type": "Question",
+        "name": "Миномётный калькулятор WARDOGS — как пользоваться онлайн?",
+        "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Калькулятор полностью бесплатный и работает онлайн в браузере. Установите точку A (позиция миномёта) и точку B (цель) на карте правым кликом или введите координаты вручную. Результаты отображаются мгновенно в левой панели."
+        }
+        }
+    ]
+    }
+    </script>
 </head>
 
 <body>
+    <!-- Yandex.Metrika noscript pixel (перенесён из <head> — в <head> noscript с <div> запрещён) -->
+    <noscript><div><img src="https://mc.yandex.ru/watch/111625912" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+    <!-- ══════════════════════════════════════════════════════════════
+         NOSCRIPT — контент для поисковых роботов и пользователей с отключённым JS
+         ══════════════════════════════════════════════════════════════ -->
+    <noscript>
+        <div
+            style="max-width:800px;margin:0 auto;padding:2rem;font-family:sans-serif;color:#e0e0e0;background:#1a1f27;min-height:100vh;">
+            <h1 style="color:#9fd356;">WARDOGS — Миномётный и артиллерийский калькулятор</h1>
+            <p>Бесплатный онлайн-калькулятор для тактического шутера <strong>WARDOGS</strong>. Мгновенный расчёт
+                дистанции, азимута и угла возвышения (mils) для миномёта и артиллерии на интерактивной карте 16×16 км.
+            </p>
+            <h2 style="color:#e8c35a;">Возможности</h2>
+            <ul>
+                <li>Точный расчёт дистанции, азимута и угла возвышения</li>
+                <li>Миномёт (до 700 м) и артиллерия (более 2 км)</li>
+                <li>Две карты: Bakurani и Ozeti</li>
+                <li>Инструменты рисования: карандаш, линейка, метка, ластик</li>
+                <li>Вышки и важные объекты на карте</li>
+                <li>Share-ссылки для передачи координат</li>
+                <li>Автосохранение настроек</li>
+                <li>Тёмная и светлая тема</li>
+                <li>Адаптивный дизайн для мобильных</li>
+            </ul>
+            <h2 style="color:#e8c35a;">Языки</h2>
+            <p>Калькулятор доступен на 9 языках:</p>
+            <p>
+                <a href="?lang=ru" style="color:#9fd356;">Русский</a> ·
+                <a href="?lang=en" style="color:#9fd356;">English</a> ·
+                <a href="?lang=de" style="color:#9fd356;">Deutsch</a> ·
+                <a href="?lang=fr" style="color:#9fd356;">Français</a> ·
+                <a href="?lang=es" style="color:#9fd356;">Español</a> ·
+                <a href="?lang=pl" style="color:#9fd356;">Polski</a> ·
+                <a href="?lang=uk" style="color:#9fd356;">Українська</a> ·
+                <a href="?lang=tr" style="color:#9fd356;">Türkçe</a> ·
+                <a href="?lang=zh" style="color:#9fd356;">中文</a>
+            </p>
+            <p style="color:#888;margin-top:2rem;">⚠️ Для работы калькулятора необходимо включить JavaScript в браузере.
+            </p>
+        </div>
+    </noscript>
     <!-- ══════════════════════════════════════════════════════════════
          SVG SPRITE ИКОНКИ
          Набор иконок для UI: инструменты рисования, навигация,
@@ -486,7 +592,8 @@
                     <h2 id="markerModalTitle" data-i18n="markerPrompt">Название метки:</h2>
                 </div>
                 <div class="modal-body">
-                    <input type="text" id="markerInput" class="modal-input" maxlength="40" autocomplete="off" placeholder="Метка" />
+                    <input type="text" id="markerInput" class="modal-input" maxlength="40" autocomplete="off"
+                        placeholder="Метка" />
                     <div class="modal-actions">
                         <button class="modal-btn" id="markerCancel" data-i18n="cancel">Отмена</button>
                         <button class="modal-btn modal-btn-accent" id="markerOk">OK</button>
@@ -495,6 +602,186 @@
             </div>
         </div>
     </div><!-- /app -->
+
+    <!-- ══════════════════════════════════════════════════════════════
+         FAQ-СЕКЦИЯ — SEO-контент с ответами на частые вопросы
+         Использует нативные <details>/<summary> для доступности и индексации
+         ══════════════════════════════════════════════════════════════ -->
+    <section class="seo-content" id="faq" itemscope itemtype="https://schema.org/FAQPage"
+        style="max-width:960px;margin:0 auto;padding:2rem 1.5rem;color:#e0e0e0;">
+        <h2 style="color:#9fd356;font-size:1.6rem;margin-bottom:1.5rem;">Часто задаваемые вопросы о WARDOGS</h2>
+
+        <details itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"
+            style="margin-bottom:1rem;background:#232830;border-radius:8px;overflow:hidden;">
+            <summary itemprop="name"
+                style="cursor:pointer;padding:1rem 1.2rem;font-weight:600;font-size:1.05rem;color:#e8c35a;list-style:none;display:flex;justify-content:space-between;align-items:center;">
+                Как рассчитать миномёт в WARDOGS?
+                <span style="font-size:1.2rem;color:#9fd356;">▾</span>
+            </summary>
+            <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"
+                style="padding:0 1.2rem 1.2rem;color:#ccc;line-height:1.7;">
+                <p itemprop="text">Откройте <strong>калькулятор WARDOGS</strong>, введите координаты огневой позиции
+                    (точка A) и цели (точка B) на интерактивной карте или через поля ввода. Калькулятор автоматически
+                    рассчитает <strong>дистанцию</strong>, <strong>азимут</strong> и <strong>угол возвышения в
+                        mils</strong>. Просто правый клик по карте — поставьте миномёт, снова правый клик — поставьте
+                    цель.</p>
+            </div>
+        </details>
+
+        <details itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"
+            style="margin-bottom:1rem;background:#232830;border-radius:8px;overflow:hidden;">
+            <summary itemprop="name"
+                style="cursor:pointer;padding:1rem 1.2rem;font-weight:600;font-size:1.05rem;color:#e8c35a;list-style:none;display:flex;justify-content:space-between;align-items:center;">
+                Какой максимальный радиус миномёта в WARDOGS?
+                <span style="font-size:1.2rem;color:#9fd356;">▾</span>
+            </summary>
+            <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"
+                style="padding:0 1.2rem 1.2rem;color:#ccc;line-height:1.7;">
+                <p itemprop="text">Максимальная дальность <strong>миномёта в WARDOGS</strong> составляет <strong>700
+                        метров</strong>. Для целей дальше 700 м используйте <strong>артиллерию</strong>, которая
+                    стреляет на расстояние <strong>более 2 км</strong>. В настройках калькулятора можно переключиться
+                    между миномётом и артиллерией.</p>
+            </div>
+        </details>
+
+        <details itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"
+            style="margin-bottom:1rem;background:#232830;border-radius:8px;overflow:hidden;">
+            <summary itemprop="name"
+                style="cursor:pointer;padding:1rem 1.2rem;font-weight:600;font-size:1.05rem;color:#e8c35a;list-style:none;display:flex;justify-content:space-between;align-items:center;">
+                Какие карты поддерживаются в калькуляторе?
+                <span style="font-size:1.2rem;color:#9fd356;">▾</span>
+            </summary>
+            <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"
+                style="padding:0 1.2rem 1.2rem;color:#ccc;line-height:1.7;">
+                <p itemprop="text">Калькулятор поддерживает две карты: <strong>Bakurani</strong> и
+                    <strong>Ozeti</strong>. Обе карты размером <strong>16×16 км</strong> с интерактивным тайловым зумом
+                    и панорамированием. На карте Bakurani дополнительно отображаются вышки и важные объекты.</p>
+            </div>
+        </details>
+
+        <details itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"
+            style="margin-bottom:1rem;background:#232830;border-radius:8px;overflow:hidden;">
+            <summary itemprop="name"
+                style="cursor:pointer;padding:1rem 1.2rem;font-weight:600;font-size:1.05rem;color:#e8c35a;list-style:none;display:flex;justify-content:space-between;align-items:center;">
+                Как рассчитать азимут и угол возвышения миномёта?
+                <span style="font-size:1.2rem;color:#9fd356;">▾</span>
+            </summary>
+            <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"
+                style="padding:0 1.2rem 1.2rem;color:#ccc;line-height:1.7;">
+                <p itemprop="text"><strong>Азимут</strong> — это направление от огневой позиции до цели, измеренное от
+                    севера по часовой стрелке. <strong>Угол возвышения (mils)</strong> — угол наклона ствола миномёта
+                    для попадания в цель. Калькулятор WARDOGS рассчитывает оба значения автоматически на основе
+                    координат точек A и B.</p>
+            </div>
+        </details>
+
+        <details itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"
+            style="margin-bottom:1rem;background:#232830;border-radius:8px;overflow:hidden;">
+            <summary itemprop="name"
+                style="cursor:pointer;padding:1rem 1.2rem;font-weight:600;font-size:1.05rem;color:#e8c35a;list-style:none;display:flex;justify-content:space-between;align-items:center;">
+                Сколько mils в градусе в WARDOGS?
+                <span style="font-size:1.2rem;color:#9fd356;">▾</span>
+            </summary>
+            <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"
+                style="padding:0 1.2rem 1.2rem;color:#ccc;line-height:1.7;">
+                <p itemprop="text">В системе измерения, используемой в WARDOGS и военном деле, один полный круг равен
+                    <strong>6400 mils (мин)</strong>. 1 градус ≈ 17.78 mils. Калькулятор автоматически конвертирует
+                    значения и показывает угол возвышения именно в mils, как в игре.</p>
+            </div>
+        </details>
+
+        <details itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"
+            style="margin-bottom:1rem;background:#232830;border-radius:8px;overflow:hidden;">
+            <summary itemprop="name"
+                style="cursor:pointer;padding:1rem 1.2rem;font-weight:600;font-size:1.05rem;color:#e8c35a;list-style:none;display:flex;justify-content:space-between;align-items:center;">
+                Миномётный калькулятор WARDOGS — как пользоваться онлайн?
+                <span style="font-size:1.2rem;color:#9fd356;">▾</span>
+            </summary>
+            <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"
+                style="padding:0 1.2rem 1.2rem;color:#ccc;line-height:1.7;">
+                <p itemprop="text"><strong>Калькулятор WARDOGS</strong> полностью бесплатный и работает онлайн в
+                    браузере — установка не требуется. Установите точку A (позиция миномёта) и точку B (цель) на
+                    интерактивной карте правым кликом или введите координаты вручную. Координаты отображаются под
+                    курсором (от 0 до 160). Результаты — дистанция, азимут и угол возвышения — отображаются мгновенно в
+                    левой панели.</p>
+            </div>
+        </details>
+
+        <details itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"
+            style="margin-bottom:1rem;background:#232830;border-radius:8px;overflow:hidden;">
+            <summary itemprop="name"
+                style="cursor:pointer;padding:1rem 1.2rem;font-weight:600;font-size:1.05rem;color:#e8c35a;list-style:none;display:flex;justify-content:space-between;align-items:center;">
+                Можно ли сохранить координаты и поделиться с друзьями?
+                <span style="font-size:1.2rem;color:#9fd356;">▾</span>
+            </summary>
+            <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"
+                style="padding:0 1.2rem 1.2rem;color:#ccc;line-height:1.7;">
+                <p itemprop="text">Да! Калькулятор автоматически сохраняет все точки и настройки в
+                    <strong>localStorage</strong> браузера. Кроме того, можно нажать кнопку «Поделиться» для получения
+                    <strong>ссылки с координатами</strong>, которую удобно отправлять союзникам в Discord или другом
+                    чате.</p>
+            </div>
+        </details>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         SEO-ТЕКСТ — описание инструмента для поисковых роботов
+         ══════════════════════════════════════════════════════════════ -->
+    <section class="seo-content"
+        style="max-width:960px;margin:0 auto;padding:0 1.5rem 2rem;color:#aaa;line-height:1.7;font-size:0.95rem;">
+        <h2 style="color:#9fd356;font-size:1.3rem;margin-bottom:1rem;">О калькуляторе WARDOGS</h2>
+        <p><strong>WARDOGS Mortar Calculator</strong> — неофициальный бесплатный онлайн-инструмент для расчёта
+            миномётного и артиллерийского огня в тактическом шутере WARDOGS. Позволяет мгновенно определить расстояние,
+            направление (азимут) и угол ствола (в mils) для точного поражения целей.</p>
+        <p>Калькулятор работает на интерактивной карте размером 16×16 км с поддержкой двух карт:
+            <strong>Bakurani</strong> и <strong>Ozeti</strong>. Инструменты рисования позволяют отмечать позиции,
+            строить линии и метки прямо на карте. Все данные автоматически сохраняются и доступны через share-ссылки.
+        </p>
+        <p>Интерфейс доступен на <strong>9 языках</strong>: русском, английском, немецком, французском, испанском,
+            польском, украинском, турецком и китайском. Калькулятор адаптирован для мобильных устройств и работает в
+            любом современном браузере без установки.</p>
+    </section>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         FOOTER — навигация, ссылки, копирайт
+         ══════════════════════════════════════════════════════════════ -->
+    <footer
+        style="max-width:960px;margin:0 auto;padding:2rem 1.5rem;border-top:1px solid #333;color:#888;font-size:0.85rem;line-height:1.8;">
+        <div style="display:flex;flex-wrap:wrap;gap:2rem;justify-content:space-between;align-items:flex-start;">
+            <div>
+                <h2 style="color:#9fd356;font-size:1.1rem;margin:0 0 0.5rem;">WARDOGS Calculator</h2>
+                <p style="margin:0;">Неофициальный миномётный и артиллерийский калькулятор<br>для игры WARDOGS.
+                    Бесплатно, онлайн, 9 языков.</p>
+            </div>
+            <div>
+                <h3 style="color:#e8c35a;font-size:0.95rem;margin:0 0 0.5rem;">Проект</h3>
+                <p style="margin:0;">
+                    <a href="https://github.com/djzet/wardogs-calc" target="_blank" rel="noopener"
+                        style="color:#9fd356;text-decoration:none;">GitHub</a> ·
+                    <a href="https://discord.gg/kwxrTCJxre" target="_blank" rel="noopener"
+                        style="color:#9fd356;text-decoration:none;">Discord</a> ·
+                    <a href="mailto:egor.silaev2003@yandex.ru" style="color:#9fd356;text-decoration:none;">Email</a>
+                </p>
+            </div>
+            <div>
+                <h3 style="color:#e8c35a;font-size:0.95rem;margin:0 0 0.5rem;">Языки</h3>
+                <p style="margin:0;">
+                    <a href="?lang=ru" style="color:#9fd356;text-decoration:none;">Русский</a> ·
+                    <a href="?lang=en" style="color:#9fd356;text-decoration:none;">English</a> ·
+                    <a href="?lang=de" style="color:#9fd356;text-decoration:none;">Deutsch</a> ·
+                    <a href="?lang=fr" style="color:#9fd356;text-decoration:none;">Français</a> ·
+                    <a href="?lang=es" style="color:#9fd356;text-decoration:none;">Español</a> ·
+                    <a href="?lang=pl" style="color:#9fd356;text-decoration:none;">Polski</a> ·
+                    <a href="?lang=uk" style="color:#9fd356;text-decoration:none;">Українська</a> ·
+                    <a href="?lang=tr" style="color:#9fd356;text-decoration:none;">Türkçe</a> ·
+                    <a href="?lang=zh" style="color:#9fd356;text-decoration:none;">中文</a>
+                </p>
+            </div>
+        </div>
+        <p style="text-align:center;margin:1.5rem 0 0;color:#555;">© 2025 Egor Silaev · MIT License · <a
+                href="https://djzet.github.io/wardogs-calc/"
+                style="color:#666;text-decoration:none;">djzet.github.io/wardogs-calc</a></p>
+    </footer>
 
     <!-- Vite entry point: подключает CSS-переменные и все JS-модули -->
     <script type="module" src="/src/main.js"></script>

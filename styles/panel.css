@@ -14,16 +14,20 @@
 /* ═══════════════ ОСНОВНАЯ ПАНЕЛЬ ═══════════════ */
 
 .panel {
-    width: var(--panel-width);  /* Fluid: 340/400/440/480px по экрану */
-    flex-shrink: 0;             /* Не сжимается */
+    width: var(--panel-width);
+    /* Fluid: 340/400/440/480px по экрану */
+    flex-shrink: 0;
+    /* Не сжимается */
     background: var(--panel);
     border-right: 1px solid var(--border);
     padding: var(--pad-panel, 20px);
     display: flex;
     flex-direction: column;
     gap: var(--gap-panel, 18px);
-    overflow-y: auto;           /* Скролл если контент не влезает */
-    overscroll-behavior: contain; /* Не пробрасываем скролл на карту */
+    overflow-y: auto;
+    /* Скролл если контент не влезает */
+    overscroll-behavior: contain;
+    /* Не пробрасываем скролл на карту */
 }
 
 .panel-header {
@@ -48,6 +52,7 @@
     cursor: pointer;
     transition: background var(--transition-fast, 0.15s);
 }
+
 .menu-toggle:hover {
     background: var(--hover);
 }
@@ -60,25 +65,30 @@
     background: var(--point-a-bg);
     padding-left: calc(var(--pad-section, 12px) - 3px);
 }
+
 .section-point-b {
     border-left: 3px solid var(--point-b);
     background: var(--point-b-bg);
     padding-left: calc(var(--pad-section, 12px) - 3px);
 }
+
 .section-point-a h2,
 .section-point-b h2 {
     margin-bottom: 8px;
 }
+
 .section-point-a h2 {
     color: var(--point-a);
 }
+
 .section-point-b h2 {
     color: var(--point-b);
 }
 
 .coord-row {
     display: grid;
-    grid-template-columns: 1fr 1fr auto; /* X | Y | [очистить] */
+    grid-template-columns: 1fr 1fr auto;
+    /* X | Y | [очистить] */
     gap: 8px;
     align-items: stretch;
 }
@@ -104,7 +114,8 @@
 /* Стилизация числовых полей ввода */
 input[type="number"] {
     width: 100%;
-    min-height: var(--touch-min, 40px); /* Удобно набирать на телефоне */
+    min-height: var(--touch-min, 40px);
+    /* Удобно набирать на телефоне */
     background: var(--field);
     border: 1px solid var(--border);
     color: var(--text);
@@ -121,16 +132,20 @@ input[type="number"]::-webkit-inner-spin-button {
     cursor: pointer;
     height: 26px;
 }
+
 input[type="number"]::-webkit-outer-spin-button {
-    -webkit-appearance: none; /* Скрываем внешние стрелки */
+    -webkit-appearance: none;
+    /* Скрываем внешние стрелки */
 }
 
 input[type="number"]:focus {
     outline: none;
     border-color: var(--accent);
 }
+
 input[type="number"]:invalid {
-    border-color: var(--danger); /* Красная граница при невалидном значении */
+    border-color: var(--danger);
+    /* Красная граница при невалидном значении */
 }
 
 /* Кнопка очистки координаты */
@@ -148,11 +163,15 @@ input[type="number"]:invalid {
     align-items: center;
     justify-content: center;
 }
+
 .clear:hover {
-    color: var(--danger); /* Красный при наведении */
+    color: var(--danger);
+    /* Красный при наведении */
 }
+
 .clear:active {
-    color: var(--danger); /* Красный при нажатии (touch feedback) */
+    color: var(--danger);
+    /* Красный при нажатии (touch feedback) */
 }
 
 /* ═══════════════ ПАНЕЛЬ РЕЗУЛЬТАТОВ ═══════════════ */
@@ -164,11 +183,13 @@ input[type="number"]:invalid {
     padding: 14px 16px;
     display: grid;
     gap: 8px;
-    position: sticky;           /* Результаты всегда на виду при скролле */
+    position: sticky;
+    /* Результаты всегда на виду при скролле */
     top: 0;
     z-index: 2;
     transition: background var(--transition-fast, 0.15s);
-    position: relative;         /* Контекст для ::after pseudo-element */
+    position: relative;
+    /* Контекст для ::after pseudo-element */
 }
 
 .result div {
@@ -180,16 +201,19 @@ input[type="number"]:invalid {
     padding: 6px 0;
     border-bottom: 1px solid rgba(159, 211, 86, 0.06);
 }
+
 .result div:last-child {
     border-bottom: none;
     padding-bottom: 0;
 }
+
 .result div:first-child {
     padding-top: 0;
 }
 
 .result span {
-    color: var(--muted);  /* Название параметра (слева) */
+    color: var(--muted);
+    /* Название параметра (слева) */
     flex-shrink: 0;
     font-size: 12px;
     text-transform: uppercase;
@@ -197,8 +221,10 @@ input[type="number"]:invalid {
 }
 
 .result b {
-    color: var(--accent); /* Значение (справа) — зелёный */
-    font-variant-numeric: tabular-nums; /* Моноширинные цифры */
+    color: var(--accent);
+    /* Значение (справа) — зелёный */
+    font-variant-numeric: tabular-nums;
+    /* Моноширинные цифры */
     font-feature-settings: "tnum";
     font-weight: 700;
     text-align: right;
@@ -207,15 +233,25 @@ input[type="number"]:invalid {
 }
 
 @keyframes resultPulse {
-    0%   { opacity: 0.4; transform: translateY(-2px); }
-    100% { opacity: 1;   transform: translateY(0); }
+    0% {
+        opacity: 0.4;
+        transform: translateY(-2px);
+    }
+
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .result b.oor {
-    color: var(--danger); /* "Вне досягаемости" — красный */
+    color: var(--danger);
+    /* "Вне досягаемости" — красный */
 }
+
 .result b.warn {
-    color: var(--warn);   /* "Слишком близко" — жёлтый */
+    color: var(--warn);
+    /* "Слишком близко" — жёлтый */
 }
 
 /* ═══════════════ СЕКЦИЯ НАСТРОЕК ═══════════════ */
@@ -233,6 +269,7 @@ input[type="number"]:invalid {
         padding: 10px 12px;
     }
 }
+
 .controls-section h2 {
     margin-bottom: 12px;
 }
@@ -240,6 +277,7 @@ input[type="number"]:invalid {
 .control-group {
     margin-bottom: 14px;
 }
+
 .control-group:last-child {
     margin-bottom: 0;
 }
@@ -260,6 +298,7 @@ input[type="number"]:invalid {
     grid-template-columns: 1fr 1fr;
     gap: 8px;
 }
+
 .radio-option {
     display: flex;
     flex-direction: column;
@@ -273,21 +312,26 @@ input[type="number"]:invalid {
     border-radius: var(--radius-md);
     transition: border-color 0.2s ease, background 0.2s ease, transform 0.15s ease;
 }
+
 .radio-option:hover {
     border-color: var(--dim);
     background: var(--hover);
 }
+
 .radio-option:has(input:checked) {
     border-color: var(--accent);
     background: rgba(159, 211, 86, 0.08);
 }
+
 .radio-option:has(input:checked) span {
     color: var(--accent);
     font-weight: 600;
 }
+
 .radio-option:active {
     transform: scale(0.97);
 }
+
 .radio-option input[type="radio"] {
     width: 0;
     height: 0;
@@ -296,9 +340,11 @@ input[type="number"]:invalid {
     cursor: pointer;
     margin: 0;
 }
+
 .radio-option input[type="radio"]:disabled {
     cursor: not-allowed;
 }
+
 .radio-option span {
     font-size: 13px;
     color: var(--text);
@@ -325,12 +371,14 @@ input[type="number"]:invalid {
     flex-direction: column;
     gap: 4px;
 }
+
 .contact-label {
     font-size: 11px;
     text-transform: uppercase;
     letter-spacing: .06em;
     color: var(--muted);
 }
+
 .contact-email {
     color: var(--accent);
     text-decoration: none;
@@ -339,6 +387,7 @@ input[type="number"]:invalid {
     word-break: break-all;
     transition: color .15s ease;
 }
+
 .contact-email:hover {
     color: var(--accent-hover);
     text-decoration: underline;
@@ -363,16 +412,20 @@ input[type="number"]:invalid {
     padding: 10px;
     transition: border-color .15s ease;
 }
+
 .discord-qr:hover {
     border-color: var(--accent);
 }
+
 .discord-qr img {
     width: 200px;
     height: 200px;
     border-radius: var(--radius-sm);
-    background: #fff;      /* Белый фон под QR */
+    background: #fff;
+    /* Белый фон под QR */
     padding: 6px;
 }
+
 .discord-qr span {
     font-size: 12px;
     color: var(--muted);
@@ -393,14 +446,19 @@ input[type="number"]:invalid {
     font-size: 14px;
     font-weight: 600;
     transition: background .15s ease, transform .1s ease;
-    box-shadow: 0 2px 8px rgba(88, 101, 242, .3); /* Тень Discord */
+    box-shadow: 0 2px 8px rgba(88, 101, 242, .3);
+    /* Тень Discord */
 }
+
 .discord-btn:hover {
     background: var(--discord-hover);
 }
+
 .discord-btn:active {
-    transform: translateY(1px); /* Эффект нажатия */
+    transform: translateY(1px);
+    /* Эффект нажатия */
 }
+
 .discord-btn svg {
     flex-shrink: 0;
 }
@@ -408,7 +466,8 @@ input[type="number"]:invalid {
 /* ═══════════════ СЕЛЕКТОР ЯЗЫКА ═══════════════ */
 
 .translate-widget {
-    margin-top: auto;     /* Прижат к низу панели */
+    margin-top: auto;
+    /* Прижат к низу панели */
     padding-top: 16px;
     border-top: 1px solid var(--border);
     display: flex;
@@ -420,12 +479,14 @@ input[type="number"]:invalid {
     width: 100%;
     min-height: var(--touch-min, 40px);
 }
+
 .translate-widget label {
     font-size: 12px;
     text-transform: uppercase;
     letter-spacing: .06em;
     color: var(--muted);
 }
+
 .translate-widget select {
     background: var(--field);
     border: 1px solid var(--border);
@@ -435,6 +496,7 @@ input[type="number"]:invalid {
     font-size: 14px;
     cursor: pointer;
 }
+
 .translate-widget select:focus {
     outline: none;
     border-color: var(--accent);
@@ -462,6 +524,7 @@ input[type="number"]:invalid {
     justify-content: center;
     user-select: none;
 }
+
 .draw-tool:hover {
     background: var(--hover);
     border-color: var(--dim);
@@ -472,10 +535,13 @@ input[type="number"]:invalid {
         height: 36px;
     }
 }
+
 .draw-tool.active {
     border-color: var(--accent);
-    background: rgba(159, 211, 86, 0.12); /* Полупрозрачный зелёный */
-    box-shadow: 0 0 0 1px var(--accent);   /* Внешний accent-контур */
+    background: rgba(159, 211, 86, 0.12);
+    /* Полупрозрачный зелёный */
+    box-shadow: 0 0 0 1px var(--accent);
+    /* Внешний accent-контур */
 }
 
 /* ═══════════════ ТОЛЩИНА ЛИНИИ ═══════════════ */
@@ -485,6 +551,7 @@ input[type="number"]:invalid {
     grid-template-columns: repeat(4, 1fr);
     gap: 6px;
 }
+
 .width-opt {
     height: 28px;
     min-height: 28px;
@@ -498,17 +565,34 @@ input[type="number"]:invalid {
     color: var(--text);
     transition: background var(--transition-fast, 0.15s), border-color var(--transition-fast, 0.15s);
 }
+
 .width-opt span {
     display: block;
     width: 16px;
     background: currentColor;
     border-radius: 1px;
 }
-.width-opt .w1 { height: 1px; }
-.width-opt .w2 { height: 2px; }
-.width-opt .w3 { height: 3px; }
-.width-opt .w4 { height: 4px; }
-.width-opt:hover { background: var(--hover); }
+
+.width-opt .w1 {
+    height: 1px;
+}
+
+.width-opt .w2 {
+    height: 2px;
+}
+
+.width-opt .w3 {
+    height: 3px;
+}
+
+.width-opt .w4 {
+    height: 4px;
+}
+
+.width-opt:hover {
+    background: var(--hover);
+}
+
 .width-opt.active {
     border-color: var(--accent);
     box-shadow: 0 0 0 1px var(--accent);
@@ -533,10 +617,12 @@ input[type="number"]:invalid {
         height: 40px;
     }
 }
+
 .clear-drawings-btn:hover {
     background: var(--hover);
     border-color: var(--dim);
 }
+
 .clear-drawings-btn:active {
     background: var(--hover);
     border-color: var(--dim);
@@ -551,6 +637,7 @@ input[type="number"]:invalid {
     padding: 12px 14px;
     margin-top: 8px;
 }
+
 .lobby-section h3 {
     margin: 0 0 10px 0;
     font-size: 14px;
@@ -558,12 +645,14 @@ input[type="number"]:invalid {
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
+
 .lobby-info {
     font-size: 13px;
     color: var(--muted);
     margin-bottom: 10px;
     font-family: monospace;
 }
+
 .lobby-players {
     display: flex;
     flex-direction: column;
@@ -572,6 +661,7 @@ input[type="number"]:invalid {
     max-height: 150px;
     overflow-y: auto;
 }
+
 .lobby-section .view-reset {
     width: 100%;
     text-align: center;
@@ -590,6 +680,7 @@ input[type="number"]:invalid {
     font: inherit;
     cursor: pointer;
 }
+
 .map-select:focus {
     outline: none;
     border-color: var(--accent);
@@ -628,17 +719,17 @@ input[type="number"]:invalid {
     transform: rotate(-90deg);
 }
 
-.controls-section > .control-group,
-.controls-section > .width-grid,
-.controls-section > .hint {
+.controls-section>.control-group,
+.controls-section>.width-grid,
+.controls-section>.hint {
     transition: opacity 0.2s ease, max-height 0.3s ease;
     overflow: hidden;
 }
 
-.controls-section.collapsed > .control-group,
-.controls-section.collapsed > .width-grid,
-.controls-section.collapsed > .hint,
-.controls-section.collapsed > .clear-drawings-btn {
+.controls-section.collapsed>.control-group,
+.controls-section.collapsed>.width-grid,
+.controls-section.collapsed>.hint,
+.controls-section.collapsed>.clear-drawings-btn {
     display: none;
 }
 
@@ -676,9 +767,11 @@ input[type="number"]:invalid {
         transform: translateY(-1px);
         box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
     }
+
     .draw-tool.active {
         transform: translateY(-1px);
     }
+
     .draw-tool:active {
         transform: translateY(0) scale(0.95);
     }

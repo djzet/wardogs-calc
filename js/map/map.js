@@ -9,7 +9,7 @@
  * Экспорт: window.MapTiles
  */
 
-window.MapTiles = (function() {
+window.MapTiles = (function () {
 
     /** LRU-кэш загруженных тайлов: ключ → {img, loaded, error} */
     const tileCache = new Map();
@@ -1313,7 +1313,7 @@ window.MapInteractions = (function () {
  * Экспорт: window.MapViewport
  */
 
-window.MapViewport = (function() {
+window.MapViewport = (function () {
 
     /** Параметры камеры: scale и смещение экрана */
     const view = { scale: 0.05, ox: 0, oy: 0 };
