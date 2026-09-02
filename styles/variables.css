@@ -75,6 +75,14 @@
     /* === Минимальный touch-target (WCAG 2.5.5) === */
     --touch-min: 44px;
 
+    /* === Цвета точек === */
+    --point-a: #9fd356;
+    --point-a-bg: rgba(159, 211, 86, 0.06);
+    --point-a-border: rgba(159, 211, 86, 0.25);
+    --point-b: #e8c35a;
+    --point-b-bg: rgba(232, 195, 90, 0.06);
+    --point-b-border: rgba(232, 195, 90, 0.25);
+
     /* === Транзишны === */
     --transition-fast: 0.15s ease;
     --transition-normal: 0.25s ease;
@@ -112,6 +120,13 @@ body.light {
     --discord-hover: #4752C4;
 
     --warn: #8a6d00;            /* Тёмно-жёлтый для светлой темы */
+
+    --point-a: #3d8c0f;
+    --point-a-bg: rgba(61, 140, 15, 0.06);
+    --point-a-border: rgba(61, 140, 15, 0.2);
+    --point-b: #7a5c00;
+    --point-b-bg: rgba(122, 92, 0, 0.06);
+    --point-b-border: rgba(122, 92, 0, 0.2);
 }
 
 /* ═══════════════ АВТО-ТЕМА ПО СИСТЕМНЫМ НАСТРОЙКАМ ═══════════════ */
@@ -137,6 +152,12 @@ body.light {
         --btn-bg: rgba(255, 255, 255, .92);
         --btn-text: #333c47;
         --warn: #8a6d00;
+        --point-a: #3d8c0f;
+        --point-a-bg: rgba(61, 140, 15, 0.06);
+        --point-a-border: rgba(61, 140, 15, 0.2);
+        --point-b: #7a5c00;
+        --point-b-bg: rgba(122, 92, 0, 0.06);
+        --point-b-border: rgba(122, 92, 0, 0.2);
     }
 }
 

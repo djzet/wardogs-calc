@@ -398,6 +398,13 @@ window.UIResults = (function (calc, points, utils) {
     /** Ссылки на DOM-элементы и данные */
     let out = null, getWeapons = null, getCurrentWeapon = null, STR = null;
 
+    /** Форсирует повторное проигрывание CSS-анимации на элементе */
+    function replayAnim(el) {
+        el.style.animation = 'none';
+        el.offsetHeight; /* Триггер reflow */
+        el.style.animation = '';
+    }
+
     /**
      * Инициализирует модуль результатов.
      * @param {object} opts — зависимости:
@@ -435,6 +442,8 @@ window.UIResults = (function (calc, points, utils) {
         /** Дистанция и азимут отображаются всегда (если есть обе точки) */
         out.dist.textContent = utils.fmtDist(r.dist, STR);
         out.az.textContent = r.azimuth.toFixed(1) + '°';
+        replayAnim(out.dist);
+        replayAnim(out.az);
 
         switch (r.status) {
             case 'coincide':
@@ -454,6 +463,7 @@ window.UIResults = (function (calc, points, utils) {
                 out.el.textContent = r.mils + utils.NBSP + STR.u_mil;
                 break;
         }
+        replayAnim(out.el);
     }
 
     return { init, update };

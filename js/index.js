@@ -213,6 +213,10 @@ function switchMap(mapId) {
     /** Синхронизируем select в drawer */
     const sel = el('mapSelect');
     if (sel) sel.value = mapId;
+
+    /** Обновляем бейдж карты */
+    const badge = el('mapBadge');
+    if (badge) badge.textContent = mapId.charAt(0).toUpperCase() + mapId.slice(1);
 }
 
 /**
@@ -314,6 +318,15 @@ AppAnalytics.init();
 LocaleManager.setOnLocaleChange(() => renderMap());
 
 // ═══════════════════════════════════════════════════════════
+//  Accordion: сворачиваемые секции
+// ═══════════════════════════════════════════════════════════
+document.querySelectorAll('.controls-section h2').forEach(h2 => {
+    h2.addEventListener('click', () => {
+        h2.closest('.controls-section').classList.toggle('collapsed');
+    });
+});
+
+// ═══════════════════════════════════════════════════════════
 //  Привязка UI-кнопок
 // ═══════════════════════════════════════════════════════════
 
@@ -322,11 +335,24 @@ el('clearA').onclick = () => AppPoints.setPoint('A', null);
 el('clearB').onclick = () => AppPoints.setPoint('B', null);
 
 /** Кнопки инструментов рисования */
+/** Названия инструментов для статус-бара (через локализацию) */
+const toolNames = {
+    pen: () => STR.toolPen || 'Карандаш',
+    line: () => STR.toolLine || 'Линейка',
+    marker: () => STR.toolMarker || 'Метка',
+    eraser: () => STR.toolEraser || 'Ластик',
+    pan: () => STR.toolPan || 'Перемещение'
+};
+
 document.querySelectorAll('.draw-tool').forEach(btn => {
     btn.addEventListener('click', () => {
-        window.AppDraw.setTool(btn.dataset.tool);
+        const tool = btn.dataset.tool;
+        window.AppDraw.setTool(tool);
         /** Меняем курсор в зависимости от инструмента */
-        canvas.style.cursor = btn.dataset.tool === 'pan' ? 'grab' : (btn.dataset.tool === 'eraser' ? 'cell' : 'crosshair');
+        canvas.style.cursor = tool === 'pan' ? 'grab' : (tool === 'eraser' ? 'cell' : 'crosshair');
+        /** Обновляем статус инструмента */
+        const statusEl = el('toolStatus');
+        if (statusEl && toolNames[tool]) statusEl.textContent = toolNames[tool]();
     });
 });
 
@@ -442,6 +468,10 @@ if (loadedState) {
     MapViewport.restore(loadedState.view);
     UIInputs.sync();
 }
+
+/** Устанавливаем бейдж текущей карты */
+const badge = el('mapBadge');
+if (badge) badge.textContent = currentMapId.charAt(0).toUpperCase() + currentMapId.slice(1);
 
 /** Применяем параметры из URL (шаринг) — после localStorage, чтобы шаринг имел приоритет */
 applySharedParams();

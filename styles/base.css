@@ -30,6 +30,7 @@ body {
 body {
     font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
     font-size: var(--font-body, 15px);
+    line-height: 1.5;
     background: var(--bg);
     color: var(--text);
     -webkit-tap-highlight-color: transparent; /* Убираем подсветку при tap на iOS */
@@ -61,6 +62,7 @@ h2 {
     letter-spacing: .06em;
     color: var(--muted);
     margin-bottom: 8px;
+    font-feature-settings: "tnum";
 }
 
 /* ═══════════════ ПРЕДОТВРАЩЕНИЕ СКРОЛЛА ═══════════════ */
@@ -181,6 +183,25 @@ svg {
 * {
     scrollbar-width: thin;
     scrollbar-color: var(--border) transparent;
+}
+
+/* ═══════════════ СВЕТЛАЯ ТЕМА: ТЕНИ ═══════════════ */
+body.light .panel {
+    box-shadow: 2px 0 16px rgba(0, 0, 0, 0.06);
+}
+body.light .result {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+body.light .controls-section {
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+}
+body.light .section-point-a {
+    border-left-color: var(--point-a);
+    background: var(--point-a-bg);
+}
+body.light .section-point-b {
+    border-left-color: var(--point-b);
+    background: var(--point-b-bg);
 }
 
 /* ═══════════════ ПЕЧАТЬ ═══════════════ */

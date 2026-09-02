@@ -85,12 +85,12 @@
 
 /* Кастомный toggle-переключатель: полоска с ползунком */
 .switch {
-    width: 38px;
-    height: 20px;
-    min-width: 38px;
+    width: 42px;
+    height: 22px;
+    min-width: 42px;
     flex-shrink: 0;
     background: var(--border);    /* Серый по умолчанию (выкл) */
-    border-radius: 10px;          /* Полная скруглённость */
+    border-radius: 11px;          /* Полная скруглённость */
     position: relative;
     transition: var(--transition-fast, 0.2s);  /* Плавная анимация переключения */
 }
@@ -101,11 +101,12 @@
     position: absolute;
     top: 2px;
     left: 2px;                   /* Левое положение = выкл */
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     border-radius: 50%;
     background: var(--text);
     transition: .2s;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
 }
 
 /* Включённое состояние: зелёная полоска */
@@ -115,7 +116,7 @@
 
 /* Включённое состояние: ползунок сдвигается вправо, белый */
 .switch-row input:checked + .switch::after {
-    left: 20px;
+    left: 22px;
     background: #fff;
 }
 

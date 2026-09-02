@@ -239,14 +239,17 @@
         <!-- ═══════ ЛЕВАЯ ПАНЕЛЬ: координаты, результаты, настройки ═══════ -->
         <aside class="panel">
             <div class="panel-header">
-                <h1 data-i18n="title">Миномётный калькулятор</h1>
+                <div class="header-text">
+                    <h1 data-i18n="title">Миномётный калькулятор</h1>
+                    <span class="map-badge" id="mapBadge">Bakurani</span>
+                </div>
                 <button class="menu-toggle" id="drawerToggle" title="Дополнительно" aria-label="Дополнительно">
                     <svg width="16" height="16">
                         <use href="#icon-menu" />
                     </svg>
                 </button>
             </div>
-            <section>
+            <section class="section-point-a">
                 <h2 data-i18n="posA">Огневая позиция (A)</h2>
                 <div class="coord-row">
                     <label>X <input type="number" id="ax" placeholder="0.00" step="0.01" min="0" max="160"></label>
@@ -254,7 +257,7 @@
                     <button class="clear" id="clearA" title="Очистить A" aria-label="Очистить A">×</button>
                 </div>
             </section>
-            <section>
+            <section class="section-point-b">
                 <h2 data-i18n="posB">Цель (B)</h2>
                 <div class="coord-row">
                     <label>X <input type="number" id="bx" placeholder="0.00" step="0.01" min="0" max="160"></label>
@@ -267,7 +270,7 @@
                 <div><span data-i18n="az">Азимут</span><b id="azimuth">—</b></div>
                 <div><span data-i18n="el">Угол возвышения</span><b id="elevation">—</b></div>
             </section>
-            <section class="controls-section">
+            <section class="controls-section" id="settingsSection">
                 <h2 data-i18n="controlsTitle">Настройки</h2>
                 <div class="control-group">
                     <label class="control-label" data-i18n="weaponType">Тип орудия</label>
@@ -321,6 +324,7 @@
                         </button>
                     </div>
                 </div>
+                <div class="tool-status" id="toolStatus"></div>
                 <div class="control-group">
                     <label class="control-label" data-i18n="lineWidth">Толщина линии</label>
                     <div class="width-grid">

@@ -26,6 +26,8 @@
         border-bottom: 1px solid var(--border);
         padding: 14px;
         gap: 14px;
+        overscroll-behavior-y: contain;
+        -webkit-overflow-scrolling: touch;
     }
 
     /* Карта: занимает минимум 50% высоты */
@@ -74,10 +76,16 @@
     .draw-tool {
         height: 42px;
     }
+    .draw-tool:active {
+        transform: scale(0.93);
+    }
 
     /* Увеличиваем кнопки толщины линии */
     .width-opt {
         height: 36px;
+    }
+    .width-opt:active {
+        transform: scale(0.93);
     }
 
     /* Увеличиваем кнопку очистки для touch */
@@ -95,6 +103,14 @@
     /* Компактные radio-кнопки */
     .radio-option {
         padding: 3px 0;
+    }
+
+    /* Map controls glassmorphism на мобильных */
+    .map-controls {
+        top: 8px;
+        right: 8px;
+        gap: 4px;
+        padding: 4px;
     }
 
     /* QR-код Discord: уменьшаем на узких экранах */
@@ -222,6 +238,16 @@
         background: transparent;
         padding: 6px 0;
     }
+
+    /* Карточки оружия — компактнее */
+    .radio-option {
+        padding: 10px 6px;
+    }
+    .radio-option span {
+        font-size: 12px;
+    }
+
+    /* Аккордеон — скрытие стрелки на маленьком экране не нужно */
 }
 
 /* ═══════════════ СОВСЕМ МАЛЕНЬКИЕ ЭКРАНЫ ≤ 360px ═══════════════ */
@@ -260,6 +286,18 @@
 
     .draw-tool {
         height: 40px;
+    }
+
+    .map-controls {
+        top: 6px;
+        right: 6px;
+        padding: 3px;
+        gap: 3px;
+    }
+
+    .view-reset {
+        padding: 5px 8px;
+        font-size: 12px;
     }
 }
 
@@ -311,12 +349,16 @@
     }
 
     .result {
-        padding: 16px 18px;
-        gap: 12px;
+        padding: 18px 20px;
+        gap: 10px;
     }
 
     .result div {
         font-size: 16px;
+    }
+
+    .result b {
+        font-size: 20px;
     }
 
     .controls-section {
@@ -330,6 +372,10 @@
     .draw-tool svg {
         width: 20px;
         height: 20px;
+    }
+
+    .tool-status {
+        font-size: 12px;
     }
 }
 
@@ -466,6 +512,18 @@
         --field: #050505;
         --border: #333333;
         --text: #ffffff;
+    }
+    .result {
+        background: var(--field);
+        border-color: var(--border);
+    }
+}
+
+/* ═══════════════ LIGHT THEME: MAP CONTROLS ═══════════════ */
+@media (prefers-color-scheme: light) {
+    .map-controls {
+        background: rgba(255, 255, 255, 0.65);
+        border: 1px solid rgba(0, 0, 0, 0.08);
     }
 }
 
