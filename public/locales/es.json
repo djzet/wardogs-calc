@@ -60,5 +60,8 @@
     },
     "mapLabel": "Mapa",
     "cancel": "Cancelar",
-    "markerDefault": "Marcador"
+    "markerDefault": "Marcador",
+    "footerDesc": "Calculadora no oficial de mortero y artillería para WARDOGS. Gratis, en línea, 9 idiomas.",
+    "footerProject": "Proyecto",
+    "footerLangs": "Idiomas"
 }

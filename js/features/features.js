@@ -43,6 +43,9 @@ window.AppDraw = (function (utils) {
   /** Координаты pending-маркера (ожидание ввода имени через модалку) */
   let pendingMarker = null;
 
+  /** Ссылка на cleanup-функцию модалки маркера (для корректного снятия listener'ов при Escape) */
+  let _cleanupModal = null;
+
   /** Колбэк при успешном завершении штриха (для перерисовки карты) */
   let onStrokeComplete = null;
 
@@ -115,6 +118,10 @@ window.AppDraw = (function (utils) {
   function startStroke(px, py) {
     if (currentTool === 'pan' || currentTool === 'eraser') return;
 
+    /** Clamp coordinates to map bounds [0, 100] */
+    px = Math.max(0, Math.min(100, px));
+    py = Math.max(0, Math.min(100, py));
+
     /** Маркер: показываем кастомную модалку вместо prompt() */
     if (currentTool === 'marker') {
       showMarkerModal(px, py);
@@ -142,6 +149,10 @@ window.AppDraw = (function (utils) {
    */
   function continueStroke(px, py) {
     if (!isDrawing || !currentStroke) return;
+
+    /** Clamp coordinates to map bounds [0, 100] */
+    px = Math.max(0, Math.min(100, px));
+    py = Math.max(0, Math.min(100, py));
 
     if (currentTool === 'pen') {
       /** Фильтр шума: игнорируем движения < 0.05% от размера карты */
@@ -196,6 +207,7 @@ window.AppDraw = (function (utils) {
    * Используется при закрытии модалки через Escape или программно.
    */
   function hideMarkerModal() {
+    if (_cleanupModal) { _cleanupModal(); _cleanupModal = null; }
     const modal = document.getElementById('markerModal');
     if (modal) modal.classList.add('hidden');
     pendingMarker = null;
@@ -313,6 +325,7 @@ window.AppDraw = (function (utils) {
 
     /** Снятие обработчиков */
     function cleanup() {
+      _cleanupModal = null;
       modal.classList.add('hidden');
       okBtn.removeEventListener('click', onOk);
       cancelBtn.removeEventListener('click', onCancel);
@@ -325,6 +338,7 @@ window.AppDraw = (function (utils) {
       if (e.target === modal) onCancel();
     }
 
+    _cleanupModal = cleanup;
     okBtn.addEventListener('click', onOk);
     cancelBtn.addEventListener('click', onCancel);
     input.addEventListener('keydown', onKey);

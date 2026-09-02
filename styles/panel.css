@@ -188,8 +188,6 @@ input[type="number"]:invalid {
     top: 0;
     z-index: 2;
     transition: background var(--transition-fast, 0.15s);
-    position: relative;
-    /* Контекст для ::after pseudo-element */
 }
 
 .result div {
@@ -727,9 +725,7 @@ input[type="number"]:invalid {
 }
 
 .controls-section.collapsed>.control-group,
-.controls-section.collapsed>.width-grid,
-.controls-section.collapsed>.hint,
-.controls-section.collapsed>.clear-drawings-btn {
+.controls-section.collapsed>.tool-status {
     display: none;
 }
 

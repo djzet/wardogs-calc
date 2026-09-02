@@ -269,8 +269,9 @@ function applySharedParams() {
         setTimeout(() => AppShare.showToast(STR.shareApplied, 'success'), 400);
     }
 
-    /** Очищаем URL-параметры (чтобы не применялись повторно при F5) */
-    history.replaceState({}, '', location.pathname);
+    /** Очищаем URL-параметры (чтобы не применялись повторно при F5), сохраняем ?lang= если был */
+    const langParam = params.get('lang');
+    history.replaceState({}, '', location.pathname + (langParam ? '?lang=' + langParam : ''));
 }
 
 // ═══════════════════════════════════════════════════════════

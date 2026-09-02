@@ -60,5 +60,8 @@
     },
     "mapLabel": "Карта",
     "cancel": "Скасувати",
-    "markerDefault": "Мітка"
+    "markerDefault": "Мітка",
+    "footerDesc": "Неофіційний мінометний та артилерійський калькулятор для WARDOGS. Безкоштовно, онлайн, 9 мов.",
+    "footerProject": "Проєкт",
+    "footerLangs": "Мови"
 }

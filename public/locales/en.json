@@ -60,5 +60,8 @@
     },
     "mapLabel": "Map",
     "cancel": "Cancel",
-    "markerDefault": "Marker"
+    "markerDefault": "Marker",
+    "footerDesc": "Unofficial mortar and artillery calculator for WARDOGS. Free, online, 9 languages.",
+    "footerProject": "Project",
+    "footerLangs": "Languages"
 }

@@ -46,17 +46,16 @@ window.UIPanels = (function (storage) {
         onChange = opts.onChange || null;
         renderMap = opts.renderMap || null;
         bind();
-        applyThemeClass();
-        /** Если тема сохранена пользователем — помечаем ручной выбор */
+        /** Определяем тему: сохранённая пользователем или системная */
         if (storage.loadTheme(null)) {
+            /** Тема сохранена пользователем — помечаем ручной выбор */
             document.documentElement.setAttribute('data-theme-manual', '');
-        } else {
+        } else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
             /** Тема не выбрана — определяем по системным настройкам */
-            if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) {
-                theme = 'light';
-                applyThemeClass();
-            }
+            theme = 'light';
         }
+        /** Применяем тему (один вызов, после определения) */
+        applyThemeClass();
     }
 
     /** Возвращает текущую тему. @returns {'dark'|'light'} */
@@ -101,6 +100,11 @@ window.UIPanels = (function (storage) {
     function openDrawer(state) {
         document.getElementById('drawer').classList.toggle('open', state);
         document.getElementById('drawerBackdrop').classList.toggle('hidden', !state);
+        /** Invalidate cached rects so pointer coordinates stay accurate */
+        if (window.MapInteractions) {
+            window.MapInteractions.invalidateWrapRect();
+            window.MapInteractions.invalidateCanvasRect();
+        }
     }
 
     /**
@@ -340,13 +344,30 @@ window.UIContextMenu = (function (utils) {
 
         menu.classList.remove('hidden');
 
-        /** Позиционирование: не выходя за пределы map-wrap */
-        const wrap = deps.getWrapRect();
-        let left = sx, top = sy;
-        if (left + menu.offsetWidth > wrap.width) left -= menu.offsetWidth;
-        if (top + menu.offsetHeight > wrap.height) top -= menu.offsetHeight;
-        menu.style.left = left + 'px';
-        menu.style.top = top + 'px';
+        /**
+         * Позиционирование меню.
+         * На мобильных (≤800px) CSS задаёт bottom-sheet (position: fixed, bottom: 0).
+         * Инлайн-стили left/top перезаписывали бы CSS — очищаем их.
+         * На десктопе — позиционируем рядом с курсором, не выходя за map-wrap.
+         */
+        const isMobile = window.innerWidth <= 800;
+        if (isMobile) {
+            menu.style.left = '';
+            menu.style.top = '';
+        } else {
+            const wrap = deps.getWrapRect();
+            /** Get canvas offset within map-wrap for correct positioning */
+            const canvasEl = document.getElementById('map');
+            const canvasRect = canvasEl.getBoundingClientRect();
+            const wrapLeft = canvasRect.left - wrap.left;
+            const wrapTop = canvasRect.top - wrap.top;
+            let left = wrapLeft + sx;
+            let top = wrapTop + sy;
+            if (left + menu.offsetWidth > wrap.width) left -= menu.offsetWidth;
+            if (top + menu.offsetHeight > wrap.height) top -= menu.offsetHeight;
+            menu.style.left = left + 'px';
+            menu.style.top = top + 'px';
+        }
     }
 
     /** Скрывает контекстное меню */
@@ -367,7 +388,7 @@ window.UIContextMenu = (function (utils) {
 
             if (action === 'setA') deps.setPoint('A', menuWorld.x, menuWorld.y);
             if (action === 'setB') deps.setPoint('B', menuWorld.x, menuWorld.y);
-            if (action === 'delete') deps.setPoint(menuPointKey, null);
+            if (action === 'delete') deps.setPoint(menuPointKey, null, null);
 
             hideMenu();
         });
@@ -425,9 +446,10 @@ window.UIResults = (function (calc, points, utils) {
      * Вызывается при каждом изменении точек или типа оружия.
      */
     function update() {
-        /** Сбрасываем CSS-классы ошибок */
+        /** Сбрасываем CSS-классы ошибок на всех полях результатов */
         out.el.classList.remove('oor', 'warn');
         out.dist.classList.remove('oor', 'warn');
+        out.az.classList.remove('oor', 'warn');
 
         /** Получаем текущее оружие и рассчитываем параметры стрельбы */
         const weapon = getWeapons()[getCurrentWeapon()];
