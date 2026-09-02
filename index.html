@@ -70,33 +70,23 @@
         <circle cx='32' cy='32' r='22' fill='none' stroke='%239fd356' stroke-width='3'/>
     </svg>">
     <!-- CSS подключается из src/main.js (Vite) -->
+
     <!-- Yandex.Metrika counter -->
-    <script>
-        ((m, e, t, r, i, k, a) => {
-            m[i] = m[i] || ((...args) => (m[i].a = m[i].a || []).push(...args));
-            m[i].l = +new Date();
-            for (const s of document.scripts) {
-                if (s.src === r) return;
-            }
-            k = e.createElement(t);
-            a = e.getElementsByTagName(t)[0];
-            k.async = 1;
-            k.src = r;
-            a.parentNode.insertBefore(k, a);
+    <script type="text/javascript">
+        (function (m, e, t, r, i, k, a) {
+            m[i] = m[i] || function () { (m[i].a = m[i].a || []).push(arguments) };
+            m[i].l = 1 * new Date();
+            for (var j = 0; j < document.scripts.length; j++) { if (document.scripts[j].src === r) { return; } }
+            k = e.createElement(t), a = e.getElementsByTagName(t)[0], k.async = 1, k.src = r, a.parentNode.insertBefore(k, a)
         })(window, document, 'script', 'https://mc.yandex.ru/metrika/tag.js?id=111625912', 'ym');
 
-        ym(111625912, 'init', {
-            ssr: true,
-            webvisor: true,
-            clickmap: true,
-            ecommerce: 'dataLayer',
-            referrer: document.referrer,
-            url: location.href,
-            accurateTrackBounce: true,
-            trackLinks: true,
-        });
+        ym(111625912, 'init', { ssr: true, webvisor: true, clickmap: true, ecommerce: "dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce: true, trackLinks: true });
     </script>
+    <noscript>
+        <div><img src="https://mc.yandex.ru/watch/111625912" style="position:absolute; left:-9999px;" alt="" /></div>
+    </noscript>
     <!-- /Yandex.Metrika counter -->
+     
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-GBQ6J5K0DN"></script>
     <script>
@@ -215,7 +205,9 @@
 
 <body>
     <!-- Yandex.Metrika noscript pixel (перенесён из <head> — в <head> noscript с <div> запрещён) -->
-    <noscript><div><img src="https://mc.yandex.ru/watch/111625912" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+    <noscript>
+        <div><img src="https://mc.yandex.ru/watch/111625912" style="position:absolute; left:-9999px;" alt="" /></div>
+    </noscript>
     <!-- ══════════════════════════════════════════════════════════════
          NOSCRIPT — контент для поисковых роботов и пользователей с отключённым JS
          ══════════════════════════════════════════════════════════════ -->
@@ -671,7 +663,8 @@
                 style="padding:0 1.2rem 1.2rem;color:#ccc;line-height:1.7;">
                 <p itemprop="text">Калькулятор поддерживает две карты: <strong>Bakurani</strong> и
                     <strong>Ozeti</strong>. Обе карты размером <strong>16×16 км</strong> с интерактивным тайловым зумом
-                    и панорамированием. На карте Bakurani дополнительно отображаются вышки и важные объекты.</p>
+                    и панорамированием. На карте Bakurani дополнительно отображаются вышки и важные объекты.
+                </p>
             </div>
         </details>
 
@@ -702,7 +695,8 @@
                 style="padding:0 1.2rem 1.2rem;color:#ccc;line-height:1.7;">
                 <p itemprop="text">В системе измерения, используемой в WARDOGS и военном деле, один полный круг равен
                     <strong>6400 mils (мин)</strong>. 1 градус ≈ 17.78 mils. Калькулятор автоматически конвертирует
-                    значения и показывает угол возвышения именно в mils, как в игре.</p>
+                    значения и показывает угол возвышения именно в mils, как в игре.
+                </p>
             </div>
         </details>
 
@@ -735,7 +729,8 @@
                 <p itemprop="text">Да! Калькулятор автоматически сохраняет все точки и настройки в
                     <strong>localStorage</strong> браузера. Кроме того, можно нажать кнопку «Поделиться» для получения
                     <strong>ссылки с координатами</strong>, которую удобно отправлять союзникам в Discord или другом
-                    чате.</p>
+                    чате.
+                </p>
             </div>
         </details>
     </section>
