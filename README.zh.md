@@ -1,4 +1,4 @@
-# WARDOGS — 迫击炮与火炮计算器
+# WARDOGS — 迫击炮与火炮计算器 | 交互式16×16公里地图
 
 [Русский](README.md) · [English](README.en.md) · [Deutsch](README.de.md) · [Français](README.fr.md) · [Español](README.es.md) · [Polski](README.pl.md) · [Українська](README.uk.md) · [Türkçe](README.tr.md) · [中文](README.zh.md)
 
