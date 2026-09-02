@@ -9,73 +9,75 @@
  *   discord_qr_click (ID 597848750) — клики по Discord
  *   email_click      (ID 597834329) — клики по email-адресам
  *
- * Экспорт: window.AppAnalytics
+ * @module AppAnalytics
  */
 
-window.AppAnalytics = (function () {
+/** ID счётчика Яндекс.Метрики */
+const YM_COUNTER_ID = 111625912;
 
-    /**
-     * Отправляет событие в Яндекс.Метрику и GA4.
-     *
-     * @param {string} goalId  — идентификатор цели YM
-     * @param {string} gaEvent — имя события для GA4
-     * @param {object} [params] — дополнительные параметры
-     */
-    function track(goalId, gaEvent, params) {
-        /** Яндекс.Метрика: достижение цели */
-        if (typeof ym === 'function') {
-            ym(111625912, 'reachGoal', goalId, params || {});
-        }
+/** CSS-селекторы Discord-элементов (panel + footer) */
+const DISCORD_ELEMENT_IDS = ['discordQr', 'discordBtn'];
+const DISCORD_FOOTER_SELECTOR = 'footer a[href*="discord.gg"]';
 
-        /** Google Analytics: событие через dataLayer */
-        window.dataLayer = window.dataLayer || [];
-        window.dataLayer.push({
-            event: gaEvent,
-            ...(params || {}),
-        });
+/** CSS-селектор всех email-ссылок */
+const EMAIL_LINK_SELECTOR = 'a[href^="mailto:"]';
+
+/**
+ * Отправляет событие в Яндекс.Метрику и GA4.
+ *
+ * @param {string} goalId  — идентификатор цели YM
+ * @param {string} gaEvent — имя события для GA4
+ * @param {object} [params] — дополнительные параметры
+ */
+const track = (goalId, gaEvent, params = {}) => {
+    // Яндекс.Метрика: достижение цели
+    if (typeof ym === 'function') {
+        ym(YM_COUNTER_ID, 'reachGoal', goalId, params);
     }
 
-    /**
-     * Привязывает обработчики кликов к DOM-элементам
-     * при готовности DOM.
-     */
-    function init() {
-        /** ── Discord ────────────────────────────────── */
-        const discordIds = ['discordQr', 'discordBtn'];
-        discordIds.forEach(function (id) {
-            var el = document.getElementById(id);
-            if (el) {
-                el.addEventListener('click', function () {
-                    track('discord_qr_click', 'discord_click', {
-                        creative_name: id,
-                    });
-                });
-            }
+    // Google Analytics: событие через dataLayer
+    window.dataLayer = window.dataLayer || [];
+    window.dataLayer.push({ event: gaEvent, ...params });
+};
+
+/**
+ * Привязывает обработчик клика с трекингом к элементу.
+ *
+ * @param {Element|null} element   — DOM-элемент
+ * @param {string}       goalId    — идентификатор цели YM
+ * @param {string}       gaEvent   — имя события GA4
+ * @param {object}       [params]  — дополнительные параметры
+ */
+const bindTrack = (element, goalId, gaEvent, params) => {
+    element?.addEventListener('click', () => track(goalId, gaEvent, params));
+};
+
+/**
+ * Привязывает обработчики кликов к DOM-элементам при готовности DOM.
+ */
+const init = () => {
+    // ── Discord ──────────────────────────────────────
+    DISCORD_ELEMENT_IDS.forEach((id) => {
+        const el = document.getElementById(id);
+        bindTrack(el, 'discord_qr_click', 'discord_click', { creative_name: id });
+    });
+
+    // Footer Discord-ссылка (нет id, ищем по href)
+    bindTrack(
+        document.querySelector(DISCORD_FOOTER_SELECTOR),
+        'discord_qr_click',
+        'discord_click',
+        { creative_name: 'footer' }
+    );
+
+    // ── Email ────────────────────────────────────────
+    // Все ссылки mailto: на странице (панель + footer)
+    document.querySelectorAll(EMAIL_LINK_SELECTOR).forEach((el) => {
+        bindTrack(el, 'email_click', 'email_click', {
+            email_target: el.getAttribute('href').replace('mailto:', ''),
         });
+    });
+};
 
-        /** Footer Discord-ссылка (нет id, ищем по href) */
-        var footerDiscord = document.querySelector(
-            'footer a[href*="discord.gg"]'
-        );
-        if (footerDiscord) {
-            footerDiscord.addEventListener('click', function () {
-                track('discord_qr_click', 'discord_click', {
-                    creative_name: 'footer',
-                });
-            });
-        }
-
-        /** ── Email ──────────────────────────────────── */
-        /** Все ссылки mailto: на странице (панель + footer) */
-        var emailLinks = document.querySelectorAll('a[href^="mailto:"]');
-        emailLinks.forEach(function (el) {
-            el.addEventListener('click', function () {
-                track('email_click', 'email_click', {
-                    email_target: el.getAttribute('href').replace('mailto:', ''),
-                });
-            });
-        });
-    }
-
-    return { init: init };
-})();
+// Экспорт на window для обратной совместимости с js/index.js
+window.AppAnalytics = { init };
