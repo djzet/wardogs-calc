@@ -1,49 +1,83 @@
-/* styles/base.css — reset, типографика, layout, утилиты */
+/**
+ * styles/base.css — Reset, типографика, базовый layout и утилиты
+ *
+ * Минимальный CSS reset + глобальные стили:
+ * - box-sizing: border-box для всех элементов
+ * - 100% высота html/body
+ * - Системный шрифт (Segoe UI → system-ui → sans-serif)
+ * - Класс .hidden для скрытия элементов
+ * - Focus-visible для accessibility
+ * - prefers-reduced-motion для отключения анимаций
+ */
 
+/* ═══════════════ CSS RESET ═══════════════ */
 * {
     margin: 0;
     padding: 0;
-    box-sizing: border-box;
+    box-sizing: border-box; /* Ширина = content + padding + border */
 }
 
-html,
-body {
-    height: 100%;
-    overscroll-behavior: none;
+/* ═══════════════ БАЗОВЫЕ РАЗМЕРЫ ═══════════════ */
+html {
+    height: 100%;              /* Фоллбэк высоты для мобильных браузеров без dvh */
+    overscroll-behavior: none; /* Предотвращаем pull-to-refresh */
 }
 
 body {
-    font-family: "Segoe UI", system-ui, sans-serif;
+    overscroll-behavior: none; /* Предотвращаем pull-to-refresh */
+}
+
+body {
+    font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    font-size: var(--font-body, 15px);
+    line-height: 1.5;
     background: var(--bg);
     color: var(--text);
-    -webkit-tap-highlight-color: transparent;
-    padding-top: env(safe-area-inset-top);
+    -webkit-tap-highlight-color: transparent; /* Убираем подсветку при tap на iOS */
+    -webkit-font-smoothing: antialiased;     /* Сглаживание шрифтов */
+    -moz-osx-font-smoothing: grayscale;
+    padding-top: env(safe-area-inset-top);     /* Безопасная зона для notch/Dynamic Island */
     padding-bottom: env(safe-area-inset-bottom);
 }
 
+/* ═══════════════ ГЛАВНЫЙ LAYOUT ═══════════════ */
 .app {
     display: flex;
     height: 100vh;
-    height: 100dvh;
+    height: 100dvh; /* dynamic viewport height — учитывает адресную строку на мобильных */
 }
 
+/* ═══════════════ ТИПОГРАФИКА ═══════════════ */
 h1 {
-    font-size: 18px;
-    color: var(--accent);
+    font-size: var(--font-h1, 18px);
+    font-weight: 600;
+    color: var(--accent); /* Зелёный заголовок */
+    line-height: 1.3;
 }
 
 h2 {
-    font-size: 12px;
+    font-size: var(--font-h2, 12px);
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: .06em;
     color: var(--muted);
     margin-bottom: 8px;
+    font-feature-settings: "tnum";
 }
 
+/* ═══════════════ ПРЕДОТВРАЩЕНИЕ СКРОЛЛА ═══════════════ */
+body.modal-open {
+    overflow: hidden; /* Блокируем скролл когда открыта модалка */
+}
+
+/* ═══════════════ УТИЛИТЫ ═══════════════ */
+
+/* Скрытие элемента с сохранением в DOM */
 .hidden {
     display: none !important;
 }
 
+/* Accessibility: контур фокуса для клавиатурной навигации */
 button:focus-visible,
 input:focus-visible,
 select:focus-visible {
@@ -51,15 +85,133 @@ select:focus-visible {
     outline-offset: 2px;
 }
 
+/* Убираем outline для мышиного клика (оставляем только для клавиатуры) */
+button:focus:not(:focus-visible),
+input:focus:not(:focus-visible),
+select:focus:not(:focus-visible) {
+    outline: none;
+}
+
+/* SVG по центру строки */
 svg {
     vertical-align: middle;
 }
 
+/* Иконки инструментов рисования — фиксированный размер */
 .draw-tool svg {
     width: 16px;
     height: 16px;
 }
 
+/* Кнопка сброса вида — отступ иконки */
 .view-reset svg {
     margin-right: 4px;
+}
+
+/* ═══════════════ ACCESSIBILITY: MINIMUM TOUCH TARGETS ═══════════════ */
+/* WCAG 2.5.5 — все интерактивные элементы минимум 44×44px на touch */
+@media (pointer: coarse) {
+    .clear {
+        min-width: var(--touch-min, 44px);
+        min-height: var(--touch-min, 44px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .draw-tool {
+        min-height: var(--touch-min, 44px);
+        min-width: var(--touch-min, 44px);
+    }
+
+    .width-opt {
+        min-height: 40px;
+    }
+
+    .menu-toggle {
+        min-width: var(--touch-min, 44px);
+        min-height: var(--touch-min, 44px);
+    }
+
+    .theme-toggle,
+    .help-toggle {
+        min-width: var(--touch-min, 44px);
+        min-height: var(--touch-min, 44px);
+    }
+
+    .radio-option {
+        min-height: var(--touch-min, 44px);
+        padding: 4px 0;
+    }
+
+    .radio-option input[type="radio"] {
+        width: 20px;
+        height: 20px;
+    }
+}
+
+/* ═══════════════ REDUCED MOTION ═══════════════ */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* ═══════════════ SCROLLBAR СТИЛИЗАЦИЯ ═══════════════ */
+/* Тонкие скроллбары для webkit-браузеров */
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--dim);
+}
+
+/* Firefox scrollbar */
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+}
+
+/* ═══════════════ СВЕТЛАЯ ТЕМА: ТЕНИ ═══════════════ */
+body.light .panel {
+    box-shadow: 2px 0 16px rgba(0, 0, 0, 0.06);
+}
+body.light .result {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+body.light .controls-section {
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+}
+body.light .section-point-a {
+    border-left-color: var(--point-a);
+    background: var(--point-a-bg);
+}
+body.light .section-point-b {
+    border-left-color: var(--point-b);
+    background: var(--point-b-bg);
+}
+
+/* ═══════════════ ПЕЧАТЬ ═══════════════ */
+@media print {
+    .map-controls,
+    .drawer,
+    .drawer-backdrop,
+    .modal-backdrop,
+    .menu-toggle,
+    .translate-widget {
+        display: none !important;
+    }
 }

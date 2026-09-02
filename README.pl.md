@@ -6,28 +6,69 @@ Nieoficjalny interaktywny kalkulator moździerza i artylerii dla taktycznej
 strzelanki **WARDOGS**. Dystans, azymut, elewacja (mils) —
 w dwa kliknięcia na mapie 16×16 km.
 
-**Demo:** https://djzet.github.io/wardogs-calc/
+**Demo online:** https://djzet.github.io/wardogs-calc/
 
 | Desktop | Mobile |
 | :-: | :-: |
-| ![desktop](docs/screenshots/desktop.png) | ![mobile](docs/screenshots/mobile.png) |
+| ![desktop](assets/screenshots/desktop.png) | ![mobile](assets/screenshots/mobile.png) |
 
 ## Funkcje
 
 - Interaktywna mapa z zoomem kafelkowym i panowaniem
-- Dystans, azymut, elewacja (mils)
-- Moździerz (700 m) i artyleria (2,5 km)
-- Linki udostępniania, autozapis, motywy
-- 9 języków, wersja mobilna
+- Obliczanie dystansu, azymutu i elewacji (mils)
+- Moździerz (700 m) i artyleria (>2 km)
+- Dwie mapy: Bakurani i Ozeti (16×16 km)
+- Narzędzia rysowania: ołówek, linijka, marker, gumka
+- Wieże i strefa na mapie Bakurani
+- Linki do udostępniania szybkiego transferu współrzędnych
+- Autozapis ustawień i punktów w localStorage
+- Ciemne i jasne motywy
+- 9 języków interfejsu (ru, en, de, fr, es, pl, uk, tr, zh)
+- Responsywny design dla urządzeń mobilnych
 
-Pełna lista — w [docs/features.md](docs/features.md).
+## Szybki start
 
-## Dokumentacja (RU)
+```bash
+# Instalacja zależności
+npm install
 
-- [development.md](docs/development.md) — uruchomienie i architektura
-- [features.md](docs/features.md) — funkcje i dane broni
-- [localization.md](docs/localization.md) — tłumaczenia
-- [contributing.md](docs/contributing.md) — jak pomóc
+# Uruchomienie serwera deweloperskiego (http://localhost:5173)
+npm run dev
+
+# Budowanie dla produkcji (dist/)
+npm run build
+
+# Podgląd budowania (http://localhost:4173)
+npm run preview
+```
+
+## Struktura projektu
+
+```
+wardogs-calc/
+├── assets/           # Ikony i zrzuty ekranu
+├── config/           # Ustawienia map i tabele balistyczne
+├── js/
+│   ├── core/         # Matematyka, współrzędne, kalkulator
+│   ├── features/     # Przechowywanie, udostępnianie, punkty, bronie, analityka
+│   ├── map/          # Kafelki, renderer, interakcje, kamera
+│   ├── ui/           # Panele, pola wprowadzania, menu kontekstowe
+│   ├── locales.js    # Menedżer lokalizacji (9 języków)
+│   └── index.js      # Moduł główny: init, powiązanie zdarzeń
+├── maps/             # Kafelki map (Bakurani, Ozeti)
+├── public/           # Statyczne: locales, robots.txt, sitemap
+├── src/main.js       # Punkt wejścia Vite
+├── styles/           # CSS: zmienne, base, panel, map, mobile
+├── index.html        # Główny markup
+└── vite.config.js    # Konfiguracja Vite + wtyczka map
+```
+
+## Technologie
+
+- **Vite** — narzędzie budowania i serwer dev
+- **Vanilla JS** — bez frameworków (IIFE + window.*)
+- **Canvas API** — renderowanie map i narzędzi rysowania
+- **CSS Variables** — motywy
 
 ## Kontakt
 

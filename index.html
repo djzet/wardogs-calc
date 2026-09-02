@@ -8,6 +8,8 @@
     <meta name="theme-color" content="#1a1f27">
     <!-- Preconnect для ускорения загрузки внешних ресурсов -->
     <link rel="preconnect" href="https://mc.yandex.ru">
+    <!-- Preload критических изображений для первого рендера -->
+    <link rel="preload" as="image" href="assets/icons/tower.webp">
     <!-- Primary SEO Meta Tags -->
     <title>WARDOGS — миномётный и артиллерийский калькулятор</title>
     <meta name="title" content="WARDOGS — миномётный и артиллерийский калькулятор">
@@ -131,7 +133,12 @@
 </head>
 
 <body>
-    <!-- ═══════════════ SVG SPRITE ИКОНКИ ═══════════════ -->
+    <!-- ══════════════════════════════════════════════════════════════
+         SVG SPRITE ИКОНКИ
+         Набор иконок для UI: инструменты рисования, навигация,
+         тема, справка, Discord и т.д.
+         Все иконки доступны через <use href="#icon-name"/>
+         ══════════════════════════════════════════════════════════════ -->
     <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
         <!-- Карандаш -->
         <symbol id="icon-pen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
@@ -182,13 +189,6 @@
             <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
             <polyline points="22,6 12,13 2,6" />
         </symbol>
-        <!-- Выход -->
-        <symbol id="icon-logout" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
-            stroke-linecap="round" stroke-linejoin="round">
-            <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
-            <polyline points="16 17 21 12 16 7" />
-            <line x1="21" y1="12" x2="9" y2="12" />
-        </symbol>
         <!-- Меню (бургер) -->
         <symbol id="icon-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round">
@@ -231,30 +231,38 @@
             <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
         </symbol>
     </svg>
+    <!-- ══════════════════════════════════════════════════════════════
+         ОСНОВНАЯ РАЗМЕТКА ПРИЛОЖЕНИЯ
+         Flex-контейнер: panel (лево) + map-wrap (право) + drawer (overlay)
+         ══════════════════════════════════════════════════════════════ -->
     <div class="app">
+        <!-- ═══════ ЛЕВАЯ ПАНЕЛЬ: координаты, результаты, настройки ═══════ -->
         <aside class="panel">
             <div class="panel-header">
-                <h1 data-i18n="title">Миномётный калькулятор</h1>
+                <div class="header-text">
+                    <h1 data-i18n="title">Миномётный калькулятор</h1>
+                    <span class="map-badge" id="mapBadge">Bakurani</span>
+                </div>
                 <button class="menu-toggle" id="drawerToggle" title="Дополнительно" aria-label="Дополнительно">
                     <svg width="16" height="16">
                         <use href="#icon-menu" />
                     </svg>
                 </button>
             </div>
-            <section>
+            <section class="section-point-a">
                 <h2 data-i18n="posA">Огневая позиция (A)</h2>
                 <div class="coord-row">
                     <label>X <input type="number" id="ax" placeholder="0.00" step="0.01" min="0" max="160"></label>
                     <label>Y <input type="number" id="ay" placeholder="0.00" step="0.01" min="0" max="160"></label>
-                    <button class="clear" id="clearA" title="Очистить A" aria-label="Очистить A"></button>
+                    <button class="clear" id="clearA" title="Очистить A" aria-label="Очистить A">×</button>
                 </div>
             </section>
-            <section>
+            <section class="section-point-b">
                 <h2 data-i18n="posB">Цель (B)</h2>
                 <div class="coord-row">
                     <label>X <input type="number" id="bx" placeholder="0.00" step="0.01" min="0" max="160"></label>
                     <label>Y <input type="number" id="by" placeholder="0.00" step="0.01" min="0" max="160"></label>
-                    <button class="clear" id="clearB" title="Очистить B" aria-label="Очистить B"></button>
+                    <button class="clear" id="clearB" title="Очистить B" aria-label="Очистить B">×</button>
                 </div>
             </section>
             <section class="result">
@@ -262,7 +270,7 @@
                 <div><span data-i18n="az">Азимут</span><b id="azimuth">—</b></div>
                 <div><span data-i18n="el">Угол возвышения</span><b id="elevation">—</b></div>
             </section>
-            <section class="controls-section">
+            <section class="controls-section" id="settingsSection">
                 <h2 data-i18n="controlsTitle">Настройки</h2>
                 <div class="control-group">
                     <label class="control-label" data-i18n="weaponType">Тип орудия</label>
@@ -285,51 +293,62 @@
                     </select>
                 </div>
             </section>
-            <section class="draw-tools-section" id="drawToolsSection">
+            <section class="controls-section" id="drawToolsSection">
                 <h2 data-i18n="drawTools">Рисование</h2>
-                <div class="tool-grid">
-                    <button class="draw-tool" data-tool="pen" title="Карандаш" data-i18n-title="toolPen">
-                        <svg width="16" height="16">
-                            <use href="#icon-pen" />
-                        </svg>
-                    </button>
-                    <button class="draw-tool" data-tool="line" title="Линейка" data-i18n-title="toolLine">
-                        <svg width="16" height="16">
-                            <use href="#icon-line" />
-                        </svg>
-                    </button>
-                    <button class="draw-tool" data-tool="marker" title="Метка" data-i18n-title="toolMarker">
-                        <svg width="16" height="16">
-                            <use href="#icon-marker" />
-                        </svg>
-                    </button>
-                    <button class="draw-tool" data-tool="eraser" title="Ластик" data-i18n-title="toolEraser">
-                        <svg width="16" height="16">
-                            <use href="#icon-eraser" />
-                        </svg>
-                    </button>
-                    <button class="draw-tool active" data-tool="pan" title="Перемещение" data-i18n-title="toolPan">
-                        <svg width="16" height="16">
-                            <use href="#icon-pan" />
-                        </svg>
-                    </button>
+                <div class="control-group">
+                    <div class="tool-grid">
+                        <button class="draw-tool" data-tool="pen" title="Карандаш" data-i18n-title="toolPen">
+                            <svg width="16" height="16">
+                                <use href="#icon-pen" />
+                            </svg>
+                        </button>
+                        <button class="draw-tool" data-tool="line" title="Линейка" data-i18n-title="toolLine">
+                            <svg width="16" height="16">
+                                <use href="#icon-line" />
+                            </svg>
+                        </button>
+                        <button class="draw-tool" data-tool="marker" title="Метка" data-i18n-title="toolMarker">
+                            <svg width="16" height="16">
+                                <use href="#icon-marker" />
+                            </svg>
+                        </button>
+                        <button class="draw-tool" data-tool="eraser" title="Ластик" data-i18n-title="toolEraser">
+                            <svg width="16" height="16">
+                                <use href="#icon-eraser" />
+                            </svg>
+                        </button>
+                        <button class="draw-tool active" data-tool="pan" title="Перемещение" data-i18n-title="toolPan">
+                            <svg width="16" height="16">
+                                <use href="#icon-pan" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
-                <div class="width-row">
-                    <span class="width-label" data-i18n="lineWidth">Толщина линии</span>
+                <div class="tool-status" id="toolStatus"></div>
+                <div class="control-group">
+                    <label class="control-label" data-i18n="lineWidth">Толщина линии</label>
                     <div class="width-grid">
                         <button class="width-opt active" data-width="1" title="1 px"><span class="w1"></span></button>
                         <button class="width-opt" data-width="2" title="2 px"><span class="w2"></span></button>
+                        <button class="width-opt" data-width="3" title="3 px"><span class="w3"></span></button>
                         <button class="width-opt" data-width="4" title="4 px"><span class="w4"></span></button>
                     </div>
                 </div>
-                <button class="view-reset" id="clearDrawingsBtn" data-i18n="clearDrawings">
-                    Очистить рисунки
-                </button>
+                <div class="control-group">
+                    <button class="clear-drawings-btn" id="clearDrawingsBtn" data-i18n="clearDrawings">
+                        Очистить рисунки
+                    </button>
+                </div>
             </section>
-            <p class="hint" data-i18n="hint">
+            <p class="hint hint-desktop" data-i18n="hint">
                 ПКМ по карте — поставить или удалить точку.<br>
                 ЛКМ — двигать карту (или саму точку).<br>
                 Колесо мыши — масштаб.
+            </p>
+            <p class="hint hint-touch hidden" data-i18n="hintTouch">
+                Долгое нажатие — поставить или удалить точку.<br>
+                Один палец — двигать карту.<br>
+                Два пальца — масштаб.
             </p>
             <div class="contact">
                 <span class="contact-label">
@@ -371,16 +390,13 @@
                 </select>
             </div>
         </aside>
+        <!-- ═══════ ОБЛАСТЬ КАРТЫ: canvas + кнопки управления + контекстное меню ═══════ -->
         <main class="map-wrap">
+            <!-- Tooltip координат под курсором (показывается при наведении) -->
             <div id="cursorCoords" class="cursor-coords"></div>
             <canvas id="map"></canvas>
+            <!-- Кнопки управления картой: шаринг, справка, тема, сброс вида -->
             <div class="map-controls">
-                <button class="view-reset" id="createLobbyBtn" data-i18n="createLobby">
-                    Создать лобби
-                </button>
-                <button class="view-reset" id="joinLobbyBtn" data-i18n="joinLobby">
-                    Присоединиться
-                </button>
                 <button class="view-reset share-btn" id="shareBtn" title="Поделиться координатами"
                     aria-label="Поделиться">
                     <svg width="16" height="16">
@@ -404,6 +420,7 @@
                     Сбросить вид
                 </button>
             </div>
+            <!-- Контекстное меню (ПКМ/long-press): установка точек A/B -->
             <div id="ctxMenu" class="ctx-menu hidden">
                 <button data-action="setA" data-i18n="menuA">
                     Позиция миномёта (A)
@@ -416,6 +433,7 @@
                 </button>
             </div>
         </main>
+        <!-- ═══════ БОКОВОЙ DRAWER: дополнительные настройки (выезжает слева) ═══════ -->
         <aside class="drawer" id="drawer">
             <div class="drawer-header">
                 <h2 data-i18n="extra">Дополнительно</h2>
@@ -430,19 +448,10 @@
                 <input type="checkbox" id="towersToggle" checked>
                 <span class="switch"></span>
             </label>
-            <section class="lobby-section hidden" id="lobbySection">
-                <h3 data-i18n="lobby">Лобби</h3>
-                <div id="lobbyInfo" class="lobby-info"></div>
-                <div id="lobbyPlayersList" class="lobby-players"></div>
-                <button id="leaveLobbyBtn" class="view-reset" data-i18n="leaveLobby">
-                    <svg width="14" height="14">
-                        <use href="#icon-logout" />
-                    </svg>
-                    Покинуть лобби
-                </button>
-            </section>
         </aside>
+        <!-- Backdrop для drawer (затемнение фона) -->
         <div class="drawer-backdrop hidden" id="drawerBackdrop"></div>
+        <!-- ═══════ МОДАЛЬНОЕ ОКНО СПРАВКИ ═══════ -->
         <div class="modal-backdrop hidden" id="helpModal">
             <div class="modal" role="dialog" aria-labelledby="helpTitle">
                 <div class="modal-header">
@@ -455,13 +464,14 @@
                 </div>
                 <div class="modal-body">
                     <p data-i18n="helpP1"><b>Установка точек.</b> Укажите свою позицию (точка A) и цель (точка B) —
-                        калькулятор рассчитает дистанцию, азимут, угол возвышения.</p>
+                        калькулятор рассчитает дистанцию, азимут и угол возвышения.</p>
                     <p data-i18n="helpP2"><b>Работа с картой.</b> Правый клик по карте открывает меню. Левая кнопка
                         мыши перемещает карту. Колесо мыши изменяет масштаб. На сенсорных экранах: один палец —
                         перемещение, два пальца — масштаб, долгое нажатие — контекстное меню.</p>
                     <p data-i18n="helpP3"><b>Координаты.</b> X и Y вводятся в игровых координатах (0–160) — тех же, что
                         показываются под курсором. Шаг изменения — 0.01 (стрелками в поле ввода).</p>
-                    <p data-i18n="helpP4"><b>Результаты.</b> Дистанция, азимут от севера, угол ствола в mils. Если цель вне досягаемости — соответствующее сообщение.</p>
+                    <p data-i18n="helpP4"><b>Результаты.</b> Дистанция, азимут от севера, угол ствола в mils. Если цель
+                        вне досягаемости — соответствующее сообщение.</p>
                     <p data-i18n="helpP5"><b>Сохранение.</b> Все данные автоматически сохраняются и восстанавливаются
                         после перезагрузки страницы.</p>
                     <p data-i18n="helpP6"><b>О калькуляторе.</b> Фан-инструмент для игры WARDOGS. Неофициальный
@@ -469,10 +479,24 @@
                 </div>
             </div>
         </div>
-    </div>
-    <!-- Supabase SDK (lobby) -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" defer></script>
-    <!-- Vite entry: CSS + все модули -->
+        <!-- Модалка ввода имени маркера (заменяет prompt()) -->
+        <div class="modal-backdrop hidden" id="markerModal">
+            <div class="modal modal-sm" role="dialog" aria-labelledby="markerModalTitle">
+                <div class="modal-header">
+                    <h2 id="markerModalTitle" data-i18n="markerPrompt">Название метки:</h2>
+                </div>
+                <div class="modal-body">
+                    <input type="text" id="markerInput" class="modal-input" maxlength="40" autocomplete="off" placeholder="Метка" />
+                    <div class="modal-actions">
+                        <button class="modal-btn" id="markerCancel" data-i18n="cancel">Отмена</button>
+                        <button class="modal-btn modal-btn-accent" id="markerOk">OK</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div><!-- /app -->
+
+    <!-- Vite entry point: подключает CSS-переменные и все JS-модули -->
     <script type="module" src="/src/main.js"></script>
 </body>
 

@@ -1,12 +1,26 @@
 {
   "name": "wardogs-calc",
-  "private": true,
   "version": "1.0.0",
+  "private": true,
   "type": "module",
+  "description": "Unofficial interactive mortar & artillery calculator for the tactical shooter WARDOGS",
+  "author": "Egor Silaev <egor.silaev2003@yandex.ru>",
+  "license": "MIT",
+  "homepage": "https://djzet.github.io/wardogs-calc/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/djzet/wardogs-calc.git"
+  },
+  "bugs": {
+    "url": "https://github.com/djzet/wardogs-calc/issues"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview"
+  },
+  "engines": {
+    "node": ">=18"
   },
   "devDependencies": {
     "vite": "^6.0.0"

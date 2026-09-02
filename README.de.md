@@ -10,24 +10,65 @@ auf der 16×16-km-Karte.
 
 | Desktop | Mobil |
 | :-: | :-: |
-| ![desktop](docs/screenshots/desktop.png) | ![mobile](docs/screenshots/mobile.png) |
+| ![desktop](assets/screenshots/desktop.png) | ![mobile](assets/screenshots/mobile.png) |
 
 ## Funktionen
 
 - Interaktive Karte mit Kachel-Zoom und Pan
-- Distanz, Azimut, Erhöhung (mils)
-- Mörser (700 m) und Artillerie (2,5 km)
-- Share-Links, Autospeichern, Themes
-- 9 Sprachen, mobile Version
+- Berechnung von Distanz, Azimut und Erhöhung (mils)
+- Mörser (700 m) und Artillerie (>2 km)
+- Zwei Karten: Bakurani und Ozeti (16×16 km)
+- Zeichnungswerkzeuge: Stift, Lineal, Marker, Radiergummi
+- Türme und Zone auf der Bakurani-Karte
+- Share-Links zur schnellen Koordinatenübertragung
+- Auto-Speicherung von Einstellungen und Punkten im localStorage
+- Dunkle und helle Themen
+- 9 Featuring-Sprachen (ru, en, de, fr, es, pl, uk, tr, zh)
+- Responsives Design für mobile Geräte
 
-Vollständige Liste — in [docs/features.md](docs/features.md).
+## Schnellstart
 
-## Dokumentation (RU)
+```bash
+# Abhängigkeiten installieren
+npm install
 
-- [development.md](docs/development.md) — Start & Architektur
-- [features.md](docs/features.md) — Funktionen & Waffendaten
-- [localization.md](docs/localization.md) — Übersetzungen
-- [contributing.md](docs/contributing.md) — Mitwirken
+# Dev-Server starten (http://localhost:5173)
+npm run dev
+
+# Für Produktion bauen (dist/)
+npm run build
+
+# Build-Vorschau (http://localhost:4173)
+npm run preview
+```
+
+## Projektstruktur
+
+```
+wardogs-calc/
+├── assets/           # Icons und Screenshots
+├── config/           # Karteneinstellungen und ballistische Tabellen
+├── js/
+│   ├── core/         # Mathematik, Koordinaten, Rechner
+│   ├── features/     # Speicher, Sharing, Punkte, Waffen, Analytik
+│   ├── map/          # Kacheln, Renderer, Interaktionen, Kamera
+│   ├── ui/           # Panels, Eingaben, Kontextmenü
+│   ├── locales.js    # Lokalisierungsmanager (9 Sprachen)
+│   └── index.js      # Hauptmodul: Init, Event-Bindung
+├── maps/             # Kacheln (Bakurani, Ozeti)
+├── public/           # Statisch: Lokalisierungen, robots.txt, sitemap
+├── src/main.js       # Vite-Einstiegspunkt
+├── styles/           # CSS: Variablen, base, panel, map, mobile
+├── index.html        # Haupt-Markup
+└── vite.config.js    # Vite-Konfiguration + Karten-Plugin
+```
+
+## Technologien
+
+- **Vite** — Build-Tool und Dev-Server
+- **Vanilla JS** — ohne Frameworks (IIFE + window.*)
+- **Canvas API** — Kartenrendering und Zeichnungswerkzeuge
+- **CSS Variables** — Theming
 
 ## Kontakt
 

@@ -1,78 +1,148 @@
-/* styles/map.css — карта, кнопки управления, контекстное меню, toast */
+/**
+ * styles/map.css — Стили карты, кнопок управления, контекстного меню и toast
+ *
+ * Секции:
+ * 1. Canvas и обёртка карты
+ * 2. Кнопки управления (сброс вида, тема, справка)
+ * 3. Контекстное меню
+ * 4. Toast-уведомления
+ * 5. Tooltip координат под курсором
+ */
+
+/* ═══════════════ CANVAS И ОБЁРТКА КАРТЫ ═══════════════ */
 
 #map {
-    touch-action: none;
-    user-select: none;
+    touch-action: none;       /* Отключаем стандартные touch-действия браузера */
+    user-select: none;        /* Запрет выделения текста */
     -webkit-user-select: none;
 }
 
 .map-wrap {
-    flex: 1;
-    position: relative;
-    overflow: hidden;
+    flex: 1;                  /* Занимает всё оставшееся пространство */
+    position: relative;       /* Контекст позиционирования для overlay-элементов */
+    overflow: hidden;          /* Скрываем содержимое за пределами */
     background: var(--bg);
 }
 
 canvas {
-    display: block;
+    display: block;           /* Убираем нижний отступ inline-элемента */
     width: 100%;
     height: 100%;
-    cursor: crosshair;
-    touch-action: none;
+    cursor: crosshair;        /* Курсор по умолчанию (рисование) */
+    touch-action: none;       /* Отключаем touch-жесты браузера */
     -webkit-user-select: none;
     user-select: none;
-    -webkit-touch-callout: none;
+    -webkit-touch-callout: none; /* Отключаем callout на iOS */
 }
+
+/* ═══════════════ КНОПКИ УПРАВЛЕНИЯ (поверх карты) ═══════════════ */
 
 .map-controls {
     position: absolute;
     top: 12px;
     right: 12px;
     display: flex;
-    gap: 8px;
-    z-index: 5;
+    gap: 6px;
+    z-index: 5;              /* Выше canvas, но ниже модалок */
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    max-width: calc(100% - 24px);
+    background: rgba(26, 31, 39, 0.55);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: var(--radius-md);
+    padding: 5px;
+}
+body.light .map-controls {
+    background: rgba(255, 255, 255, 0.65);
+    border: 1px solid rgba(0, 0, 0, 0.08);
 }
 
 .view-reset {
-    background: var(--btn-bg);
-    border: 1px solid var(--menu-border);
+    background: transparent;
+    border: none;
     color: var(--btn-text);
-    padding: 6px 12px;
+    padding: 6px 10px;
     border-radius: var(--radius-sm);
     cursor: pointer;
     font-size: 13px;
-    backdrop-filter: blur(6px);
+    backdrop-filter: blur(6px);     /* Размытие фона */
     -webkit-backdrop-filter: blur(6px);
+    transition: background var(--transition-fast, 0.15s), transform 0.15s ease;
+    white-space: nowrap;
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .view-reset:hover {
+        background: rgba(255, 255, 255, 0.1);
+    }
+    body.light .view-reset:hover {
+        background: rgba(0, 0, 0, 0.06);
+    }
+    .view-reset:hover {
+        transform: translateY(-1px);
+    }
 }
 
 .view-reset:hover {
     background: var(--hover);
 }
 
+/* Убираем hover-эффект на touch (мешает :active) */
+@media (pointer: coarse) {
+    .view-reset:hover {
+        background: transparent;
+    }
+}
+
+/* Активное состояние для touch */
+.view-reset:active {
+    transform: scale(0.95);
+}
+
+/* Кнопки переключения темы и справки — квадратные */
 .theme-toggle,
 .help-toggle {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 36px;
+    width: 32px;
+    min-width: 32px;
     padding: 6px 0;
+    transition: background var(--transition-fast, 0.15s), transform 0.15s ease;
 }
 
+.share-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+}
+
+.theme-toggle:active,
+.help-toggle:active {
+    background: var(--hover);
+    transform: scale(0.97);
+}
+
+/* По умолчанию: показываем солнце, скрываем луну (тёмная тема) */
 .theme-toggle .icon-sun {
     display: block;
 }
-
 .theme-toggle .icon-moon {
     display: none;
 }
 
+/* В светлой теме: наоборот */
 body.light .theme-toggle .icon-sun {
     display: none;
 }
-
 body.light .theme-toggle .icon-moon {
     display: block;
 }
+
+/* ═══════════════ КОНТЕКСТНОЕ МЕНЮ ═══════════════ */
 
 .ctx-menu {
     position: absolute;
@@ -102,13 +172,15 @@ body.light .theme-toggle .icon-moon {
     background: var(--hover);
 }
 
+/* Пункт "Удалить" — красный */
 .ctx-menu button.danger {
     color: var(--danger);
 }
-
 .ctx-menu button.danger:hover {
     color: var(--danger-hover);
 }
+
+/* ═══════════════ TOAST-УВЕДОМЛЕНИЯ ═══════════════ */
 
 .toast {
     position: absolute;
@@ -124,22 +196,45 @@ body.light .theme-toggle .icon-moon {
     -webkit-backdrop-filter: blur(6px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, .2);
     opacity: 0;
-    transform: translateY(-10px);
-    pointer-events: none;
-    transition: opacity .25s ease, transform .25s ease;
+    transform: translateY(-10px);   /* Сдвиг вверх при скрытии */
+    pointer-events: none;            /* Не перехватывает клики */
+    transition: opacity var(--transition-normal, 0.25s), transform var(--transition-normal, 0.25s);
     z-index: 20;
-    max-width: 280px;
+    max-width: calc(100vw - 24px);  /* Не выходит за экран */
+    word-break: break-word;
 }
 
 .toast.show {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateY(0);        /* Появление снизу */
+    will-change: opacity, transform; /* GPU-ускорение анимации появления */
 }
 
 .toast.success {
     border-color: var(--accent);
     color: var(--accent);
 }
+
+/* На мобильных toast — fixed чтобы не зависеть от overflow:hidden в map-wrap */
+@media (max-width: 800px) {
+    .toast {
+        position: fixed;
+        top: auto;
+        bottom: calc(16px + env(safe-area-inset-bottom, 0px));
+        left: 50%;
+        right: auto;
+        transform: translateX(-50%) translateY(20px);
+        max-width: calc(100vw - 32px);
+        text-align: center;
+        border-radius: var(--radius-md);
+        z-index: 50;
+    }
+    .toast.show {
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+/* ═══════════════ TOOLTIP КООРДИНАТ ПОД КУРСОРОМ ═══════════════ */
 
 .cursor-coords {
     position: absolute;
@@ -148,21 +243,32 @@ body.light .theme-toggle .icon-moon {
     font-family: monospace;
     font-size: 12px;
     font-weight: bold;
-    color: var(--text);
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
-    pointer-events: none;
+    color: #fff;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9); /* Тень для читаемости */
+    pointer-events: none;    /* Не мешает кликам */
     z-index: 10;
-    background: rgba(0, 0, 0, 0.35);
-    padding: 3px 7px;
-    border-radius: 4px;
+    background: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    padding: 4px 8px;
+    border-radius: var(--radius-sm);
     letter-spacing: 0.5px;
-    display: none;
+    font-feature-settings: "tnum";
+    display: none;           /* Скрыт по умолчанию, показывается через .visible */
 }
 
 .cursor-coords span {
-    display: block;
+    display: block;          /* X и Y на разных строках */
 }
 
 .cursor-coords.visible {
     display: block;
+}
+
+/* На мобильных — tooltip координат крупнее для читаемости */
+@media (max-width: 800px) {
+    .cursor-coords {
+        font-size: 11px;
+        padding: 3px 7px;
+    }
 }

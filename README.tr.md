@@ -10,24 +10,65 @@ haritada iki tıklamayla.
 
 | Desktop | Mobil |
 | :-: | :-: |
-| ![desktop](docs/screenshots/desktop.png) | ![mobile](docs/screenshots/mobile.png) |
+| ![desktop](assets/screenshots/desktop.png) | ![mobile](assets/screenshots/mobile.png) |
 
 ## Özellikler
 
 - Kare zoom ve pan özellikli interaktif harita
-- Mesafe, azimut, yükselme (mils)
-- Havan (700 m) ve topçu (2,5 km)
-- Paylaşım bağlantıları, otomatik kaydetme, temalar
-- 9 dil, mobil sürüm
+- Mesafe, azimut ve yükselme (mils) hesaplama
+- Havan (700 m) ve topçu (>2 km)
+- İki harita: Bakurani ve Ozeti (16×16 km)
+- Çizim araçları: kalem, cetvel, işaretleyici, silgi
+- Bakurani haritasında kuleler ve bölge
+- Koordinat paylaşımı için paylaşım bağlantıları
+- Ayarları ve noktaları localStorage'a otomatik kaydetme
+- Koyu ve açık temalar
+- 9 arayüz dili (ru, en, de, fr, es, pl, uk, tr, zh)
+- Mobil cihazlar için duyarlı tasarım
 
-Tam liste — [docs/features.md](docs/features.md) içinde.
+## Hızlı Başlangıç
 
-## Dokümantasyon (RU)
+```bash
+# Bağımlılıkları yükleme
+npm install
 
-- [development.md](docs/development.md) — çalıştırma ve mimari
-- [features.md](docs/features.md) — özellikler ve silah verileri
-- [localization.md](docs/localization.md) — çeviriler
-- [contributing.md](docs/contributing.md) — nasıl katkıda bulunulur
+# Geliştirme sunucusunu başlat (http://localhost:5173)
+npm run dev
+
+# Üretim için derleme (dist/)
+npm run build
+
+# Derleme önizleme (http://localhost:4173)
+npm run preview
+```
+
+## Proje Yapısı
+
+```
+wardogs-calc/
+├── assets/           # Simgeler ve ekran görüntüleri
+├── config/           # Harita ayarları ve balistik tablolar
+├── js/
+│   ├── core/         # Matematik, koordinatlar, hesaplayıcı
+│   ├── features/     # Depolama, paylaşım, noktalar, silahlar, analitik
+│   ├── map/          # Kareler, motor, etkileşimler, kamera
+│   ├── ui/           # Paneller, giriş alanları, bağlam menüsü
+│   ├── locales.js    # Yerelleştirme yöneticisi (9 dil)
+│   └── index.js      # Ana modül: init, olay bağlama
+├── maps/             # Harita kareleri (Bakurani, Ozeti)
+├── public/           # Statik: locales, robots.txt, sitemap
+├── src/main.js       # Vite giriş noktası
+├── styles/           # CSS: değişkenler, base, panel, map, mobile
+├── index.html        # Ana markup
+└── vite.config.js    # Vite yapılandırması + harita eklentisi
+```
+
+## Teknolojiler
+
+- **Vite** — derleme aracı ve geliştirme sunucusu
+- **Vanilla JS** — frameworksüz (IIFE + window.*)
+- **Canvas API** — harita işleme ve çizim araçları
+- **CSS Variables** — tema desteği
 
 ## İletişim
 
