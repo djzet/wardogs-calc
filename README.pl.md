@@ -1,4 +1,4 @@
-# WARDOGS — Kalkulator Moździerza i Artylerii
+# WARDOGS — Kalkulator Moździerza i Artylerii | Interaktywna Mapa 16×16 km
 
 [Русский](README.md) · [English](README.en.md) · [Deutsch](README.de.md) · [Français](README.fr.md) · [Español](README.es.md) · [Polski](README.pl.md) · [Українська](README.uk.md) · [Türkçe](README.tr.md) · [中文](README.zh.md)
 

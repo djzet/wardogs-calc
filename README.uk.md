@@ -1,4 +1,4 @@
-# WARDOGS — Калькулятор міномета та артилерії
+# WARDOGS — Калькулятор міномета та артилерії | Інтерактивна карта 16×16 км
 
 [Русский](README.md) · [English](README.en.md) · [Deutsch](README.de.md) · [Français](README.fr.md) · [Español](README.es.md) · [Polski](README.pl.md) · [Українська](README.uk.md) · [Türkçe](README.tr.md) · [中文](README.zh.md)
 

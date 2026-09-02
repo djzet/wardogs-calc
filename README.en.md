@@ -1,4 +1,4 @@
-# WARDOGS — Mortar & Artillery Calculator
+# WARDOGS — Mortar & Artillery Calculator | Interactive 16×16 km Map
 
 [Русский](README.md) · [English](README.en.md) · [Deutsch](README.de.md) · [Français](README.fr.md) · [Español](README.es.md) · [Polski](README.pl.md) · [Українська](README.uk.md) · [Türkçe](README.tr.md) · [中文](README.zh.md)
 
