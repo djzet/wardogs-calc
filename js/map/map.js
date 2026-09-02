@@ -938,7 +938,7 @@ window.MapRenderer = (function (utils, tiles) {
 
 /**
  *
- * Центральный обработчик всех pointer/touch/wheel событий на canvas.
+ * Центральный обработчик всех pointer/touch/wheelter/touch/wheel событий на canvas.
  * Управляет следующими режимами:
  *
  * Режимы dragging:
@@ -1050,8 +1050,8 @@ window.MapInteractions = (function () {
      * Запускает таймер долгого нажатия.
      * По истечении delay вызывает callback и устанавливает longPressFired.
      *
-     * @param {number} sx — экраниая X
-     * @param {number} sy — экраниая Y
+     * @param {number} sx — экранная X
+     * @param {number} sy — экранная Y
      * @param {number} delay — задержка в мс
      * @param {Function} callback — функция при долгом нажатии
      */

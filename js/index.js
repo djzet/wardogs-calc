@@ -266,11 +266,11 @@ function switchMap(mapId) {
 }
 
 /**
- * Проверяет попадание на вышку в экраниной позиции.
- * Использует пространственную сетку MapSpatial — O(1)平均.
+ * Проверяет попадание на вышку в экранной позиции.
+ * Использует пространственную сетку MapSpatial — O(1) в среднем.
  *
- * @param {number} sx — экраниая X
- * @param {number} sy — экраниая Y
+ * @param {number} sx — экранная X
+ * @param {number} sy — экранная Y
  * @returns {object|null} объект вышки или null
  */
 function findTowerAt(sx, sy) {

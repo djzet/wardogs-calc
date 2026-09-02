@@ -79,7 +79,7 @@ window.AppUtils = (function () {
      * Конвертирует экранные пиксели обратно в мировые координаты (метры).
      * Обратная функция к worldToScreen.
      *
-     * @param {number} sx — экраниая X координата (пиксели)
+     * @param {number} sx — экранная X координата (пиксели)
      * @param {number} sy — экранная Y координата (пиксели)
      * @param {{scale: number, ox: number, oy: number}} view — объект камеры
      * @returns {{x: number, y: number}} мировые координаты в метрах
@@ -148,7 +148,7 @@ window.AppUtils = (function () {
      * @returns {string} строка с координатой, например "82.40"
      */
     function gameCoord(meters) {
-        /** Обработка negative zero: (-0).toFixed(2) → "0.00", но на某些 платформах может быть "-0.00" */
+        /** Обработка negative zero: (-0).toFixed(2) → "0.00", но на некоторых платформах может быть "-0.00" */
         const v = Object.is(meters, -0) ? 0 : meters;
         return (v / 100).toFixed(2);
     }
