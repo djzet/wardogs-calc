@@ -203,6 +203,14 @@ window.LocaleManager = (function () {
      * Инициализация: загружает язык и привязывает селектор языка в drawer.
      */
     async function init() {
+        /** Parse ?lang= from URL (highest priority, overrides localStorage) */
+        const urlParams = new URLSearchParams(location.search);
+        const urlLang = urlParams.get('lang');
+        if (urlLang && SUPPORTED_LOCALES.includes(urlLang) && urlLang !== currentLocale) {
+            currentLocale = urlLang;
+            try { localStorage.setItem('wardogs_lang', urlLang); } catch (e) { }
+        }
+
         await loadLocale(currentLocale);
         applyTranslations();
         if (onLocaleChange) onLocaleChange();
@@ -215,6 +223,10 @@ window.LocaleManager = (function () {
                 await loadLocale(newLocale);
                 applyTranslations();
                 if (onLocaleChange) onLocaleChange();
+                /** Update URL to reflect selected language */
+                const params = new URLSearchParams(location.search);
+                params.set('lang', newLocale);
+                history.replaceState({}, '', location.pathname + '?' + params.toString());
             });
         }
     }

@@ -60,5 +60,8 @@
     },
     "mapLabel": "Карта",
     "cancel": "Отмена",
-    "markerDefault": "Метка"
+    "markerDefault": "Метка",
+    "footerDesc": "Неофициальный миномётный и артиллерийский калькулятор для игры WARDOGS. Бесплатно, онлайн, 9 языков.",
+    "footerProject": "Проект",
+    "footerLangs": "Языки"
 }

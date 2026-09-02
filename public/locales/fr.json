@@ -60,5 +60,8 @@
     },
     "mapLabel": "Carte",
     "cancel": "Annuler",
-    "markerDefault": "Marqueur"
+    "markerDefault": "Marqueur",
+    "footerDesc": "Calculateur officieux de mortier et d'artillerie pour WARDOGS. Gratuit, en ligne, 9 langues.",
+    "footerProject": "Projet",
+    "footerLangs": "Langues"
 }

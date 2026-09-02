@@ -60,5 +60,8 @@
     },
     "mapLabel": "Harita",
     "cancel": "İptal",
-    "markerDefault": "İşaret"
+    "markerDefault": "İşaret",
+    "footerDesc": "WARDOGS için resmi olmayan havan ve topçu hesaplayıcı. Ücretsiz, çevrimiçi, 9 dil.",
+    "footerProject": "Proje",
+    "footerLangs": "Diller"
 }

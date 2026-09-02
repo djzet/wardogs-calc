@@ -312,6 +312,7 @@ window.AppWeapons = (function (storage) {
      * @param {string} w — ID оружия ('mortar' | 'artillery')
      */
     function set(w) {
+        if (!['mortar', 'artillery'].includes(w)) return;
         currentWeapon = w;
         storage.saveWeapon(w);
         /** Синхронизируем состояние radio-кнопок */
@@ -320,21 +321,32 @@ window.AppWeapons = (function (storage) {
         });
     }
 
+    /** Store bound onChange handler to remove duplicates on re-bind */
+    let _boundOnChange = null;
+
     /**
      * Привязывает обработчики к radio-кнопкам выбора оружия.
      * При клике сохраняет выбор и вызывает колбэк onChange.
+     * Снимает предыдущие обработчики для предотвращения дублирования.
      *
      * @param {Function} onChange — колбэк при смене оружия
      */
     function bind(onChange) {
+        /** Remove previous listeners to prevent duplicate handlers */
+        if (_boundOnChange) {
+            document.querySelectorAll('input[name="weapon"]').forEach(radio => {
+                radio.removeEventListener('change', _boundOnChange);
+            });
+        }
+        _boundOnChange = (e) => {
+            currentWeapon = e.target.value;
+            storage.saveWeapon(currentWeapon);
+            if (onChange) onChange();
+        };
         const radios = document.querySelectorAll('input[name="weapon"]');
         radios.forEach(radio => {
             if (radio.value === currentWeapon) radio.checked = true;
-            radio.addEventListener('change', (e) => {
-                currentWeapon = e.target.value;
-                storage.saveWeapon(currentWeapon);
-                if (onChange) onChange();
-            });
+            radio.addEventListener('change', _boundOnChange);
         });
     }
 

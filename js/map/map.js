@@ -296,6 +296,7 @@ window.MapRenderer = (function (utils, tiles) {
         ctx.fillStyle = color;
         ctx.beginPath(); ctx.arc(s.x, s.y, 7, 0, Math.PI * 2); ctx.fill();
         ctx.strokeStyle = '#fff'; ctx.lineWidth = 2; ctx.stroke();
+        ctx.lineWidth = 1;
         ctx.fillStyle = color;
         ctx.font = 'bold 13px sans-serif';
         ctx.textAlign = 'start';
@@ -531,6 +532,8 @@ window.MapRenderer = (function (utils, tiles) {
         if (isPreview) ctx.setLineDash([3, 3]); /** Пунктир для предпросмотра */
         ctx.stroke();
         ctx.setLineDash([]);
+        ctx.lineCap = 'butt';
+        ctx.lineJoin = 'miter';
     }
 
     /**
@@ -782,6 +785,8 @@ window.MapRenderer = (function (utils, tiles) {
             const sa = utils.worldToScreen(pointA.x, pointA.y, view);
             const sb = utils.worldToScreen(pointB.x, pointB.y, view);
             ctx.strokeStyle = c.line;
+            ctx.lineWidth = 1;
+            ctx.lineCap = 'butt';
             ctx.setLineDash([6, 6]);
             ctx.beginPath(); ctx.moveTo(sa.x, sa.y); ctx.lineTo(sb.x, sb.y); ctx.stroke();
             ctx.setLineDash([]);
@@ -965,6 +970,8 @@ window.MapInteractions = (function () {
         if (e.button === 1) {
             e.preventDefault();
             stopLongPress();
+            /** Cancel any active drawing stroke */
+            if (window.AppDraw) window.AppDraw.cancelStroke();
             dragging = { mode: 'pan', startX: p.x, startY: p.y, ox: view.ox, oy: view.oy };
             canvas.style.cursor = 'grabbing';
             return;
@@ -1005,6 +1012,7 @@ window.MapInteractions = (function () {
         /** Попадание на точку A/B → режим перетаскивания точки */
         const hit = hitPoint(p.x, p.y);
         if (hit) {
+            stopLongPress();
             dragging = { mode: 'point', key: hit };
             canvas.style.cursor = 'grabbing';
             return;
@@ -1123,7 +1131,14 @@ window.MapInteractions = (function () {
             if (e.pointerType === 'mouse' && !dragging) {
                 const overPoint = hitPoint(p.x, p.y);
                 const overTower = !overPoint && findTowerAt(p.x, p.y);
-                canvas.style.cursor = overPoint ? 'grab' : (overTower ? 'pointer' : 'crosshair');
+                if (overPoint) {
+                    canvas.style.cursor = 'grab';
+                } else if (overTower) {
+                    canvas.style.cursor = 'pointer';
+                } else {
+                    const tool = window.AppDraw ? window.AppDraw.getTool() : 'pan';
+                    canvas.style.cursor = tool === 'eraser' ? 'cell' : (tool === 'pan' ? 'grab' : 'crosshair');
+                }
             }
             return;
         }
@@ -1254,14 +1269,15 @@ window.MapInteractions = (function () {
         const { view, renderMap, scheduleRender, debouncedSaveView, utils } = opts;
         e.preventDefault(); /** Предотвращаем скролл страницы */
 
+        const p = canvasPos(e, canvas);
         const factor = Math.exp(-e.deltaY * 0.0015);
         const newScale = utils.clamp(view.scale * factor, MIN_SCALE, MAX_SCALE);
 
-        /** Масштабируем относительно позиции курсора */
-        const wpt = utils.screenToWorld(e.offsetX, e.offsetY, view);
+        /** Масштабируем относительно позиции курсора (используем canvasPos для консистентности) */
+        const wpt = utils.screenToWorld(p.x, p.y, view);
         view.scale = newScale;
-        view.ox = e.offsetX - wpt.x * view.scale;
-        view.oy = e.offsetY + wpt.y * view.scale;
+        view.ox = p.x - wpt.x * view.scale;
+        view.oy = p.y + wpt.y * view.scale;
 
         scheduleRender();
         debouncedSaveView();

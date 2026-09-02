@@ -60,5 +60,8 @@
     },
     "mapLabel": "Karte",
     "cancel": "Abbrechen",
-    "markerDefault": "Markierung"
+    "markerDefault": "Markierung",
+    "footerDesc": "Inoffizieller Mörser- und Artillerie-Rechner für WARDOGS. Kostenlos, online, 9 Sprachen.",
+    "footerProject": "Projekt",
+    "footerLangs": "Sprachen"
 }

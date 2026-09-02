@@ -148,7 +148,9 @@ window.AppUtils = (function () {
      * @returns {string} строка с координатой, например "82.40"
      */
     function gameCoord(meters) {
-        return (meters / 100).toFixed(2).replace(/^-0\.00$/, '0.00');
+        /** Обработка negative zero: (-0).toFixed(2) → "0.00", но на某些 платформах может быть "-0.00" */
+        const v = Object.is(meters, -0) ? 0 : meters;
+        return (v / 100).toFixed(2);
     }
 
     /**

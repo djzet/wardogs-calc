@@ -60,5 +60,8 @@
     },
     "mapLabel": "地图",
     "cancel": "取消",
-    "markerDefault": "标记"
+    "markerDefault": "标记",
+    "footerDesc": "WARDOGS 非官方迫击炮和火炮计算器。免费、在线、9种语言。",
+    "footerProject": "项目",
+    "footerLangs": "语言"
 }

@@ -60,5 +60,8 @@
     },
     "mapLabel": "Mapa",
     "cancel": "Anuluj",
-    "markerDefault": "Znacznik"
+    "markerDefault": "Znacznik",
+    "footerDesc": "Nieoficjalny kalkulator moździerowy i artyleryjski dla WARDOGS. Darmowy, online, 9 języków.",
+    "footerProject": "Projekt",
+    "footerLangs": "Języki"
 }
