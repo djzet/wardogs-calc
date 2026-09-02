@@ -196,38 +196,25 @@ window.MapTiles = (function () {
 
 window.MapRenderer = (function (utils, tiles) {
 
-    /** Цветовые палитры для тёмной и светлой тем */
-    const CANVAS_THEMES = {
-        dark: {
-            bg: '#10151b',          /** Фон за пределами карты */
-            mapBg: '#161d25',       /** Фон области карты */
-            gridMinor: 'rgba(255, 255, 255, 0.10)',  /** Мелкая сетка */
-            gridMajor: 'rgba(255, 255, 255, 0.28)',  /** Крупная сетка — контуры */
-            axes: 'rgba(255, 255, 255, 0.35)',       /** Оси координат */
-            dim: 'rgba(6, 8, 12, 0.55)',             /** Затемнение за картой */
-            border: '#46536b',       /** Граница карты */
-            labels: '#5c6875',       /** Подписи координат */
-            line: '#e8c35a',         /** Линия A→B */
-        },
-        light: {
-            bg: '#dfe5ec',
-            mapBg: '#f2f5f8',
-            gridMinor: 'rgba(15, 25, 40, 0.12)',
-            gridMajor: 'rgba(15, 25, 40, 0.30)',
-            axes: 'rgba(15, 25, 40, 0.40)',
-            dim: 'rgba(255, 255, 255, 0.6)',
-            border: '#7d8896',
-            labels: '#5c6875',
-            line: '#8a6d00',
-        },
-    };
-
     /**
-     * Возвращает цвета темы по имени.
-     * @param {string} theme — 'dark' | 'light'
-     * @returns {object} палитра цветов
+     * Читает цвета темы из CSS-переменных (--canvas-*).
+     * Единый источник правды: variables.css.
+     * @returns {object} палитра цветов для canvas
      */
-    function getThemeColors(theme) { return CANVAS_THEMES[theme] || CANVAS_THEMES.dark; }
+    function getThemeColors() {
+        const r = getComputedStyle(document.body);
+        return {
+            bg:       r.getPropertyValue('--canvas-bg').trim(),
+            mapBg:    r.getPropertyValue('--canvas-map-bg').trim(),
+            gridMinor: r.getPropertyValue('--canvas-grid-minor').trim(),
+            gridMajor: r.getPropertyValue('--canvas-grid-major').trim(),
+            axes:     r.getPropertyValue('--canvas-axes').trim(),
+            dim:      r.getPropertyValue('--canvas-dim').trim(),
+            border:   r.getPropertyValue('--canvas-border').trim(),
+            labels:   r.getPropertyValue('--canvas-labels').trim(),
+            line:     r.getPropertyValue('--canvas-line').trim(),
+        };
+    }
 
     /**
      * Вычисляет размер иконки вышки в пикселях.
@@ -351,10 +338,9 @@ window.MapRenderer = (function (utils, tiles) {
      * Рисует одну вышку: иконку tower.webp (или fallback-кружок).
      * Если вышка выбрана — рисует tooltip.
      */
-    function drawTower(ctx, view, p, towerIcon, selectedTower, STR, mapSize, themeColors) {
-        const wx = utils.percentToMeters(p.x, mapSize);
-        const wy = utils.percentToMeters(p.y, mapSize);
-        const s = utils.worldToScreen(wx, wy, view);
+    function drawTower(ctx, view, p, towerIcon, selectedTower, STR, mapSize, themeColors, idx) {
+        const cached = window.MapSpatial && window.MapSpatial.getTowerScreenPos(idx);
+        const s = cached || utils.worldToScreen(utils.percentToMeters(p.x, mapSize), utils.percentToMeters(p.y, mapSize), view);
         const iconSize = getTowerIconSize(view.scale);
 
         if (towerIcon.complete && towerIcon.naturalWidth > 0) {
@@ -693,6 +679,89 @@ window.MapRenderer = (function (utils, tiles) {
     }
 
     // ═══════════════════════════════════════════════════════════
+    //  Offscreen Canvas: статический оверлей для idle-оптимизации
+    // ═══════════════════════════════════════════════════════════
+
+    /**
+     * Offscreen canvas для кэширования статических элементов карты:
+     * сетка, оси, затемнение, граница, зона, вышки, рисунки, линии, точки.
+     *
+     * При idle (тайлы грузятся, но пользователь не двигает карту)
+     * перерисовываются только тайлы + композитинг кэшированного оверлея.
+     * Полная перерисовка оверлея — только при движении/зуме/смене данных.
+     */
+    let _staticCanvas = null;
+    let _staticCtx = null;
+    let _staticCssW = 0;
+    let _staticCssH = 0;
+    let _staticDpr = 0;
+
+    /**
+     * Создаёт или пересоздаёт offscreen canvas под текущий DPR и размер.
+     * Контекст получает DPR-трансформ для рисования в CSS-координатах.
+     *
+     * @param {number} cssW — CSS ширина canvas
+     * @param {number} cssH — CSS высота canvas
+     */
+    function ensureStaticCanvas(cssW, cssH) {
+        const dpr = window.devicePixelRatio || 1;
+        if (_staticCanvas && _staticCssW === cssW && _staticCssH === cssH && _staticDpr === dpr) return;
+        _staticCanvas = document.createElement('canvas');
+        _staticCssW = cssW;
+        _staticCssH = cssH;
+        _staticDpr = dpr;
+        _staticCanvas.width = Math.round(cssW * dpr);
+        _staticCanvas.height = Math.round(cssH * dpr);
+        _staticCtx = _staticCanvas.getContext('2d');
+        _staticCtx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    //  Валидация кэша статического оверлея
+    // ═══════════════════════════════════════════════════════════
+
+    /** Флаг: кэш оверлея нужно перерисовать */
+    let _ovDirty = true;
+
+    /** Метаданные последней отрисовки оверлея (для валидации без аллокаций) */
+    let _ovScale = 0, _ovOx = 0, _ovOy = 0;
+    let _ovW = 0, _ovH = 0;
+    let _ovMapSize = 0, _ovTilesId = '', _ovLocale = '', _ovBg = '';
+
+    /**
+     * Принудительно инвалидирует кэш статического оверлея.
+     * Вызывается при загрузке нового тайла, смене карты, темы или языка.
+     */
+    function invalidateBgCache() { _ovDirty = true; }
+
+    /**
+     * Композитит кэшированный статический оверлей на основной canvas.
+     * Использует setTransform(1,0,0,1) для пиксель-точного копирования
+     * с offscreen canvas физического размера.
+     *
+     * @param {CanvasRenderingContext2D} ctx — контекст основного canvas
+     */
+    function compositeStatic(ctx) {
+        if (!_staticCanvas) return;
+        ctx.save();
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+        ctx.drawImage(_staticCanvas, 0, 0);
+        ctx.restore();
+    }
+
+    /**
+     * Рисует слои 1-2 (фон + область карты) на указанный контекст.
+     */
+    function drawBgAndMap(ctx, view, MAP, w, h, c) {
+        ctx.fillStyle = c.bg;
+        ctx.fillRect(0, 0, w, h);
+        const m0 = utils.worldToScreen(0, 0, view);
+        const m1 = utils.worldToScreen(MAP.size, MAP.size, view);
+        ctx.fillStyle = c.mapBg;
+        ctx.fillRect(m0.x, m1.y, m1.x - m0.x, m0.y - m1.y);
+    }
+
+    // ═══════════════════════════════════════════════════════════
     //  Главная функция отрисовки
     // ═══════════════════════════════════════════════════════════
 
@@ -700,113 +769,171 @@ window.MapRenderer = (function (utils, tiles) {
      * Главная функция отрисовки всей карты.
      * Вызывается при каждом обновлении (перемещение, зум, изменение точек).
      *
+     * Отрисовка разделена на два слоя:
+     * 1. Тайловая подложка (динамическая — меняется при загрузке тайлов)
+     * 2. Статический оверлей (сетка, вышки, точки — кэшируется в offscreen canvas)
+     *
+     * При загрузке нового тайла вызывается drawComposite() — перерисовывает
+     * только тайлы и берёт статический оверлей из кэша.
+     *
      * @param {CanvasRenderingContext2D} ctx — контекст canvas
      * @param {HTMLCanvasElement} canvas — элемент canvas
      * @param {object} opts — все данные для отрисовки:
      *   view, MAP, ZONE, TOWERS, WEAPONS, currentWeapon,
-     *   pointA, pointB, theme, showTowers, selectedTower,
+     *   pointA, pointB, showTowers, selectedTower,
      *   STR, towerIcon, TILES, onTileLoaded
      */
     function draw(ctx, canvas, opts) {
         const { view, MAP, ZONE, TOWERS, WEAPONS, currentWeapon,
-            pointA, pointB, theme, showTowers, selectedTower,
+            pointA, pointB, showTowers, selectedTower,
             STR, towerIcon, TILES, onTileLoaded } = opts;
 
-        const c = getThemeColors(theme);
+        const c = getThemeColors();
         const w = canvas.clientWidth, h = canvas.clientHeight;
 
-        /** Слой 1: Фон за пределами карты */
-        ctx.fillStyle = c.bg;
-        ctx.fillRect(0, 0, w, h);
+        /** Обеспечиваем offscreen canvas нужного размера */
+        ensureStaticCanvas(w, h);
 
-        /** Слой 2: Область карты (прямоугольник) */
-        const m0 = utils.worldToScreen(0, 0, view);
-        const m1 = utils.worldToScreen(MAP.size, MAP.size, view);
-        ctx.fillStyle = c.mapBg;
-        ctx.fillRect(m0.x, m1.y, m1.x - m0.x, m0.y - m1.y);
+        /** Слой 1-2: Фон + область карты */
+        drawBgAndMap(ctx, view, MAP, w, h, c);
 
         /** Слой 3: Тайловая подложка */
         tiles.drawTiles(ctx, canvas, view, MAP, TILES, c, onTileLoaded);
 
-        /** Слой 3.5: Затемнение тайлов (только для ozeti) */
-        if (TILES.mapId === 'ozeti') {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
-            ctx.fillRect(m0.x, m1.y, m1.x - m0.x, m0.y - m1.y);
+        /** ══ Валидация кэша статического оверлея ══ */
+        const locale = document.documentElement.lang || '';
+        const ovStale = _ovDirty
+            || view.scale !== _ovScale || view.ox !== _ovOx || view.oy !== _ovOy
+            || w !== _ovW || h !== _ovH
+            || MAP.size !== _ovMapSize || TILES.mapId !== _ovTilesId
+            || locale !== _ovLocale || c.bg !== _ovBg;
+
+        if (ovStale) {
+            const sctx = _staticCtx;
+
+            /** Очищаем offscreen canvas перед перерисовкой */
+            sctx.clearRect(0, 0, w, h);
+
+            /** Слой 3.5: Затемнение тайлов (только для ozeti) */
+            if (TILES.mapId === 'ozeti') {
+                const m0 = utils.worldToScreen(0, 0, view);
+                const m1 = utils.worldToScreen(MAP.size, MAP.size, view);
+                sctx.fillStyle = 'rgba(0, 0, 0, 0.5)';
+                sctx.fillRect(m0.x, m1.y, m1.x - m0.x, m0.y - m1.y);
+            }
+
+            /** Слой 4: Сетка (мелкая + крупная с подписями) */
+            drawMinorGrid(sctx, view, c, w, h, MAP.size);
+            drawGrid(sctx, view, c, w, h, MAP.size, STR);
+
+            /** Слой 5: Оси координат (пересечение 0,0) */
+            sctx.strokeStyle = c.axes;
+            sctx.beginPath();
+            const zero = utils.worldToScreen(0, 0, view);
+            sctx.moveTo(zero.x + .5, 0); sctx.lineTo(zero.x + .5, h);
+            sctx.moveTo(0, zero.y + .5); sctx.lineTo(w, zero.y + .5);
+            sctx.stroke();
+
+            /** Слой 6: Затемнение за пределами карты (4 прямоугольника) */
+            const m0 = utils.worldToScreen(0, 0, view);
+            const m1 = utils.worldToScreen(MAP.size, MAP.size, view);
+            sctx.fillStyle = c.dim;
+            sctx.fillRect(0, 0, w, m1.y);             /** Сверху */
+            sctx.fillRect(0, m0.y, w, h - m0.y);      /** Снизу */
+            sctx.fillRect(0, m1.y, m0.x, m0.y - m1.y); /** Слева */
+            sctx.fillRect(m1.x, m1.y, w - m1.x, m0.y - m1.y); /** Справа */
+
+            /** Слой 7: Граница карты */
+            sctx.strokeStyle = c.border;
+            sctx.lineWidth = 1.5;
+            sctx.strokeRect(m0.x, m1.y, m1.x - m0.x, m0.y - m1.y);
+            sctx.lineWidth = 1;
+
+            /** Слой 8: Боевая зона (круг) — если задана и радиус > 0 */
+            if (ZONE && ZONE.r > 0) {
+                const zc = utils.worldToScreen(ZONE.cx, ZONE.cy, view);
+                sctx.beginPath();
+                sctx.arc(zc.x, zc.y, ZONE.r * view.scale, 0, Math.PI * 2);
+                sctx.fillStyle = 'rgba(159, 211, 86, 0.05)';
+                sctx.fill();
+                sctx.strokeStyle = 'rgba(124, 180, 60, 0.55)';
+                sctx.setLineDash([10, 6]);
+                sctx.lineWidth = 1.5;
+                sctx.stroke();
+                sctx.setLineDash([]);
+                sctx.lineWidth = 1;
+            }
+
+            /** Слой 9: Вышки (если включены в настройках) */
+            if (showTowers) TOWERS.forEach((p, i) => drawTower(sctx, view, p, towerIcon, selectedTower, STR, MAP.size, c, i));
+
+            /** Слой 10: Рисунки пользователя */
+            drawDrawings(sctx, view, MAP.size, STR);
+
+            /** Слой 11: Линия A→B с подписью расстояния (пунктир) */
+            if (pointA && pointB) {
+                const sa = utils.worldToScreen(pointA.x, pointA.y, view);
+                const sb = utils.worldToScreen(pointB.x, pointB.y, view);
+                sctx.strokeStyle = c.line;
+                sctx.lineWidth = 1;
+                sctx.lineCap = 'butt';
+                sctx.setLineDash([6, 6]);
+                sctx.beginPath(); sctx.moveTo(sa.x, sa.y); sctx.lineTo(sb.x, sb.y); sctx.stroke();
+                sctx.setLineDash([]);
+
+                /** Подпись расстояния рядом с линией */
+                const d = Math.hypot(pointB.x - pointA.x, pointB.y - pointA.y);
+                sctx.fillStyle = c.line;
+                sctx.font = '12px monospace';
+                sctx.fillText(utils.fmtDist(d, STR), (sa.x + sb.x) / 2 + 8, (sa.y + sb.y) / 2 - 8);
+            }
+
+            /** Слой 12: Круг дальности текущего оружия */
+            drawRangeCircle(sctx, view, pointA, WEAPONS[currentWeapon], STR);
+
+            /** Слой 13: Точки A (зелёная) и B (красная) */
+            if (pointA) drawPoint(sctx, view, pointA, '#7bc95e', 'A');
+            if (pointB) drawPoint(sctx, view, pointB, '#e05656', 'B');
+
+            /** Обновляем метаданные кэша */
+            _ovDirty = false;
+            _ovScale = view.scale; _ovOx = view.ox; _ovOy = view.oy;
+            _ovW = w; _ovH = h;
+            _ovMapSize = MAP.size; _ovTilesId = TILES.mapId;
+            _ovLocale = locale; _ovBg = c.bg;
         }
 
-        /** Слой 4: Сетка (мелкая + крупная с подписями) */
-        drawMinorGrid(ctx, view, c, w, h, MAP.size);
-        drawGrid(ctx, view, c, w, h, MAP.size, STR);
-
-        /** Слой 5: Оси координат (пересечение 0,0) */
-        ctx.strokeStyle = c.axes;
-        ctx.beginPath();
-        const zero = utils.worldToScreen(0, 0, view);
-        ctx.moveTo(zero.x + .5, 0); ctx.lineTo(zero.x + .5, h);
-        ctx.moveTo(0, zero.y + .5); ctx.lineTo(w, zero.y + .5);
-        ctx.stroke();
-
-        /** Слой 6: Затемнение за пределами карты (4 прямоугольника) */
-        ctx.fillStyle = c.dim;
-        ctx.fillRect(0, 0, w, m1.y);             /** Сверху */
-        ctx.fillRect(0, m0.y, w, h - m0.y);      /** Снизу */
-        ctx.fillRect(0, m1.y, m0.x, m0.y - m1.y); /** Слева */
-        ctx.fillRect(m1.x, m1.y, w - m1.x, m0.y - m1.y); /** Справа */
-
-        /** Слой 7: Граница карты */
-        ctx.strokeStyle = c.border;
-        ctx.lineWidth = 1.5;
-        ctx.strokeRect(m0.x, m1.y, m1.x - m0.x, m0.y - m1.y);
-        ctx.lineWidth = 1;
-
-        /** Слой 8: Боевая зона (круг) — если задана и радиус > 0 */
-        if (ZONE && ZONE.r > 0) {
-            const zc = utils.worldToScreen(ZONE.cx, ZONE.cy, view);
-            ctx.beginPath();
-            ctx.arc(zc.x, zc.y, ZONE.r * view.scale, 0, Math.PI * 2);
-            ctx.fillStyle = 'rgba(159, 211, 86, 0.05)';
-            ctx.fill();
-            ctx.strokeStyle = 'rgba(124, 180, 60, 0.55)';
-            ctx.setLineDash([10, 6]);
-            ctx.lineWidth = 1.5;
-            ctx.stroke();
-            ctx.setLineDash([]);
-            ctx.lineWidth = 1;
-        }
-
-        /** Слой 9: Вышки (если включены в настройках) */
-        if (showTowers) TOWERS.forEach(p => drawTower(ctx, view, p, towerIcon, selectedTower, STR, MAP.size, c));
-
-        /** Слой 10: Рисунки пользователя */
-        drawDrawings(ctx, view, MAP.size, STR);
-
-        /** Слой 11: Линия A→B с подписью расстояния (пунктир) */
-        if (pointA && pointB) {
-            const sa = utils.worldToScreen(pointA.x, pointA.y, view);
-            const sb = utils.worldToScreen(pointB.x, pointB.y, view);
-            ctx.strokeStyle = c.line;
-            ctx.lineWidth = 1;
-            ctx.lineCap = 'butt';
-            ctx.setLineDash([6, 6]);
-            ctx.beginPath(); ctx.moveTo(sa.x, sa.y); ctx.lineTo(sb.x, sb.y); ctx.stroke();
-            ctx.setLineDash([]);
-
-            /** Подпись расстояния рядом с линией */
-            const d = Math.hypot(pointB.x - pointA.x, pointB.y - pointA.y);
-            ctx.fillStyle = c.line;
-            ctx.font = '12px monospace';
-            ctx.fillText(utils.fmtDist(d, STR), (sa.x + sb.x) / 2 + 8, (sa.y + sb.y) / 2 - 8);
-        }
-
-        /** Слой 12: Круг дальности текущего оружия */
-        drawRangeCircle(ctx, view, pointA, WEAPONS[currentWeapon], STR);
-
-        /** Слой 13: Точки A (зелёная) и B (красная) */
-        if (pointA) drawPoint(ctx, view, pointA, '#7bc95e', 'A');
-        if (pointB) drawPoint(ctx, view, pointB, '#e05656', 'B');
+        /** Композитим статический оверлей поверх тайлов (всегда — даже из кэша) */
+        compositeStatic(ctx);
     }
 
-    return { getTowerIconSize, draw };
+    /**
+     * Лёгкая отрисовка: только тайлы + кэшированный статический оверлей.
+     * Вызывается при загрузке нового тайла (idle), без перерисовки сетки/точек.
+     *
+     * Экономия: пропускает 10 слоёв (сетка, оси, затемнение, граница,
+     * зона, вышки, рисунки, линия, круг дальности, точки).
+     *
+     * @param {CanvasRenderingContext2D} ctx
+     * @param {HTMLCanvasElement} canvas
+     * @param {object} opts — view, MAP, TILES, onTileLoaded
+     */
+    function drawComposite(ctx, canvas, opts) {
+        const { view, MAP, TILES, onTileLoaded } = opts;
+        const c = getThemeColors();
+        const w = canvas.clientWidth, h = canvas.clientHeight;
+
+        /** Слой 1-2: Фон + область карты */
+        drawBgAndMap(ctx, view, MAP, w, h, c);
+
+        /** Слой 3: Тайлы (только что загрузились) */
+        tiles.drawTiles(ctx, canvas, view, MAP, TILES, c, onTileLoaded);
+
+        /** Статический оверлей из кэша (без перерисовки) */
+        compositeStatic(ctx);
+    }
+
+    return { getTowerIconSize, draw, drawComposite, invalidateBgCache };
 })(window.AppUtils, window.MapTiles);
 
 /**

@@ -8,7 +8,7 @@
  */
 
 import { defineConfig } from 'vite';
-import { cpSync, createReadStream, existsSync, mkdirSync, statSync } from 'node:fs';
+import { cpSync, createReadStream, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync } from 'node:fs';
 import { join, dirname, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -84,6 +84,74 @@ function mapsPlugin() {
   };
 }
 
+/**
+ * Vite-плагин: инлайнинг локализации.
+ *
+ * Собирает ВСЕ JSON-файлы из public/locales/ и встраивает их
+ * в JS-бандл как виртуальный модуль 'virtual:locale-data'.
+ *
+ * В dev-режиме: экспортирует null → locales.js продолжает использовать fetch(),
+ *   чтобы правки JSON отслеживались без перезапуска dev-сервера.
+ * В build-режиме: экспортирует все переводы → −9 HTTP-запросов.
+ */
+function inlineLocales() {
+  const VIRTUAL_ID = 'virtual:locale-data';
+  const resolvedVirtualId = '\0' + VIRTUAL_ID;
+
+  /** Папка с локалями */
+  const localesDir = join(root, 'public', 'locales');
+
+  /** Флаг: build или dev */
+  let isBuild = false;
+
+  return {
+    name: 'inline-locales',
+
+    /** Определяем режим (build vs serve) */
+    config(_, { command }) {
+      isBuild = command === 'build';
+    },
+
+    /** Резолвим виртуальный ID (всегда, чтобы locale-data.js не падал) */
+    resolveId(id) {
+      if (id === VIRTUAL_ID) return resolvedVirtualId;
+    },
+
+    /** Генерируем модуль со всеми переводами (только в build) */
+    load(id) {
+      if (id !== resolvedVirtualId) return;
+
+      /** Dev-режим: оставляем fetch() для live-reload JSON */
+      if (!isBuild) {
+        return 'export default null;';
+      }
+
+      /** Build: собираем все JSON-файлы локалей */
+      const data = {};
+      for (const file of readdirSync(localesDir)) {
+        if (!file.endsWith('.json')) continue;
+        const lang = file.replace('.json', '');
+        const json = readFileSync(join(localesDir, file), 'utf-8');
+        data[lang] = JSON.parse(json);
+      }
+
+      const size = JSON.stringify(data).length;
+      console.log(`[inline-locales] inlined ${Object.keys(data).length} locales (${(size / 1024).toFixed(1)} KB) → −9 HTTP-запросов`);
+
+      return `export default ${JSON.stringify(data)};`;
+    },
+
+    /** После сборки: удаляем dist/locales/ — данные уже в бандле */
+    closeBundle() {
+      const distLocales = join(root, 'dist', 'locales');
+      if (existsSync(distLocales)) {
+        rmSync(distLocales, { recursive: true });
+        console.log('[inline-locales] removed dist/locales/ (data inlined in JS bundle)');
+      }
+    },
+  };
+}
+
 export default defineConfig({
   /** './' — относительный base: работает и на GH Pages (/wardogs-calc/), и в vite preview (/) */
   base: './',
@@ -106,6 +174,6 @@ export default defineConfig({
     port: 4173,  /** Порт preview-сервера (после build) */
   },
 
-  /** Подключаем кастомный плагин для раздачи тайлов карты */
-  plugins: [mapsPlugin()],
+  /** Подключаем кастомные плагины */
+  plugins: [mapsPlugin(), inlineLocales()],
 });

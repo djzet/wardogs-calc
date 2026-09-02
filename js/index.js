@@ -74,6 +74,9 @@ let ZONE = mapCfg.zone;
 let TOWERS = mapCfg.towers;
 let TILES = mapCfg.tiles;
 
+/** Пространственный индекс вышек: предвычисление мировых координат */
+MapSpatial.configure(TOWERS, MAP.size);
+
 // ═══════════════════════════════════════════════════════════
 //  Canvas и DOM-элементы
 // ═══════════════════════════════════════════════════════════
@@ -115,6 +118,7 @@ towerIcon.onload = () => renderMap();
 
 MapTiles.configure(TILES.cacheMax || TILE_CACHE_MAX);
 AppDraw.configure(MAP.size, STR);
+AppDraw.initButtons();
 AppDraw.setOnStrokeComplete(() => renderMap());
 
 // ═══════════════════════════════════════════════════════════
@@ -127,13 +131,20 @@ AppDraw.setOnStrokeComplete(() => renderMap());
  * Вызывается при любом изменении (точки, зум, перемещение, тема).
  */
 function renderMap() {
+    /** Инвалидация кэша статического оверлея: данные могли измениться (точки, оружие, вышки) */
+    MapRenderer.invalidateBgCache();
+
+    /** Пересчёт экранных позиций + построение сетки (один раз за кадр) */
+    if (UIPanels.getShowTowers()) {
+        MapSpatial.rebuild(view, MapRenderer.getTowerIconSize(view.scale) / 2);
+    }
     MapRenderer.draw(ctx, canvas, {
         view, MAP, ZONE, TOWERS, WEAPONS,
         currentWeapon: AppWeapons.get(),
         pointA: AppPoints.getA(), pointB: AppPoints.getB(),
-        theme: UIPanels.getTheme(), showTowers: UIPanels.getShowTowers(),
+        showTowers: UIPanels.getShowTowers(),
         selectedTower, STR, towerIcon, TILES,
-        onTileLoaded: scheduleRender /** Перерисовка при загрузке нового тайла */
+        onTileLoaded: onTileLoaded /** Debounce → drawComposite при загрузке тайла (idle) */
     });
 }
 
@@ -152,6 +163,38 @@ function scheduleRender() {
         _rafId = 0;
         renderMap();
     });
+}
+
+/**
+ * Лёгкий план через rAF: только тайлы + кэшированный статический оверлей.
+ * Вызывается при загрузке нового тайла (idle) — пропускает
+ * перерисовку сетки, осей, вышек, точек (10 слоёв).
+ *
+ * Экономия CPU: вместо 13 слоёв — только фон + тайлы + drawImage(оверлей).
+ */
+let _tileRafId = 0;
+function scheduleTileRender() {
+    if (_tileRafId) return;
+    _tileRafId = requestAnimationFrame(() => {
+        _tileRafId = 0;
+        MapRenderer.drawComposite(ctx, canvas, {
+            view, MAP, TILES, onTileLoaded
+        });
+    });
+}
+
+/**
+ * Debounce колбэк для загрузки тайлов.
+ * При быстром зуме N тайлов загружаются за миллисекунды —
+ * debounce 50ms батчит их в одну перерисовку.
+ *
+ * Использует drawComposite() — лёгкий путь: фон + тайлы + кэшированный оверлей.
+ * Пропускает перерисовку сетки, осей, вышек, точек (10 слоёв).
+ */
+let _tileDebounce = 0;
+function onTileLoaded() {
+    clearTimeout(_tileDebounce);
+    _tileDebounce = setTimeout(scheduleTileRender, 50); /** 50ms batch → lightweight */
 }
 
 /**
@@ -189,10 +232,13 @@ function switchMap(mapId) {
     TOWERS = mapCfg.towers;
     TILES = mapCfg.tiles;
 
+    MapSpatial.configure(TOWERS, MAP.size);
+
     selectedTower = null;
     AppStorage.saveMap(mapId);
     MapTiles.clearCache();
     MapTiles.configure(TILES.cacheMax || TILE_CACHE_MAX);
+    MapRenderer.invalidateBgCache();
 
     /** Сбрасываем рисунки при смене карты */
     if (window.AppDraw) {
@@ -221,7 +267,7 @@ function switchMap(mapId) {
 
 /**
  * Проверяет попадание на вышку в экраниной позиции.
- * Используется при клике/tap для выбора вышки.
+ * Использует пространственную сетку MapSpatial — O(1)平均.
  *
  * @param {number} sx — экраниая X
  * @param {number} sy — экраниая Y
@@ -230,11 +276,9 @@ function switchMap(mapId) {
 function findTowerAt(sx, sy) {
     if (!UIPanels.getShowTowers()) return null;
     const halfSize = MapRenderer.getTowerIconSize(view.scale) / 2;
-    for (const p of TOWERS) {
-        const s = worldToScreen(percentToMeters(p.x, MAP.size), percentToMeters(p.y, MAP.size), view);
-        if (Math.abs(s.x - sx) <= halfSize && Math.abs(s.y - sy) <= halfSize) return p;
-    }
-    return null;
+    /** Гарантируем актуальность сетки (no-op если view не менялся) */
+    MapSpatial.rebuild(view, halfSize);
+    return MapSpatial.findTowerAt(sx, sy, halfSize);
 }
 
 /**

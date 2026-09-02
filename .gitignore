@@ -1,29 +1,16 @@
 # Dependencies
-node_modules/
+node_modules
 
 # Build output
-dist/
-
-# Vite
-.vite/
-
-# Environment variables
-.env
-.env.*
-*.local
+dist
 
 # Logs
 *.log
-npm-debug.log*
 
 # OS files
 .DS_Store
 Thumbs.db
-Desktop.ini
 
 # IDE
-.idea/
-.vscode/
-*.swp
-*.swo
-*~
+.vscode
+.idea

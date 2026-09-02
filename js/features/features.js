@@ -40,6 +40,9 @@ window.AppDraw = (function (utils) {
   /** Прокси локализации (STR.key → LocaleManager.t(key)) */
   let STR = null;
 
+  /** Кэш DOM-кнопок (заполняется в initButtons) */
+  let _toolBtns, _widthBtns;
+
   /** Координаты pending-маркера (ожидание ввода имени через модалку) */
   let pendingMarker = null;
 
@@ -61,6 +64,15 @@ window.AppDraw = (function (utils) {
   }
 
   /**
+   * Кэширует ссылки на кнопки инструментов и толщины.
+   * Вызывать после монтирования DOM (после configure).
+   */
+  function initButtons() {
+    _toolBtns = document.querySelectorAll('.draw-tool');
+    _widthBtns = document.querySelectorAll('.width-opt');
+  }
+
+  /**
    * Устанавливает колбэк, вызываемый при сохранении штриха.
    * Используется для перерисовки карты после маркера.
    * @param {Function} fn — callback
@@ -75,7 +87,7 @@ window.AppDraw = (function (utils) {
     if (!TOOLS.includes(tool)) return;
     currentTool = tool;
     /** Обновляем CSS-класс active на кнопках инструментов */
-    document.querySelectorAll('.draw-tool').forEach(btn => {
+    _toolBtns.forEach(btn => {
       btn.classList.toggle('active', btn.dataset.tool === tool);
     });
   }
@@ -86,7 +98,7 @@ window.AppDraw = (function (utils) {
    */
   function setWidth(w) {
     currentWidth = Math.max(1, Math.min(6, Number(w) || 1));
-    document.querySelectorAll('.width-opt').forEach(btn => {
+    _widthBtns.forEach(btn => {
       btn.classList.toggle('active', Number(btn.dataset.width) === currentWidth);
     });
   }
@@ -346,7 +358,7 @@ window.AppDraw = (function (utils) {
   }
 
   return {
-    configure, setOnStrokeComplete,
+    configure, initButtons, setOnStrokeComplete,
     setTool, setWidth, getTool, getWidth,
     getLocalDrawings, getCurrentStroke, isActive,
     startStroke, continueStroke, finishStroke, cancelStroke,
