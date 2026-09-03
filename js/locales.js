@@ -1,29 +1,6 @@
-/**
- *
- * Поддерживает 9 языков: ru, en, de, fr, es, pl, uk, tr, zh.
- *
- * Работа:
- * 1. Если доступны инлайненные переводы (build) — использует их мгновенно
- * 2. Иначе загружает JSON-файл перевода из /locales/{lang}.json (dev)
- * 3. При ошибке загрузки — использует встроенный fallback (только ru)
- * 4. Применяет переводы к DOM через data-i18n / data-i18n-title
- * 5. Сохраняет выбор языка в localStorage
- *
- * Экспорт: window.LocaleManager
- */
-
 window.LocaleManager = (function () {
-
-    /** Поддерживаемые языки */
     const SUPPORTED_LOCALES = ['ru', 'en', 'de', 'fr', 'es', 'pl', 'uk', 'tr', 'zh'];
-
-    /** Язык по умолчанию */
     const DEFAULT_LOCALE = 'ru';
-
-    /**
-     * Встроенный fallback-перевод (только русский).
-     * Используется если JSON-файл не загрузился (офлайн, ошибка сервера).
-     */
     const FALLBACK_TRANSLATIONS = {
         ru: {
             title: 'Миномётный калькулятор',
@@ -106,54 +83,22 @@ window.LocaleManager = (function () {
             seoAboutP3: 'Интерфейс доступен на <strong>9 языках</strong>. Калькулятор адаптирован для мобильных устройств и работает в любом современном браузере без установки.'
         }
     };
-
-    /**
-     * Whitelist-based XSS sanitizer.
-     * Allows only safe HTML tags: <b>, <strong>, <em>, <br>, <code>.
-     * Strips everything else to prevent injection from compromised locale files.
-     *
-     * @param {string} str — raw translation string potentially containing HTML
-     * @returns {string} sanitized string with only whitelisted tags
-     */
     function safeHTML(str) {
         return str.replace(/<(?!\/?(b|strong|em|br|code)\b)[^>]*>/gi, '');
     }
-
-    /** Текущий активный язык */
     let currentLocale = DEFAULT_LOCALE;
-
-    /** Пытаемся загрузить сохранённый язык из localStorage */
     try {
         currentLocale = localStorage.getItem('wardogs_lang') || DEFAULT_LOCALE;
     } catch (e) {
         currentLocale = DEFAULT_LOCALE;
     }
-
-    /** Загруженные переводы (объект ключ→перевод) */
     let translations = {};
-
-    /** Флаг: были ли переводы загружены */
     let loaded = false;
-
-    /** Колбэк при смене языка (для перерисовки canvas) */
     let onLocaleChange = null;
-
-    /**
-     * Загружает переводы для указанного языка.
-     * Приоритет:
-     *   1. window.__INLINED_LOCALES__ (build-only, Vite плагин inlineLocales)
-     *   2. fetch() из public/locales/{lang}.json (dev-режим)
-     *   3. FALLBACK_TRANSLATIONS (офлайн / ошибка сервера)
-     *
-     * @param {string} locale — код языка ('ru', 'en', ...)
-     * @returns {Promise<object>} объект перевода
-     */
     async function loadLocale(locale) {
         if (!SUPPORTED_LOCALES.includes(locale)) {
             locale = DEFAULT_LOCALE;
         }
-
-        /** Путь 1: инлайненные переводы (build-режим, −9 HTTP-запросов) */
         const inlined = window.__INLINED_LOCALES__;
         if (inlined && inlined[locale]) {
             translations = inlined[locale];
@@ -163,8 +108,6 @@ window.LocaleManager = (function () {
             try { localStorage.setItem('wardogs_lang', locale); } catch (e) { }
             return translations;
         }
-
-        /** Путь 2: fetch из public/locales/ (dev-режим) */
         try {
             const base = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.BASE_URL) || './';
             const response = await fetch(`${base}locales/${locale}.json`);
@@ -176,7 +119,6 @@ window.LocaleManager = (function () {
             try { localStorage.setItem('wardogs_lang', locale); } catch (e) { }
             return translations;
         } catch (error) {
-            /** Путь 3: встроенный fallback (только ru) */
             console.warn(`Failed to load locale ${locale}, using fallback:`, error.message);
             translations = FALLBACK_TRANSLATIONS[locale] || FALLBACK_TRANSLATIONS[DEFAULT_LOCALE];
             currentLocale = locale;
@@ -185,14 +127,6 @@ window.LocaleManager = (function () {
             return translations;
         }
     }
-
-    /**
-     * Возвращает перевод по ключу.
-     * Поддерживает вложенные ключи через точку (например, "weaponNames.mortar").
-     *
-     * @param {string} key — ключ перевода
-     * @returns {string|object} переведённый текст или сам ключ если не найден
-     */
     function t(key) {
         if (!loaded) {
             const fallback = FALLBACK_TRANSLATIONS[DEFAULT_LOCALE];
@@ -201,15 +135,6 @@ window.LocaleManager = (function () {
         const value = getNestedValue(translations, key);
         return value !== undefined ? value : key;
     }
-
-    /**
-     * Извлекает вложенное значение из объекта по ключу с точками.
-     * Пример: getNestedValue({a: {b: 'x'}}, 'a.b') → 'x'
-     *
-     * @param {object} obj — объект перевода
-     * @param {string} key — ключ с точечной нотацией
-     * @returns {*} значение или undefined
-     */
     function getNestedValue(obj, key) {
         const keys = key.split('.');
         let value = obj;
@@ -222,48 +147,30 @@ window.LocaleManager = (function () {
         }
         return value;
     }
-
-    /**
-     * Применяет переводы ко всем DOM-элементам с атрибутами data-i18n.
-     *
-     * data-i18n="key" — подставляет текст (или innerHTML если содержит <)
-     * data-i18n-title="key" — подставляет атрибут title
-     */
     function applyTranslations() {
         if (!loaded) return;
-
-        /** Переводим атрибуты title */
         document.querySelectorAll('[data-i18n-title]').forEach(el => {
             el.title = t(el.dataset.i18nTitle);
         });
-
-        /** Переводим текст/innerHTML */
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const translation = t(el.dataset.i18n);
             if (typeof translation === 'string' && translation.includes('<')) {
-                el.innerHTML = safeHTML(translation); /** С HTML (например, helpP2 с <br>) */
+                el.innerHTML = safeHTML(translation);
             } else {
                 el.textContent = translation;
             }
         });
     }
-
-    /**
-     * Инициализация: загружает язык и привязывает селектор языка в drawer.
-     */
     async function init() {
-        /** Parse ?lang= from URL (highest priority, overrides localStorage) */
         const urlParams = new URLSearchParams(location.search);
         const urlLang = urlParams.get('lang');
         if (urlLang && SUPPORTED_LOCALES.includes(urlLang) && urlLang !== currentLocale) {
             currentLocale = urlLang;
             try { localStorage.setItem('wardogs_lang', urlLang); } catch (e) { }
         }
-
         await loadLocale(currentLocale);
         applyTranslations();
         if (onLocaleChange) onLocaleChange();
-
         const langSelect = document.getElementById('langSelect');
         if (langSelect) {
             langSelect.value = currentLocale;
@@ -272,17 +179,13 @@ window.LocaleManager = (function () {
                 await loadLocale(newLocale);
                 applyTranslations();
                 if (onLocaleChange) onLocaleChange();
-                /** Update URL to reflect selected language */
                 const params = new URLSearchParams(location.search);
                 params.set('lang', newLocale);
                 history.replaceState({}, '', location.pathname + '?' + params.toString());
             });
         }
     }
-
-    /** Устанавливает колбэк при смене языка (для перерисовки canvas) */
     function setOnLocaleChange(fn) { onLocaleChange = fn; }
-
     return {
         init,
         loadLocale,
@@ -291,11 +194,6 @@ window.LocaleManager = (function () {
         setOnLocaleChange
     };
 })();
-
-/**
- * Автоматическая инициализация при загрузке DOM.
- * Если DOM уже готов — init() сразу, иначе ждём DOMContentLoaded.
- */
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         window.LocaleManager.init();

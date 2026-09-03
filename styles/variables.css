@@ -1,172 +1,77 @@
-/**
- * styles/variables.css — CSS-переменные и темы оформления
- *
- * Определяет:
- * - Цвета для тёмной темы (:root) — активна по умолчанию
- * - Цвета для светлой темы (body.light) — переключается классом
- * - Размеры: радиусы, ширина панели и drawer
- * - Флуидные размеры через clamp() для адаптивности
- *
- * Использование: var(--accent), var(--bg), и т.д.
- */
-
-/* ═══════════════ ТЁМНАЯ ТЕМА (по умолчанию) ═══════════════ */
 :root {
     color-scheme: dark;
-
-    /* === Фоны === */
     --bg: #12151a;
-    /* Основной фон страницы */
     --panel: #1a1f27;
-    /* Фон панели и модальных окон */
     --field: #0f1319;
-    /* Фон полей ввода и секций */
-
-    /* === Границы === */
     --border: #2c3440;
-    /* Основная граница элементов */
-
-    /* === Текст === */
     --text: #e6e6e6;
-    /* Основной текст */
     --muted: #8a94a3;
-    /* Приглушённый текст (заголовки h2, лейблы) */
     --dim: #5c6875;
-    /* Ещё тусклее (подсказки, справка) */
-
-    /* === Акценты === */
     --accent: #9fd356;
-    /* Основной акцент (зелёный) — кнопки, результаты */
     --accent-hover: #b8e877;
-    /* Акцент при наведении */
-
-    /* === Ошибки и предупреждения === */
     --danger: #e05656;
-    /* Красный — ошибки, удаление */
     --danger-hover: #ff6b6b;
-    /* Красный при наведении */
     --warn: #e8c35a;
-    /* Жёлтый — предупреждения */
-
-    /* === Контекстное меню === */
     --menu: #1e242e;
-    /* Фон контекстного меню */
     --menu-border: #39424f;
-    /* Граница контекстного меню */
-
-    /* === Hover-состояния === */
     --hover: #2c3440;
-    /* Фон при наведении */
-
-    /* === Кнопки поверх карты === */
     --btn-bg: rgba(30, 36, 46, .85);
-    /* Полупрозрачный фон кнопок */
     --btn-text: #cfd6df;
-    /* Текст кнопок */
-
-    /* === Discord === */
     --discord: #5865F2;
-    /* Фирменный цвет Discord */
     --discord-hover: #4752C4;
-    /* Discord при наведении */
-
-    /* === Радиусы скругления === */
     --radius-sm: 6px;
-    /* Маленький — кнопки, поля */
     --radius-md: 8px;
-    /* Средний — секции, меню */
     --radius-lg: 10px;
-    /* Большой — модальные окна */
-
-    /* === Размеры компонентов (desktop) === */
     --panel-width: 400px;
-    /* Ширина левой панели (desktop) */
     --drawer-width: 260px;
-    /* Ширина бокового drawer'а */
-
-    /* === Флуидная типографика === */
     --font-h1: clamp(16px, 2vw, 20px);
     --font-h2: clamp(11px, 1.2vw, 13px);
     --font-body: clamp(13px, 1.4vw, 15px);
     --font-small: clamp(11px, 1.1vw, 12px);
     --font-result: clamp(13px, 1.5vw, 16px);
-
-    /* === Флуидные отступы === */
     --gap-panel: clamp(12px, 1.5vw, 20px);
     --pad-panel: clamp(14px, 2vw, 24px);
     --pad-section: clamp(10px, 1.2vw, 14px);
-
-    /* === Минимальный touch-target (WCAG 2.5.5) === */
     --touch-min: 44px;
-
-    /* === Цвета точек === */
     --point-a: #9fd356;
     --point-a-bg: rgba(159, 211, 86, 0.06);
     --point-a-border: rgba(159, 211, 86, 0.25);
     --point-b: #e8c35a;
     --point-b-bg: rgba(232, 195, 90, 0.06);
     --point-b-border: rgba(232, 195, 90, 0.25);
-
-    /* === Canvas: цвета для отрисовки карты === */
     --canvas-bg: #10151b;
-    /* Фон за пределами карты */
     --canvas-map-bg: #161d25;
-    /* Фон области карты */
     --canvas-grid-minor: rgba(255, 255, 255, 0.10);
-    /* Мелкая сетка */
     --canvas-grid-major: rgba(255, 255, 255, 0.28);
-    /* Крупная сетка */
     --canvas-axes: rgba(255, 255, 255, 0.35);
-    /* Оси координат */
     --canvas-dim: rgba(6, 8, 12, 0.55);
-    /* Затемнение за картой */
     --canvas-border: #46536b;
-    /* Граница карты */
     --canvas-labels: #5c6875;
-    /* Подписи координат */
     --canvas-line: #e8c35a;
-    /* Линия A→B */
-
-    /* === Транзишны === */
     --transition-fast: 0.15s ease;
     --transition-normal: 0.25s ease;
 }
-
-/* ═══════════════ СВЕТЛАЯ ТЕМА ═══════════════ */
 body.light {
     color-scheme: light;
-
     --bg: #eef1f5;
     --panel: #ffffff;
     --field: #f6f8fa;
-
     --border: #d7dde5;
-
     --text: #1d2530;
     --muted: #5c6875;
     --dim: #6b7684;
-
     --accent: #4e8f1d;
-    /* Тёмно-зелёный для контраста на белом */
     --accent-hover: #3f7517;
-
     --danger: #c23b3b;
     --danger-hover: #e04444;
-
     --menu: #ffffff;
     --menu-border: #c9d1db;
-
     --hover: #e8edf3;
-
     --btn-bg: rgba(255, 255, 255, .92);
     --btn-text: #333c47;
-
     --discord: #5865F2;
     --discord-hover: #4752C4;
-
     --warn: #8a6d00;
-    /* Тёмно-жёлтый для светлой темы */
-
     --canvas-bg: #dfe5ec;
     --canvas-map-bg: #f2f5f8;
     --canvas-grid-minor: rgba(15, 25, 40, 0.12);
@@ -176,7 +81,6 @@ body.light {
     --canvas-border: #7d8896;
     --canvas-labels: #5c6875;
     --canvas-line: #8a6d00;
-
     --point-a: #3d8c0f;
     --point-a-bg: rgba(61, 140, 15, 0.06);
     --point-a-border: rgba(61, 140, 15, 0.2);
@@ -184,35 +88,21 @@ body.light {
     --point-b-bg: rgba(122, 92, 0, 0.06);
     --point-b-border: rgba(122, 92, 0, 0.2);
 }
-
-/* ═══════════════ АВТО-ТЕМА ПО СИСТЕМНЫМ НАСТРОЙКАМ ═══════════════ */
-/* Переменные темы применяются через JS (ui.js → applyThemeClass()),
-   который добавляет класс body.light при prefers-color-scheme: light.
-   Здесь только color-scheme для корректного отображения
-   системных элементов (скроллбар, формы) до запуска JS. */
 @media (prefers-color-scheme: light) {
     :root:not([data-theme-manual]) {
         color-scheme: light;
     }
 }
-
-/* ═══════════════ АДАПТИВНЫЕ РАЗМЕРЫ ПАНЕЛИ ═══════════════ */
-
-/* Планшет (≤1024px): панель уже */
 @media (max-width: 1024px) {
     :root {
         --panel-width: 340px;
     }
 }
-
-/* Большой экран (≥1600px): панель шире */
 @media (min-width: 1600px) {
     :root {
         --panel-width: 440px;
     }
 }
-
-/* Очень большой экран (≥2000px): ещё шире */
 @media (min-width: 2000px) {
     :root {
         --panel-width: 480px;

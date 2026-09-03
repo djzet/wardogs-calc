@@ -1,93 +1,56 @@
-/**
- * styles/mobile.css — Мобильная и планшетная адаптация (responsive)
- *
- * Брейкпоинты:
- * - ≤ 360px:  совсем маленькие экраны
- * - ≤ 480px:  маленькие телефоны
- * - ≤ 800px:  все мобильные / горизонтальный планшет
- * - ≤ 1024px: планшеты в портрете
- * - ≥ 1440px: большие экраны (2K+)
- * - landscape: альбомная ориентация
- * - pointer: coarse — touch-устройства
- */
-
-/* ═══════════════ ВСЕ МОБИЛЬНЫЕ ≤ 800px ═══════════════ */
 @media (max-width: 800px) {
-
-    /* Вертикальная раскладка: панель сверху, карта снизу */
     .app {
         flex-direction: column;
     }
-
-    /* ═══════════════ ПАНЕЛЬ: оптимизированный размер ═══════════════ */
     .panel {
         width: 100%;
         max-height: 42vh;
-        /* Уменьшено: 42% вместо 50% — больше места для карты */
         border-right: none;
         border-bottom: 1px solid var(--border);
         padding: 12px 14px;
         gap: 10px;
-        /* Уменьшен gap между секциями */
         overscroll-behavior-y: contain;
         -webkit-overflow-scrolling: touch;
         scroll-behavior: smooth;
     }
-
-    /* ═══════════════ ЗАГОЛОВОК: компактнее ═══════════════ */
     .panel-header {
         gap: 6px;
     }
-
     .panel-header h1 {
         font-size: 15px;
     }
-
     .map-badge {
         font-size: 9px;
         padding: 1px 6px;
     }
-
-    /* ═══════════════ СЕКЦИИ A/B: компактнее ═══════════════ */
     .section-point-a,
     .section-point-b {
         border-left-width: 2px;
-        /* Тоньше бордер */
         padding-left: calc(10px - 2px);
         background: transparent;
-        /* Убираем фон — экономия визуального пространства */
     }
-
     .section-point-a h2,
     .section-point-b h2 {
         font-size: 11px;
         margin-bottom: 6px;
     }
-
-    /* ═══════════════ КООРДИНАТЫ: более компактно ═══════════════ */
     .coord-row {
         gap: 6px;
     }
-
     .coord-row label {
         gap: 2px;
         font-size: 11px;
     }
-
     input[type="number"] {
         min-height: 40px;
         padding: 8px 6px;
         font-size: 16px;
-        /* Минимум 16px чтобы iOS не зумил при фокусе */
     }
-
     .clear {
         min-width: 36px;
         min-height: 36px;
         font-size: 16px;
     }
-
-    /* ═══════════════ РЕЗУЛЬТАТЫ: sticky с backdrop-blur ═══════════════ */
     .result {
         padding: 10px 14px;
         gap: 2px;
@@ -100,8 +63,6 @@
         border-radius: var(--radius-sm);
         box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
     }
-
-    /* Градиент-маска снизу результатов для плавного перехода */
     .result::after {
         content: '';
         position: absolute;
@@ -113,22 +74,17 @@
         pointer-events: none;
         border-radius: 0 0 var(--radius-sm) var(--radius-sm);
     }
-
     .result div {
         padding: 5px 0;
         border-bottom: none;
         font-size: 14px;
     }
-
     .result span {
         font-size: 11px;
     }
-
     .result b {
         font-size: 16px;
     }
-
-    /* ═══════════════ ACCORDION СЕКЦИИ: touch-friendly ═══════════════ */
     .controls-section h2 {
         padding: 4px 0;
         margin-bottom: 8px;
@@ -136,76 +92,55 @@
         display: flex;
         align-items: center;
     }
-
     .controls-section h2:active {
         opacity: 0.7;
     }
-
-    /* Уменьшаем секции настроек */
     .controls-section {
         padding: 8px 10px;
         border-radius: var(--radius-sm);
     }
-
     .control-group {
         margin-bottom: 10px;
     }
-
-    /* ═══════════════ КАРТОЧКИ ОРУЖИЯ: компактнее ═══════════════ */
     .radio-group {
         gap: 6px;
     }
-
     .radio-option {
         padding: 10px 6px;
         border-width: 1.5px;
     }
-
     .radio-option span {
         font-size: 12px;
         line-height: 1.2;
     }
-
-    /* ═══════════════ ИНСТРУМЕНТЫ: крупнее для touch ═══════════════ */
     .tool-grid {
         gap: 6px;
     }
-
     .draw-tool {
         height: 42px;
     }
-
     .draw-tool:active {
         transform: scale(0.93);
         transition: transform 0.08s ease;
     }
-
     .width-grid {
         gap: 6px;
     }
-
     .width-opt {
         height: 34px;
     }
-
     .width-opt:active {
         transform: scale(0.93);
         transition: transform 0.08s ease;
     }
-
     .clear-drawings-btn {
         height: 42px;
         font-size: 13px;
     }
-
-    /* ═══════════════ КАРТА: больше пространства ═══════════════ */
     .map-wrap {
         flex: 1;
         min-height: 58vh;
-        /* Минимум 58% высоты экрана для карты */
     }
-
-    /* ═══════════════ SCROLL AFFORDANCE: градиент-индикатор ═══════════════ */
     .panel::after {
         content: '';
         position: sticky;
@@ -218,8 +153,6 @@
         z-index: 2;
         flex-shrink: 0;
     }
-
-    /* ═══════════════ PANEL DRAG HANDLE: визуальный хэндл ═══════════════ */
     .panel-header::before {
         content: '';
         display: block;
@@ -231,8 +164,6 @@
         opacity: 0.35;
         order: -1;
     }
-
-    /* ═══════════════ КНОПКИ КАРТЫ: компактный glassmorphism ═══════════════ */
     .map-controls {
         top: 8px;
         right: 8px;
@@ -240,12 +171,10 @@
         padding: 4px;
         border-radius: var(--radius-sm);
     }
-
     .view-reset {
         padding: 5px 8px;
         font-size: 12px;
     }
-
     .theme-toggle,
     .help-toggle {
         width: 36px;
@@ -253,15 +182,12 @@
         height: 36px;
         padding: 5px 0;
     }
-
     .theme-toggle svg,
     .help-toggle svg {
         width: 18px;
         height: 18px;
         flex-shrink: 0;
     }
-
-    /* ═══════════════ КОНТЕКСТНОЕ МЕНЮ: bottom sheet на мобильных ═══════════════ */
     .ctx-menu {
         position: fixed;
         bottom: 0;
@@ -280,17 +206,14 @@
         z-index: 15;
         animation: slideUp 0.2s ease;
     }
-
     @keyframes slideUp {
         from {
             transform: translateY(100%);
         }
-
         to {
             transform: translateY(0);
         }
     }
-
     .ctx-menu button {
         min-height: 48px;
         padding: 12px 16px;
@@ -298,8 +221,6 @@
         border-radius: var(--radius-sm);
         text-align: center;
     }
-
-    /* ═══════════════ DRAWER: full-width bottom sheet ═══════════════ */
     .drawer {
         width: 100%;
         max-width: 100%;
@@ -315,17 +236,13 @@
         transform: translateY(100%);
         padding-bottom: calc(20px + env(safe-area-inset-bottom, 0px));
     }
-
     .drawer.open {
         transform: translateY(0);
     }
-
     .drawer-header {
         padding-bottom: 8px;
         border-bottom: 1px solid var(--border);
     }
-
-    /* Drawer drag handle (визуальный индикатор) */
     .drawer-header::before {
         content: '';
         display: block;
@@ -336,154 +253,113 @@
         margin: 0 auto 8px;
         opacity: 0.5;
     }
-
-    /* ═══════════════ МОДАЛКИ: адаптация ═══════════════ */
     .modal {
         max-width: calc(100% - 32px);
         max-height: 70vh;
         border-radius: var(--radius-lg);
     }
-
     .modal-header {
         padding: 12px 14px;
     }
-
     .modal-body {
         padding: 14px;
     }
-
     .modal-input {
         font-size: 16px;
-        /* iOS: 16px чтобы не зумил */
     }
-
     .modal-btn {
         min-height: 44px;
         padding: 10px 20px;
     }
-
-    /* ═══════════════ QR-код Discord: компактнее ═══════════════ */
     .discord-qr img {
         width: 140px;
         height: 140px;
     }
-
     .discord-block {
         gap: 8px;
     }
-
     .discord-btn {
         padding: 10px 14px;
         font-size: 13px;
     }
-
-    /* ═══════════════ КОНТАКТ: компактнее ═══════════════ */
     .contact {
         padding: 8px 10px;
         flex-direction: row;
         align-items: center;
         gap: 8px;
     }
-
     .contact-label {
         flex-shrink: 0;
     }
-
-    /* ═══════════════ ЯЗЫК: компактнее ═══════════════ */
     .translate-widget {
         padding-top: 10px;
         gap: 4px;
     }
-
     .translate-widget select {
         font-size: 13px;
     }
-
-    /* ═══════════════ Touch-подсказки ═══════════════ */
     .hint-desktop {
         display: none !important;
     }
-
     .hint-touch {
         display: block !important;
     }
-
     .hint {
         display: none;
-        /* Скрываем generic hint — место на вес золота */
     }
-
-    /* ═══════════════ ACTIVE STATES:햅tic-like feedback ═══════════════ */
     .draw-tool {
         transition: transform 0.1s ease, background 0.15s ease, border-color 0.15s ease;
     }
-
     .draw-tool:active {
         background: var(--hover);
         border-color: var(--dim);
         transform: scale(0.92);
     }
-
     .draw-tool.active:active {
         background: rgba(159, 211, 86, 0.2);
         border-color: var(--accent);
         transform: scale(0.92);
     }
-
     .width-opt {
         transition: transform 0.1s ease, background 0.15s ease;
     }
-
     .width-opt:active {
         background: var(--hover);
         transform: scale(0.9);
     }
-
     .width-opt.active:active {
         border-color: var(--accent);
         transform: scale(0.9);
     }
-
     .clear-drawings-btn {
         transition: transform 0.1s ease, background 0.15s ease;
     }
-
     .clear-drawings-btn:active {
         background: var(--hover);
         border-color: var(--dim);
         transform: scale(0.95);
     }
-
     .view-reset:active {
         transform: scale(0.92);
     }
-
     .clear:active {
         color: var(--danger);
         transform: scale(0.85);
     }
-
-    /* Radio option active —macro-like feedback */
     .radio-option {
         transition: transform 0.12s ease, border-color 0.2s ease, background 0.2s ease;
     }
-
     .radio-option:active {
         transform: scale(0.95);
     }
-
-    /* Menu toggle active */
     .menu-toggle:active {
         background: var(--hover);
         transform: scale(0.9);
     }
-
-    /* ═══════════════ COORDINATE ROWS: improved touch ═══════════════ */
     .coord-row {
         gap: 6px;
         align-items: stretch;
     }
-
     .coord-row label {
         background: var(--field);
         border: 1px solid var(--border);
@@ -491,12 +367,9 @@
         padding: 2px 6px;
         transition: border-color 0.15s ease;
     }
-
     .coord-row label:focus-within {
         border-color: var(--accent);
     }
-
-    /* ═══════════════ SECTION HEADERS: subtle accordion hint ═══════════════ */
     .controls-section h2::after {
         content: '';
         display: inline-block;
@@ -510,143 +383,107 @@
         opacity: 0.5;
         transition: transform 0.2s ease;
     }
-
-    /* ═══════════════ MAP CONTROLS: refined glassmorphism ═══════════════ */
     .theme-toggle,
     .help-toggle {
         transition: transform 0.1s ease, background 0.15s ease;
     }
-
     .theme-toggle:active,
     .help-toggle:active {
         transform: scale(0.88);
     }
 }
-
-/* ═══════════════ МАЛЕНЬКИЕ ТЕЛЕФОНЫ ≤ 480px ═══════════════ */
 @media (max-width: 480px) {
     .panel {
         padding: 10px 12px;
         gap: 8px;
         max-height: 45vh;
     }
-
     .panel-header h1 {
         font-size: 14px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
     }
-
-    /* Результаты — компактнее с улучшенной читаемостью */
     .result {
         padding: 8px 12px;
         backdrop-filter: blur(12px);
         -webkit-backdrop-filter: blur(12px);
     }
-
     .result div {
         font-size: 13px;
         gap: 8px;
     }
-
     .result span {
         font-size: 10px;
     }
-
     .result b {
         font-size: 15px;
         letter-spacing: 0.02em;
     }
-
-    /* Координаты — минимум отступов */
     .coord-row {
         gap: 4px;
     }
-
     .coord-row label {
         padding: 2px 4px;
     }
-
     input[type="number"] {
         padding: 8px 4px;
         font-size: 16px;
     }
-
-    /* Секции — без фона и рамок */
     .controls-section {
         border: none;
         background: transparent;
         padding: 4px 0;
     }
-
     .controls-section h2 {
         font-size: 10px;
         margin-bottom: 6px;
         min-height: 32px;
     }
-
-    /* Карточки оружия — супер-компактные */
     .radio-group {
         gap: 4px;
     }
-
     .radio-option {
         padding: 8px 4px;
     }
-
     .radio-option span {
         font-size: 11px;
     }
-
-    /* Инструменты */
     .tool-grid {
         gap: 4px;
     }
-
     .draw-tool {
         height: 40px;
     }
-
     .draw-tool svg {
         width: 14px;
         height: 14px;
     }
-
     .width-grid {
         gap: 4px;
     }
-
     .width-opt {
         height: 32px;
     }
-
-    /* QR-код */
     .discord-qr img {
         width: 120px;
         height: 120px;
     }
-
-    /* Drawer */
     .drawer {
         padding: 14px;
         gap: 12px;
         max-height: 75vh;
     }
-
-    /* Кнопки управления картой — супер-компактные */
     .map-controls {
         top: 6px;
         right: 6px;
         padding: 3px;
         gap: 2px;
     }
-
     .view-reset {
         padding: 4px 6px;
         font-size: 11px;
     }
-
     .theme-toggle,
     .help-toggle {
         width: 32px;
@@ -654,167 +491,124 @@
         height: 32px;
         padding: 4px 0;
     }
-
     .theme-toggle svg,
     .help-toggle svg {
         width: 16px;
         height: 16px;
         flex-shrink: 0;
     }
-
     .share-btn svg {
         width: 14px;
         height: 14px;
     }
-
-    /* ═══════════════ SCROLL GRADIENT: тоньше ═══════════════ */
     .panel::after {
         height: 16px;
     }
 }
-
-/* ═══════════════ СОВСЕМ МАЛЕНЬКИЕ ЭКРАНЫ ≤ 360px ═══════════════ */
 @media (max-width: 360px) {
     .panel {
         padding: 8px 10px;
         gap: 6px;
         max-height: 48vh;
     }
-
     .panel-header h1 {
         font-size: 13px;
     }
-
     .result {
         padding: 7px 10px;
     }
-
     .result div {
         font-size: 12px;
         gap: 6px;
     }
-
     .result span {
         font-size: 10px;
     }
-
     .result b {
         font-size: 14px;
     }
-
-    /* Координаты — super compact */
     .coord-row {
         gap: 3px;
     }
-
     .coord-row label {
         font-size: 10px;
         gap: 1px;
     }
-
     input[type="number"] {
         padding: 6px 3px;
         font-size: 16px;
         min-height: 38px;
     }
-
     .section-point-a,
     .section-point-b {
         padding-left: 6px;
     }
-
     .section-point-a h2,
     .section-point-b h2 {
         font-size: 10px;
         margin-bottom: 4px;
     }
-
-    /* Инструменты — предельно компактно */
     .tool-grid {
         gap: 3px;
     }
-
     .draw-tool {
         height: 38px;
     }
-
     .draw-tool svg {
         width: 13px;
         height: 13px;
     }
-
     .width-grid {
         gap: 3px;
     }
-
     .width-opt {
         height: 30px;
     }
-
     .clear-drawings-btn {
         height: 38px;
         font-size: 12px;
     }
-
-    /* Discord */
     .discord-qr img {
         width: 100px;
         height: 100px;
     }
-
     .discord-btn {
         padding: 8px 12px;
         font-size: 12px;
     }
-
-    /* Контекстное меню */
     .ctx-menu button {
         min-height: 44px;
         font-size: 14px;
     }
 }
-
-/* ═══════════════ ПЛАНШЕТЫ В ПОРТРЕТЕ ≤ 1024px ═══════════════ */
 @media (max-width: 1024px) and (min-width: 801px) {
     .panel {
         width: var(--panel-width);
-        /* 340px из variables */
         max-height: none;
-        /* Панель не ограничена по высоте */
     }
-
     .map-controls {
         top: 12px;
         right: 12px;
     }
-
     .view-reset {
         padding: 6px 12px;
     }
-
-    /* Иконки темы/справки — не уменьшаем на планшетах */
     .theme-toggle,
     .help-toggle {
         width: 36px;
         min-width: 36px;
         height: 36px;
     }
-
     .theme-toggle svg,
     .help-toggle svg {
         width: 18px;
         height: 18px;
     }
 }
-
-/* ═══════════════ АЛЬБОМНАЯ ОРИЕНТАЦИЯ НА МОБИЛЬНЫХ ═══════════════ */
 @media (max-width: 800px) and (orientation: landscape) {
-
-    /* В альбоме — горизонтальная раскладка как на десктопе */
     .app {
         flex-direction: row;
     }
-
     .panel {
         width: 280px;
         max-height: 100%;
@@ -824,34 +618,24 @@
         gap: 8px;
         padding: 8px 12px;
     }
-
-    /* Убираем drag handle в альбоме — не нужен */
     .panel-header::before {
         display: none;
     }
-
-    /* Убираем scroll gradient в альбоме */
     .panel::after {
         display: none;
     }
-
     .map-wrap {
         flex: 1;
         min-height: 0;
         min-width: 0;
     }
-
-    /* Скрываем次要ные элементы */
     .discord-block {
         display: none;
     }
-
     .contact,
     .hint {
         display: none;
     }
-
-    /* Результаты — горизонтально для экономии места */
     .result {
         display: grid;
         grid-template-columns: 1fr 1fr 1fr;
@@ -861,255 +645,191 @@
         -webkit-backdrop-filter: none;
         box-shadow: none;
     }
-
     .result::after {
         display: none;
     }
-
     .result div {
         flex-direction: column;
         align-items: center;
         text-align: center;
         gap: 1px;
     }
-
     .result span {
         font-size: 9px;
     }
-
     .result b {
         font-size: 12px;
     }
-
-    /* Секции A/B — компактнее */
     .section-point-a,
     .section-point-b {
         border-left-width: 2px;
         padding-left: 7px;
     }
-
-    /* Скрываем drawer в альбоме */
     .drawer {
         max-width: 280px;
     }
-
-    /* Адаптация секций для альбома */
     .controls-section {
         padding: 6px 8px;
     }
-
     .controls-section h2 {
         font-size: 10px;
         margin-bottom: 4px;
         min-height: 28px;
     }
-
-    /* Инструменты — компактнее */
     .tool-grid {
         gap: 3px;
     }
-
     .draw-tool {
         height: 34px;
     }
-
     .width-grid {
         gap: 3px;
     }
-
     .width-opt {
         height: 26px;
     }
 }
-
-/* ═══════════════ БОЛЬШИЕ ЭКРАНЫ ≥ 1440px ═══════════════ */
 @media (min-width: 1440px) {
     .panel {
         padding: 24px;
         gap: 22px;
     }
-
     .result {
         padding: 18px 20px;
         gap: 10px;
     }
-
     .result div {
         font-size: 16px;
     }
-
     .result b {
         font-size: 20px;
     }
-
     .controls-section {
         padding: 14px 16px;
     }
-
     .draw-tool {
         height: 40px;
     }
-
     .draw-tool svg {
         width: 20px;
         height: 20px;
     }
-
     .tool-status {
         font-size: 12px;
     }
 }
-
-/* ═══════════════ ОЧЕНЬ БОЛЬШИЕ ЭКРАНЫ ≥ 2000px ═══════════════ */
 @media (min-width: 2000px) {
     .panel {
         padding: 28px;
         gap: 24px;
     }
-
     .result div {
         font-size: 17px;
     }
-
     h1 {
         font-size: 22px;
     }
-
     .controls-section {
         padding: 16px 20px;
     }
-
     .draw-tool svg {
         width: 22px;
         height: 22px;
     }
-
     .tool-grid {
         gap: 8px;
     }
-
     .width-grid {
         gap: 8px;
     }
 }
-
-/* ═══════════════ TOUCH-УСТРОЙСТВА ═══════════════ */
 @media (pointer: coarse) {
-
-    /* Все кликабельные элементы — минимум 44px (WCAG 2.5.5) */
     .draw-tool {
         min-height: 44px;
     }
-
     .width-opt {
         min-height: 40px;
     }
-
     .clear-drawings-btn {
         min-height: 48px;
     }
-
     .menu-toggle {
         min-width: 44px;
         min-height: 44px;
     }
-
     .view-reset {
         min-height: 40px;
     }
-
     .theme-toggle,
     .help-toggle {
         min-width: 44px;
         min-height: 44px;
     }
-
     .tool-grid {
         gap: 8px;
     }
-
     .width-grid {
         gap: 8px;
     }
-
     .radio-option {
         min-height: 44px;
     }
-
     .radio-option input[type="radio"] {
         width: 22px;
         height: 22px;
     }
-
     .map-select,
     .translate-widget select {
         min-height: 44px;
     }
-
     .ctx-menu button {
         padding: 12px 16px;
         min-height: 44px;
     }
-
     .modal-btn {
         min-height: 44px;
         padding: 10px 20px;
     }
-
     .clear {
         min-width: 44px;
         min-height: 44px;
     }
-
-    /* Увеличиваем отступы между кликабельными элементами */
     .controls-section {
         gap: 2px;
     }
-
-    /* Увеличиваем полоску toggle для touch */
     .switch {
         width: 48px;
         height: 26px;
         min-width: 48px;
         border-radius: 13px;
     }
-
     .switch::after {
         width: 22px;
         height: 22px;
         top: 2px;
         left: 2px;
     }
-
     .switch-row input:checked+.switch::after {
         left: 24px;
     }
 }
-
-/* ═══════════════ HOVER-CAPABLE (только мышь) ═══════════════ */
 @media (hover: hover) and (pointer: fine) {
     .draw-tool {
         height: 36px;
     }
-
     .width-opt {
         height: 28px;
     }
-
     .clear-drawings-btn {
         height: 40px;
     }
-
     .tool-grid {
         gap: 6px;
     }
-
     .width-grid {
         gap: 6px;
     }
 }
-
-/* ═══════════════ ТЁМНАЯ ТЕМА: OLED ОПТИМИЗАЦИЯ ═══════════════ */
 @media (prefers-color-scheme: dark) and (prefers-contrast: more) {
     :root {
         --bg: #000000;
@@ -1118,32 +838,25 @@
         --border: #333333;
         --text: #ffffff;
     }
-
     .result {
         background: var(--field);
         border-color: var(--border);
     }
 }
-
-/* ═══════════════ LIGHT THEME: MAP CONTROLS ═══════════════ */
 @media (prefers-color-scheme: light) {
     .map-controls {
         background: rgba(255, 255, 255, 0.65);
         border: 1px solid rgba(0, 0, 0, 0.08);
     }
 }
-
-/* ═══════════════ PRINT ═══════════════ */
 @media print {
     .map-wrap {
         display: none;
     }
-
     .panel {
         width: 100%;
         border: none;
     }
-
     .drawer,
     .drawer-backdrop {
         display: none !important;
