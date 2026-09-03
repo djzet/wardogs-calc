@@ -4,15 +4,16 @@ window.AppStorage = (function (utils) {
     const THEME_KEY = 'wardogs_theme';
     const TOWERS_KEY = 'wardogs_towers';
     const MAP_KEY = 'wardogs_map';
-    function saveState(pointA, pointB, view, mapSize) {
+
+    function saveState(pointA, pointB, view, worldSize) {
         const state = {
             pointA: pointA ? {
-                px: utils.metersToPercent(pointA.x, mapSize),
-                py: utils.metersToPercent(pointA.y, mapSize)
+                px: utils.worldToPercent(pointA.x, worldSize),
+                py: utils.worldToPercent(pointA.y, worldSize)
             } : null,
             pointB: pointB ? {
-                px: utils.metersToPercent(pointB.x, mapSize),
-                py: utils.metersToPercent(pointB.y, mapSize)
+                px: utils.worldToPercent(pointB.x, worldSize),
+                py: utils.worldToPercent(pointB.y, worldSize)
             } : null,
             view: { scale: view.scale, ox: view.ox, oy: view.oy }
         };
@@ -22,7 +23,8 @@ window.AppStorage = (function (utils) {
             console.warn('Failed to save state:', e);
         }
     }
-    function loadState(mapSize) {
+
+    function loadState(worldSize) {
         const saved = localStorage.getItem(STATE_KEY);
         if (!saved) return null;
         try {
@@ -30,14 +32,14 @@ window.AppStorage = (function (utils) {
             const result = { view: null, pointA: null, pointB: null };
             if (state.pointA) {
                 result.pointA = {
-                    x: utils.percentToMeters(state.pointA.px, mapSize),
-                    y: utils.percentToMeters(state.pointA.py, mapSize)
+                    x: utils.percentToWorld(state.pointA.px, worldSize),
+                    y: utils.percentToWorld(state.pointA.py, worldSize)
                 };
             }
             if (state.pointB) {
                 result.pointB = {
-                    x: utils.percentToMeters(state.pointB.px, mapSize),
-                    y: utils.percentToMeters(state.pointB.py, mapSize)
+                    x: utils.percentToWorld(state.pointB.px, worldSize),
+                    y: utils.percentToWorld(state.pointB.py, worldSize)
                 };
             }
             if (state.view) {
@@ -49,30 +51,39 @@ window.AppStorage = (function (utils) {
             return null;
         }
     }
+
     function saveWeapon(weapon) {
         localStorage.setItem(WEAPON_KEY, weapon);
     }
+
     function loadWeapon(defaultWeapon) {
         return localStorage.getItem(WEAPON_KEY) || defaultWeapon;
     }
+
     function saveTheme(theme) {
         localStorage.setItem(THEME_KEY, theme);
     }
+
     function loadTheme(defaultTheme) {
         return localStorage.getItem(THEME_KEY) || defaultTheme;
     }
+
     function saveTowers(show) {
         localStorage.setItem(TOWERS_KEY, show ? '1' : '0');
     }
+
     function loadTowers() {
         return localStorage.getItem(TOWERS_KEY) !== '0';
     }
+
     function saveMap(mapId) {
         localStorage.setItem(MAP_KEY, mapId);
     }
+
     function loadMap(defaultMap) {
         return localStorage.getItem(MAP_KEY) || defaultMap;
     }
+
     return {
         saveState, loadState,
         saveWeapon, loadWeapon,
@@ -81,15 +92,18 @@ window.AppStorage = (function (utils) {
         saveMap, loadMap
     };
 })(window.AppUtils);
+
 window.AppPoints = (function (utils) {
     let pointA = null;
     let pointB = null;
-    let mapSize = 16000;
+    let worldSize = 160;
     let coordScale = 100;
+    let bounds = null;
     let onChange = null;
     function configure(opts) {
-        mapSize = opts.mapSize;
+        worldSize = opts.worldSize;
         coordScale = opts.coordScale || 100;
+        bounds = opts.bounds || null;
         onChange = opts.onChange || null;
     }
     function emit() { if (onChange) onChange(); }
@@ -98,47 +112,62 @@ window.AppPoints = (function (utils) {
     function setPoint(key, x, y) {
         let p = null;
         if (x != null && y != null) {
-            p = { x: utils.clamp(x, 0, mapSize), y: utils.clamp(y, 0, mapSize) };
+            if (bounds) {
+                p = {
+                    x: utils.clamp(x, bounds.minX, bounds.maxX),
+                    y: utils.clamp(y, bounds.minY, bounds.maxY)
+                };
+            } else {
+                p = { x: utils.clamp(x, 0, worldSize), y: utils.clamp(y, 0, worldSize) };
+            }
         }
         if (key === 'A') pointA = p; else pointB = p;
         emit();
     }
+
     function assign(a, b) {
         pointA = a;
         pointB = b;
     }
+
     function readPoint(ix, iy, existingPoint) {
         const rawX = String(ix.value).replace(',', '.');
         const rawY = String(iy.value).replace(',', '.');
         const hasX = rawX !== '';
         const hasY = rawY !== '';
         if (!hasX && !hasY) return null;
-        const maxGame = mapSize / coordScale;
         let gx, gy;
         if (hasX) {
             gx = parseFloat(rawX);
             if (isNaN(gx)) return null;
         } else {
-            gx = existingPoint ? existingPoint.x / coordScale : NaN;
+            gx = existingPoint ? existingPoint.x : NaN;
             if (isNaN(gx)) return null;
         }
         if (hasY) {
             gy = parseFloat(rawY);
             if (isNaN(gy)) return null;
         } else {
-            gy = existingPoint ? existingPoint.y / coordScale : NaN;
+            gy = existingPoint ? existingPoint.y : NaN;
             if (isNaN(gy)) return null;
         }
-        return {
-            x: utils.clamp(gx, 0, maxGame) * coordScale,
-            y: utils.clamp(gy, 0, maxGame) * coordScale
-        };
+
+        if (bounds) {
+            gx = utils.clamp(gx, bounds.minX, bounds.maxX);
+            gy = utils.clamp(gy, bounds.minY, bounds.maxY);
+        } else {
+            gx = utils.clamp(gx, 0, worldSize);
+            gy = utils.clamp(gy, 0, worldSize);
+        }
+        return { x: gx, y: gy };
     }
+
     function pointEq(a, b) {
         if (a === b) return true;
         if (!a || !b) return false;
         return a.x === b.x && a.y === b.y;
     }
+
     function applyFromInputs(ax, ay, bx, by) {
         const newA = readPoint(ax, ay, pointA);
         const newB = readPoint(bx, by, pointB);
@@ -147,6 +176,7 @@ window.AppPoints = (function (utils) {
         pointB = newB;
         emit();
     }
+
     function hitPoint(sx, sy, view) {
         for (const [key, p] of [['A', pointA], ['B', pointB]]) {
             if (!p) continue;
@@ -157,8 +187,10 @@ window.AppPoints = (function (utils) {
     }
     return { configure, getA, getB, setPoint, assign, applyFromInputs, hitPoint };
 })(window.AppUtils);
+
 window.AppWeapons = (function (storage) {
     let currentWeapon = null;
+
     function init(defaultWeapon, onChange) {
         currentWeapon = storage.loadWeapon(defaultWeapon);
         if (!['mortar', 'artillery'].includes(currentWeapon)) {
@@ -167,6 +199,7 @@ window.AppWeapons = (function (storage) {
         }
         bind(onChange);
     }
+    
     function get() { return currentWeapon; }
     function set(w) {
         if (!['mortar', 'artillery'].includes(w)) return;
@@ -177,6 +210,7 @@ window.AppWeapons = (function (storage) {
         });
     }
     let _boundOnChange = null;
+
     function bind(onChange) {
         if (_boundOnChange) {
             document.querySelectorAll('input[name="weapon"]').forEach(radio => {
@@ -196,22 +230,25 @@ window.AppWeapons = (function (storage) {
     }
     return { init, get, set };
 })(window.AppStorage);
+
 window.AppShare = (function (utils) {
     let toastTimer = null;
-    function generateUrl(pointA, pointB, currentWeapon, mapSize, mapId) {
+
+    function generateUrl(pointA, pointB, currentWeapon, worldSize, mapId) {
         const params = new URLSearchParams();
         if (pointA) {
-            params.set('ax', utils.metersToPercent(pointA.x, mapSize).toFixed(2));
-            params.set('ay', utils.metersToPercent(pointA.y, mapSize).toFixed(2));
+            params.set('ax', utils.worldToPercent(pointA.x, worldSize).toFixed(2));
+            params.set('ay', utils.worldToPercent(pointA.y, worldSize).toFixed(2));
         }
         if (pointB) {
-            params.set('bx', utils.metersToPercent(pointB.x, mapSize).toFixed(2));
-            params.set('by', utils.metersToPercent(pointB.y, mapSize).toFixed(2));
+            params.set('bx', utils.worldToPercent(pointB.x, worldSize).toFixed(2));
+            params.set('by', utils.worldToPercent(pointB.y, worldSize).toFixed(2));
         }
         params.set('w', currentWeapon);
         if (mapId) params.set('map', mapId);
         return location.origin + location.pathname + '?' + params.toString();
     }
+
     async function copyToClipboard(text) {
         try {
             await navigator.clipboard.writeText(text);
@@ -228,6 +265,7 @@ window.AppShare = (function (utils) {
             return true;
         }
     }
+
     function showToast(message, type = 'success') {
         let toast = document.getElementById('toast');
         if (!toast) {
@@ -246,7 +284,8 @@ window.AppShare = (function (utils) {
             toast.classList.remove('show');
         }, 2500);
     }
-    function parseSharedParams(mapSize, knownMaps) {
+
+    function parseSharedParams(worldSize, knownMaps) {
         const params = new URLSearchParams(location.search);
         const result = { applied: false, pointA: null, pointB: null, weapon: null, mapId: null };
         if (params.has('map') && knownMaps && knownMaps[params.get('map')]) {
@@ -258,8 +297,8 @@ window.AppShare = (function (utils) {
             const ay = parseFloat(params.get('ay'));
             if (!isNaN(ax) && !isNaN(ay)) {
                 result.pointA = {
-                    x: utils.percentToMeters(utils.clamp(ax, 0, 100), mapSize),
-                    y: utils.percentToMeters(utils.clamp(ay, 0, 100), mapSize)
+                    x: utils.percentToWorld(utils.clamp(ax, 0, 100), worldSize),
+                    y: utils.percentToWorld(utils.clamp(ay, 0, 100), worldSize)
                 };
                 result.applied = true;
             }
@@ -269,8 +308,8 @@ window.AppShare = (function (utils) {
             const by = parseFloat(params.get('by'));
             if (!isNaN(bx) && !isNaN(by)) {
                 result.pointB = {
-                    x: utils.percentToMeters(utils.clamp(bx, 0, 100), mapSize),
-                    y: utils.percentToMeters(utils.clamp(by, 0, 100), mapSize)
+                    x: utils.percentToWorld(utils.clamp(bx, 0, 100), worldSize),
+                    y: utils.percentToWorld(utils.clamp(by, 0, 100), worldSize)
                 };
                 result.applied = true;
             }
@@ -284,6 +323,7 @@ window.AppShare = (function (utils) {
         }
         return result;
     }
+    
     return {
         generateUrl,
         copyToClipboard,

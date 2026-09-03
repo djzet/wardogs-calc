@@ -9,7 +9,6 @@ export default [
       ecmaVersion: "latest",
       sourceType: "module",
       globals: {
-        // ── Browser / DOM globals ──
         window: "readonly",
         document: "readonly",
         console: "readonly",
@@ -35,18 +34,15 @@ export default [
         confirm: "readonly",
         prompt: "readonly",
         getComputedStyle: "readonly",
-        // ── External libraries ──
         L: "readonly",
         maplibregl: "readonly",
         gsap: "readonly",
         ym: "readonly",
         dataLayer: "readonly",
         gtag: "readonly",
-        // ── Vite / Node (config files) ──
         process: "readonly",
         __dirname: "readonly",
         import: "readonly",
-        // ── Project globals (loaded via <script> tags) ──
         AppStorage: "readonly",
         AppDraw: "readonly",
         AppPoints: "readonly",

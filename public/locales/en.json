@@ -47,7 +47,7 @@
     "helpTitle": "How to Use the Calculator",
     "helpP1": "<b>Setting Points.</b> Mark your position (point A) and target (point B) — the calculator will compute distance, azimuth, and elevation.",
     "helpP2": "<b>Working with Map.</b> Right-click opens the menu. Left-click pans the map. Mouse wheel zooms. On touch screens: one finger pans, two fingers zoom, long press opens context menu.",
-    "helpP3": "<b>Coordinates.</b> Y and X are entered in game coordinates (0–163.83) — the same as shown under the cursor. Change step is 0.01 (arrows in input field).",
+    "helpP3": "<b>Coordinates.</b> Y and X are entered in game coordinates (0–160.00) — the same as shown under the cursor. Change step is 0.01 (arrows in input field).",
     "helpP4": "<b>Results.</b> Distance, azimuth from north, barrel angle in mils. If target is out of range — corresponding message.",
     "helpP5": "<b>Saving.</b> All data is automatically saved and restored after page reload.",
     "helpP6": "<b>About Calculator.</b> Fan-made tool for WARDOGS game. Unofficial project, not affiliated with game developers.",

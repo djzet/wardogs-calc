@@ -52,7 +52,7 @@ window.LocaleManager = (function () {
             helpTitle: 'Как пользоваться калькулятором',
             helpP1: '<b>Установка точек.</b> Укажите свою позицию (точка A) и цель (точка B).',
             helpP2: '<b>Работа с картой.</b> Правый клик — меню. Левая кнопка — перемещение. Колесо — масштаб.',
-            helpP3: '<b>Координаты.</b> Y и X в игровых координатах (0–163.83). Шаг — 0.01.',
+            helpP3: '<b>Координаты.</b> Y и X в игровых координатах (0–160.00). Шаг — 0.01.',
             helpP4: '<b>Результаты.</b> Дистанция, азимут, угол в mils, время подлёта.',
             helpP5: '<b>Сохранение.</b> Данные сохраняются автоматически.',
             helpP6: '<b>О калькуляторе.</b> Фан-инструмент для WARDOGS.',
@@ -83,15 +83,18 @@ window.LocaleManager = (function () {
             seoAboutP3: 'Интерфейс доступен на <strong>9 языках</strong>. Калькулятор адаптирован для мобильных устройств и работает в любом современном браузере без установки.'
         }
     };
+
     function safeHTML(str) {
         return str.replace(/<(?!\/?(b|strong|em|br|code)\b)[^>]*>/gi, '');
     }
+
     let currentLocale = DEFAULT_LOCALE;
     try {
         currentLocale = localStorage.getItem('wardogs_lang') || DEFAULT_LOCALE;
     } catch (e) {
         currentLocale = DEFAULT_LOCALE;
     }
+
     let translations = {};
     let loaded = false;
     let onLocaleChange = null;
@@ -127,6 +130,7 @@ window.LocaleManager = (function () {
             return translations;
         }
     }
+
     function t(key) {
         if (!loaded) {
             const fallback = FALLBACK_TRANSLATIONS[DEFAULT_LOCALE];
@@ -147,6 +151,7 @@ window.LocaleManager = (function () {
         }
         return value;
     }
+
     function applyTranslations() {
         if (!loaded) return;
         document.querySelectorAll('[data-i18n-title]').forEach(el => {
@@ -161,6 +166,7 @@ window.LocaleManager = (function () {
             }
         });
     }
+
     async function init() {
         const urlParams = new URLSearchParams(location.search);
         const urlLang = urlParams.get('lang');
@@ -185,6 +191,7 @@ window.LocaleManager = (function () {
             });
         }
     }
+    
     function setOnLocaleChange(fn) { onLocaleChange = fn; }
     return {
         init,

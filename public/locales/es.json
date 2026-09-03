@@ -47,7 +47,7 @@
     "helpTitle": "Cómo usar la calculadora",
     "helpP1": "<b>Colocación de puntos.</b> Marca tu posición (punto A) y el objetivo (punto B) — la calculadora calculará distancia, azimut y elevación.",
     "helpP2": "<b>Uso del mapa.</b> Clic derecho abre el menú. Clic izquierdo mueve el mapa. La rueda del ratón hace zoom. En pantallas táctiles: un dedo mueve, dos dedos hacen zoom, presión larga abre el menú contextual.",
-    "helpP3": "<b>Coordenadas.</b> Y e X se ingresan en coordenadas del juego (0–163.83) — las mismas que se muestran bajo el cursor. Paso de cambio: 0,01 (flechas en el campo).",
+    "helpP3": "<b>Coordenadas.</b> Y e X se ingresan en coordenadas del juego (0–160.00) — las mismas que se muestran bajo el cursor. Paso de cambio: 0,01 (flechas en el campo).",
     "helpP4": "<b>Resultados.</b> Distancia, azimut desde el norte, ángulo del cañón en mil. Si el objetivo está fuera de alcance — mensaje correspondiente.",
     "helpP5": "<b>Guardado.</b> Todos los datos se guardan automáticamente y se restauran después de recargar la página.",
     "helpP6": "<b>Acerca de la calculadora.</b> Herramienta hecha por fans para el juego WARDOGS. Proyecto no oficial, no afiliado con los desarrolladores del juego.",

@@ -47,7 +47,7 @@
     "helpTitle": "Wie man den Rechner benutzt",
     "helpP1": "<b>Punkte setzen.</b> Markiere deine Position (Punkt A) und das Ziel (Punkt B) — der Rechner berechnet Entfernung, Azimut und Erhöhung.",
     "helpP2": "<b>Kartenbedienung.</b> Rechtsklick öffnet das Menü. Linksklick verschiebt die Karte. Mausrad zoomt. Auf Touchscreens: ein Finger verschiebt, zwei Finger zoomen, langes Drücken öffnet das Kontextmenü.",
-    "helpP3": "<b>Koordinaten.</b> Y und X werden in Spielkoordinaten (0–163.83) eingegeben — dieselben wie unter dem Cursor. Änderungsschritt: 0,01 (Pfeile im Eingabefeld).",
+    "helpP3": "<b>Koordinaten.</b> Y und X werden in Spielkoordinaten (0–160.00) eingegeben — dieselben wie unter dem Cursor. Änderungsschritt: 0,01 (Pfeile im Eingabefeld).",
     "helpP4": "<b>Ergebnisse.</b> Entfernung, Azimut von Norden, Rohrwinkel in mil. Bei Zielen außer Reichweite — entsprechende Meldung.",
     "helpP5": "<b>Speichern.</b> Alle Daten werden automatisch gespeichert und nach dem Neuladen wiederhergestellt.",
     "helpP6": "<b>Über den Rechner.</b> Fan-Projekt für das Spiel WARDOGS. Inoffizielles Projekt, nicht mit den Spielentwicklern verbunden.",

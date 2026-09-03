@@ -6,7 +6,7 @@ const TILE_CACHE_MAX = 500;
 const INPUT_DEBOUNCE_MS = CONFIG.timing.inputDebounceMs;
 const TAP_THRESHOLD = CONFIG.timing.tapThreshold;
 const LONG_PRESS_MS = CONFIG.timing.longPressMs;
-const { percentToMeters, worldToScreen } = window.AppUtils;
+const { worldToScreen } = window.AppUtils;
 const STR = new Proxy({}, {
     get: (t, prop) => window.LocaleManager ? window.LocaleManager.t(prop) : prop
 });
@@ -14,15 +14,23 @@ function el(id) { return document.getElementById(id); }
 let currentMapId = AppStorage.loadMap(CONFIG.defaultMap);
 if (!MAPS[currentMapId]) currentMapId = CONFIG.defaultMap;
 let mapCfg = MAPS[currentMapId];
-let MAP = { size: mapCfg.size, coordScale: mapCfg.coordScale };
+
+let MAP = {
+    bounds: mapCfg.bounds,
+    tileBounds: mapCfg.tileBounds,
+    coordScale: mapCfg.coordScale,
+    worldSize: mapCfg.bounds.maxX
+};
 let ZONE = mapCfg.zone;
 let TOWERS = mapCfg.towers;
 let TILES = mapCfg.tiles;
-MapSpatial.configure(TOWERS, MAP.size);
+let worldSize = MAP.worldSize;
+MapSpatial.configure(TOWERS);
 const canvas = el('map');
 canvas.addEventListener('mousedown', e => {
     if (e.button === 1) e.preventDefault();
 });
+
 const ctx = canvas.getContext('2d');
 const inputs = { ax: el('ax'), ay: el('ay'), bx: el('bx'), by: el('by') };
 const out = { dist: el('dist'), az: el('azimuth'), el: el('elevation') };
@@ -32,9 +40,10 @@ const towerIcon = new Image();
 towerIcon.src = window.AppUtils.assetUrl('assets/icons/tower.webp');
 towerIcon.onload = () => renderMap();
 MapTiles.configure(TILES.cacheMax || TILE_CACHE_MAX);
-AppDraw.configure(MAP.size, STR);
+AppDraw.configure(worldSize, STR);
 AppDraw.initButtons();
 AppDraw.setOnStrokeComplete(() => renderMap());
+
 function renderMap() {
     MapRenderer.invalidateBgCache();
     if (UIPanels.getShowTowers()) {
@@ -46,9 +55,11 @@ function renderMap() {
         pointA: AppPoints.getA(), pointB: AppPoints.getB(),
         showTowers: UIPanels.getShowTowers(),
         selectedTower, STR, towerIcon, TILES,
+        coordScale: MAP.coordScale,
         onTileLoaded: onTileLoaded
     });
 }
+
 let _rafId = 0;
 function scheduleRender() {
     if (_rafId) return;
@@ -57,6 +68,7 @@ function scheduleRender() {
         renderMap();
     });
 }
+
 let _tileRafId = 0;
 function scheduleTileRender() {
     if (_tileRafId) return;
@@ -67,29 +79,39 @@ function scheduleTileRender() {
         });
     });
 }
+
 let _tileDebounce = 0;
 function onTileLoaded() {
     clearTimeout(_tileDebounce);
     _tileDebounce = setTimeout(scheduleTileRender, 50);
 }
+
 function saveState() {
-    AppStorage.saveState(AppPoints.getA(), AppPoints.getB(), view, MAP.size);
+    AppStorage.saveState(AppPoints.getA(), AppPoints.getB(), view, worldSize);
 }
+
 function onPointsChanged() {
     UIInputs.sync();
     UIResults.update();
     renderMap();
     saveState();
 }
+
 function switchMap(mapId) {
     if (!MAPS[mapId] || mapId === currentMapId) return;
     currentMapId = mapId;
     mapCfg = MAPS[mapId];
-    MAP = { size: mapCfg.size, coordScale: mapCfg.coordScale };
+    MAP = {
+        bounds: mapCfg.bounds,
+        tileBounds: mapCfg.tileBounds,
+        coordScale: mapCfg.coordScale,
+        worldSize: mapCfg.bounds.maxX
+    };
     ZONE = mapCfg.zone;
     TOWERS = mapCfg.towers;
     TILES = mapCfg.tiles;
-    MapSpatial.configure(TOWERS, MAP.size);
+    worldSize = MAP.worldSize;
+    MapSpatial.configure(TOWERS);
     selectedTower = null;
     AppStorage.saveMap(mapId);
     MapTiles.clearCache();
@@ -98,12 +120,13 @@ function switchMap(mapId) {
     if (window.AppDraw) {
         AppDraw.cancelStroke();
         AppDraw.clearDrawings();
-        AppDraw.configure(MAP.size, STR);
+        AppDraw.configure(worldSize, STR);
     }
-    MapViewport.setMapSize(MAP.size, MAP.coordScale);
-    AppPoints.configure({ mapSize: MAP.size, coordScale: MAP.coordScale, onChange: onPointsChanged });
+    MapViewport.setMap(worldSize, MAP.coordScale, MAP.bounds);
+    AppPoints.configure({ worldSize, coordScale: MAP.coordScale, bounds: MAP.bounds, onChange: onPointsChanged });
     MapViewport.resetView();
-    UIInputs.setMapSize(MAP.size, MAP.coordScale);
+    UIInputs.setMapSize(worldSize, MAP.coordScale, MAP.bounds);
+    UIResults.setCoordScale(MAP.coordScale);
     UIInputs.sync();
     UIResults.update();
     renderMap();
@@ -113,12 +136,14 @@ function switchMap(mapId) {
     const badge = el('mapBadge');
     if (badge) badge.textContent = mapId.charAt(0).toUpperCase() + mapId.slice(1);
 }
+
 function findTowerAt(sx, sy) {
     if (!UIPanels.getShowTowers()) return null;
     const halfSize = MapRenderer.getTowerIconSize(view.scale) / 2;
     MapSpatial.rebuild(view, halfSize);
     return MapSpatial.findTowerAt(sx, sy, halfSize);
 }
+
 function applySharedParams() {
     const params = new URLSearchParams(location.search);
     let mapApplied = false;
@@ -129,7 +154,7 @@ function applySharedParams() {
             mapApplied = true;
         }
     }
-    const parsed = AppShare.parseSharedParams(MAP.size, MAPS);
+    const parsed = AppShare.parseSharedParams(worldSize, MAPS);
     AppPoints.assign(parsed.pointA || AppPoints.getA(), parsed.pointB || AppPoints.getB());
     if (parsed.weapon) AppWeapons.set(parsed.weapon);
     if (parsed.applied || mapApplied) {
@@ -139,10 +164,11 @@ function applySharedParams() {
     const langParam = params.get('lang');
     history.replaceState({}, '', location.pathname + (langParam ? '?lang=' + langParam : ''));
 }
-MapViewport.init({ canvas, renderMap, saveState, mapSize: MAP.size, coordScale: MAP.coordScale });
+
+MapViewport.init({ canvas, renderMap, saveState, worldSize, coordScale: MAP.coordScale, bounds: MAP.bounds });
 view = MapViewport.get();
-AppPoints.configure({ mapSize: MAP.size, coordScale: MAP.coordScale, onChange: onPointsChanged });
-UIResults.init({ out, getWeapons: () => WEAPONS, getCurrentWeapon: () => AppWeapons.get(), STR });
+AppPoints.configure({ worldSize, coordScale: MAP.coordScale, bounds: MAP.bounds, onChange: onPointsChanged });
+UIResults.init({ out, getWeapons: () => WEAPONS, getCurrentWeapon: () => AppWeapons.get(), STR, coordScale: MAP.coordScale });
 UIPanels.init({
     onChange: () => {
         if (!UIPanels.getShowTowers()) selectedTower = null;
@@ -151,13 +177,15 @@ UIPanels.init({
     renderMap: renderMap,
     saveState: saveState
 });
-UIInputs.init({ inputs, debounceMs: INPUT_DEBOUNCE_MS, mapSize: MAP.size, coordScale: MAP.coordScale });
+
+UIInputs.init({ inputs, debounceMs: INPUT_DEBOUNCE_MS, worldSize, coordScale: MAP.coordScale, bounds: MAP.bounds });
 UIContextMenu.init({
     getView: () => view,
     hitPoint: (sx, sy) => AppPoints.hitPoint(sx, sy, view),
     setPoint: (k, x, y) => AppPoints.setPoint(k, x, y),
     getWrapRect: () => canvas.parentElement.getBoundingClientRect()
 });
+
 AppWeapons.init(CONFIG.defaultWeapon, () => { UIResults.update(); renderMap(); });
 AppAnalytics.init();
 LocaleManager.setOnLocaleChange(() => renderMap());
@@ -166,9 +194,11 @@ document.querySelectorAll('.controls-section h2').forEach(h2 => {
         h2.closest('.controls-section').classList.toggle('collapsed');
     });
 });
+
 el('resetView').onclick = () => MapViewport.resetView();
 el('clearA').onclick = () => AppPoints.setPoint('A', null);
 el('clearB').onclick = () => AppPoints.setPoint('B', null);
+
 const toolNames = {
     pen: () => STR.toolPen || 'Карандаш',
     line: () => STR.toolLine || 'Линейка',
@@ -176,6 +206,7 @@ const toolNames = {
     eraser: () => STR.toolEraser || 'Ластик',
     pan: () => STR.toolPan || 'Перемещение'
 };
+
 document.querySelectorAll('.draw-tool').forEach(btn => {
     btn.addEventListener('click', () => {
         const tool = btn.dataset.tool;
@@ -185,6 +216,7 @@ document.querySelectorAll('.draw-tool').forEach(btn => {
         if (statusEl && toolNames[tool]) statusEl.textContent = toolNames[tool]();
     });
 });
+
 document.querySelectorAll('.width-opt').forEach(btn => {
     btn.addEventListener('click', () => window.AppDraw.setWidth(btn.dataset.width));
 });
@@ -192,64 +224,77 @@ el('clearDrawingsBtn').addEventListener('click', () => {
     window.AppDraw.clearDrawings();
     renderMap();
 });
+
 window.addEventListener('blur', () => MapInteractions.handleBlur(canvas));
 window.addEventListener('resize', () => {
     MapInteractions.invalidateWrapRect();
     MapInteractions.invalidateCanvasRect();
 });
+
 canvas.addEventListener('pointerleave', () => {
     const cc = MapInteractions.getCursorCoordsEl();
     if (cc) cc.classList.remove('visible');
 });
+
 canvas.addEventListener('wheel', e => MapInteractions.handleWheel(e, canvas, {
     view, renderMap, scheduleRender, debouncedSaveView: () => MapViewport.debouncedSave(), utils: window.AppUtils
 }), { passive: false });
 const onUp = e => MapInteractions.handlePointerUp(e, canvas, {
     view, renderMap, scheduleRender, findTowerAt, selectedTower, setSelectedTower: t => { selectedTower = t; }
 });
+
 window.addEventListener('pointermove', e => MapInteractions.handlePointerMove(e, canvas, {
     get view() { return view; },
-    get mapSize() { return MAP.size; },
+    get worldSize() { return worldSize; },
+    get coordScale() { return MAP.coordScale; },
     renderMap, scheduleRender, debouncedSaveView: () => MapViewport.debouncedSave(),
     hitPoint: (sx, sy) => AppPoints.hitPoint(sx, sy, view), findTowerAt,
     setPoint: (k, x, y) => AppPoints.setPoint(k, x, y),
-    utils: window.AppUtils, TAP_THRESHOLD, get coordScale() { return MAP.coordScale; }
+    utils: window.AppUtils, TAP_THRESHOLD
 }));
+
 canvas.addEventListener('pointerdown', e => MapInteractions.handlePointerDown(e, canvas, {
-    view, mapSize: MAP.size, renderMap, scheduleRender,
+    view, worldSize, renderMap, scheduleRender,
     hitPoint: (sx, sy) => AppPoints.hitPoint(sx, sy, view), findTowerAt,
     openMenuAt: (sx, sy) => UIContextMenu.openMenuAt(sx, sy), hideMenu: () => UIContextMenu.hideMenu(),
     LONG_PRESS_MS, utils: window.AppUtils
 }));
+
 window.addEventListener('pointerup', onUp);
 window.addEventListener('pointercancel', onUp);
 canvas.addEventListener('contextmenu', e => MapInteractions.handleContextMenu(e, canvas, {
     openMenuAt: (sx, sy) => UIContextMenu.openMenuAt(sx, sy)
 }));
+
 window.addEventListener('pointerdown', e => {
     const ctxMenu = el('ctxMenu');
     if (ctxMenu && !ctxMenu.contains(e.target)) UIContextMenu.hideMenu();
 });
+
 window.addEventListener('keydown', e => {
     if (e.key === 'Escape') { UIContextMenu.hideMenu(); UIPanels.openHelp(false); if (window.AppDraw) AppDraw.hideMarkerModal(); }
 });
+
 el('shareBtn').addEventListener('click', async () => {
-    const url = AppShare.generateUrl(AppPoints.getA(), AppPoints.getB(), AppWeapons.get(), MAP.size, currentMapId);
+    const url = AppShare.generateUrl(AppPoints.getA(), AppPoints.getB(), AppWeapons.get(), worldSize, currentMapId);
     await AppShare.copyToClipboard(url);
     AppShare.showToast(STR.shareCopied, 'success');
 });
+
 const mapSelect = el('mapSelect');
 if (mapSelect) {
     mapSelect.value = currentMapId;
     mapSelect.addEventListener('change', () => switchMap(mapSelect.value));
 }
+
 MapViewport.resize();
-const loadedState = AppStorage.loadState(MAP.size);
+const loadedState = AppStorage.loadState(worldSize);
 if (loadedState) {
     AppPoints.assign(loadedState.pointA, loadedState.pointB);
     MapViewport.restore(loadedState.view);
     UIInputs.sync();
 }
+
 const badge = el('mapBadge');
 if (badge) badge.textContent = currentMapId.charAt(0).toUpperCase() + currentMapId.slice(1);
 applySharedParams();

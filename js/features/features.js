@@ -11,14 +11,17 @@ window.AppDraw = (function (utils) {
   let pendingMarker = null;
   let _cleanupModal = null;
   let onStrokeComplete = null;
+
   function configure(size, str) {
     mapSize = size;
     if (str) STR = str;
   }
+
   function initButtons() {
     _toolBtns = document.querySelectorAll('.draw-tool');
     _widthBtns = document.querySelectorAll('.width-opt');
   }
+
   function setOnStrokeComplete(fn) { onStrokeComplete = fn; }
   function setTool(tool) {
     if (!TOOLS.includes(tool)) return;
@@ -27,12 +30,14 @@ window.AppDraw = (function (utils) {
       btn.classList.toggle('active', btn.dataset.tool === tool);
     });
   }
+
   function setWidth(w) {
     currentWidth = Math.max(1, Math.min(6, Number(w) || 1));
     _widthBtns.forEach(btn => {
       btn.classList.toggle('active', Number(btn.dataset.width) === currentWidth);
     });
   }
+
   function getTool() { return currentTool; }
   function getWidth() { return currentWidth; }
   function getLocalDrawings() { return localDrawings; }
@@ -54,6 +59,7 @@ window.AppDraw = (function (utils) {
       width: currentWidth
     };
   }
+
   function continueStroke(px, py) {
     if (!isDrawing || !currentStroke) return;
     px = Math.max(0, Math.min(100, px));
@@ -67,6 +73,7 @@ window.AppDraw = (function (utils) {
       else currentStroke.points[1] = { x: px, y: py };
     }
   }
+
   function finishStroke() {
     if (!isDrawing || !currentStroke) { isDrawing = false; return; }
     isDrawing = false;
@@ -84,6 +91,7 @@ window.AppDraw = (function (utils) {
     currentStroke = null;
     if (onStrokeComplete) onStrokeComplete();
   }
+
   function cancelStroke() { isDrawing = false; currentStroke = null; }
   function hideMarkerModal() {
     if (_cleanupModal) { _cleanupModal(); _cleanupModal = null; }
@@ -92,6 +100,7 @@ window.AppDraw = (function (utils) {
     pendingMarker = null;
     cancelStroke();
   }
+
   function eraseAt(sx, sy, view) {
     const baseEraseRadius = 8;
     let removed = false;
@@ -117,10 +126,12 @@ window.AppDraw = (function (utils) {
     }
     return removed;
   }
+
   function clearDrawings() {
     localDrawings = [];
     cancelStroke();
   }
+
   function showMarkerModal(px, py) {
     const modal = document.getElementById('markerModal');
     const input = document.getElementById('markerInput');
@@ -148,14 +159,17 @@ window.AppDraw = (function (utils) {
       finishStroke();
       pendingMarker = null;
     }
+
     function onCancel() {
       cleanup();
       pendingMarker = null;
     }
+
     function onKey(e) {
       if (e.key === 'Enter') { e.preventDefault(); onOk(); }
       else if (e.key === 'Escape') { e.preventDefault(); onCancel(); }
     }
+
     function cleanup() {
       _cleanupModal = null;
       modal.classList.add('hidden');
@@ -164,15 +178,18 @@ window.AppDraw = (function (utils) {
       input.removeEventListener('keydown', onKey);
       modal.removeEventListener('mousedown', onBackdrop);
     }
+
     function onBackdrop(e) {
       if (e.target === modal) onCancel();
     }
+
     _cleanupModal = cleanup;
     okBtn.addEventListener('click', onOk);
     cancelBtn.addEventListener('click', onCancel);
     input.addEventListener('keydown', onKey);
     modal.addEventListener('mousedown', onBackdrop);
   }
+  
   return {
     configure, initButtons, setOnStrokeComplete,
     setTool, setWidth, getTool, getWidth,

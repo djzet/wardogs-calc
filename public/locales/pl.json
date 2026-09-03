@@ -47,7 +47,7 @@
     "helpTitle": "Jak korzystać z kalkulatora",
     "helpP1": "<b>Ustawianie punktów.</b> Zaznacz swoją pozycję (punkt A) i cel (punkt B) — kalkulator obliczy odległość, azymut i elewację.",
     "helpP2": "<b>Obsługa mapy.</b> Prawy przycisk otwiera menu. Lewy przycisk przesuwa mapę. Kółko myszy przybliża. Na ekranach dotykowych: jeden palec przesuwa, dwa palce przybliżają, długie naciśnięcie otwiera menu kontekstowe.",
-    "helpP3": "<b>Współrzędne.</b> Y i X są wprowadzane we współrzędnych gry (0–163.83) — tych samych, co pod kursorem. Krok zmiany: 0,01 (strzałki w polu).",
+    "helpP3": "<b>Współrzędne.</b> Y i X są wprowadzane we współrzędnych gry (0–160.00) — tych samych, co pod kursorem. Krok zmiany: 0,01 (strzałki w polu).",
     "helpP4": "<b>Wyniki.</b> Odległość, azymut od północy, kąt lufy w mil. Jeśli cel jest poza zasięgiem — odpowiedni komunikat.",
     "helpP5": "<b>Zapisywanie.</b> Wszystkie dane są automatycznie zapisywane i przywracane po odświeżeniu strony.",
     "helpP6": "<b>O kalkulatorze.</b> Narzędzie stworzone przez fanów dla gry WARDOGS. Nieoficjalny projekt, niepowiązany z twórcami gry.",

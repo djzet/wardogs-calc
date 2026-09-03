@@ -1,5 +1,4 @@
 window.MapSpatial = (function () {
-    const { percentToMeters } = window.AppUtils;
     let _world = [];
     let _screen = [];
     let _grid = new Map();
@@ -10,13 +9,14 @@ window.MapSpatial = (function () {
     function _cellKey(cx, cy) {
         return (cx << 16) | (cy & 0xFFFF);
     }
-    function configure(towers, mapSize) {
+
+    function configure(towers) {
         _world = new Array(towers.length);
         _screen = [];
         for (let i = 0; i < towers.length; i++) {
             _world[i] = {
-                wx: percentToMeters(towers[i].x, mapSize),
-                wy: percentToMeters(towers[i].y, mapSize),
+                wx: towers[i].x,
+                wy: towers[i].y,
                 data: towers[i]
             };
         }
@@ -25,6 +25,7 @@ window.MapSpatial = (function () {
         _vOx = 0;
         _vOy = 0;
     }
+
     function rebuild(view, halfSize) {
         if (view.scale === _vScale && view.ox === _vOx && view.oy === _vOy) return;
         _vScale = view.scale;
@@ -35,15 +36,17 @@ window.MapSpatial = (function () {
         const ox = view.ox;
         const oy = view.oy;
         _screen = new Array(n);
+
         for (let i = 0; i < n; i++) {
             const t = _world[i];
             _screen[i] = {
                 x: t.wx * scale + ox,
-                y: -t.wy * scale + oy
+                y: -(t.wy * scale) + oy
             };
         }
         _cellSize = Math.max(32, halfSize * 2);
         _grid.clear();
+
         for (let i = 0; i < n; i++) {
             const s = _screen[i];
             const minCX = Math.floor((s.x - halfSize) / _cellSize);
@@ -60,6 +63,7 @@ window.MapSpatial = (function () {
             }
         }
     }
+
     function findTowerAt(sx, sy, halfSize) {
         const cx = Math.floor(sx / _cellSize);
         const cy = Math.floor(sy / _cellSize);
@@ -73,6 +77,7 @@ window.MapSpatial = (function () {
         }
         return null;
     }
+    
     function getTowerScreenPos(index) {
         return _screen[index] || null;
     }

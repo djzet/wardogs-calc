@@ -47,7 +47,7 @@
     "helpTitle": "Comment utiliser le calculateur",
     "helpP1": "<b>Placement des points.</b> Marquez votre position (point A) et la cible (point B) — le calculateur calculera la distance, l'azimut et l'élévation.",
     "helpP2": "<b>Utilisation de la carte.</b> Le clic droit ouvre le menu. Le clic gauche déplace la carte. La molette zoome. Sur écrans tactiles : un doigt déplace, deux doigts zooment, appui long ouvre le menu contextuel.",
-    "helpP3": "<b>Coordonnées.</b> Y et X sont saisis en coordonnées de jeu (0–163.83) — les mêmes que sous le curseur. Pas de modification : 0,01 (flèches dans le champ).",
+    "helpP3": "<b>Coordonnées.</b> Y et X sont saisis en coordonnées de jeu (0–160.00) — les mêmes que sous le curseur. Pas de modification : 0,01 (flèches dans le champ).",
     "helpP4": "<b>Résultats.</b> Distance, azimut depuis le nord, angle du canon en mil. Si la cible est hors de portée — message correspondant.",
     "helpP5": "<b>Sauvegarde.</b> Toutes les données sont automatiquement enregistrées et restaurées après le rechargement de la page.",
     "helpP6": "<b>À propos du calculateur.</b> Outil créé par des fans pour le jeu WARDOGS. Projet non officiel, non affilié aux développeurs du jeu.",

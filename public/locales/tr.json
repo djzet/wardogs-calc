@@ -47,7 +47,7 @@
     "helpTitle": "Hesaplayıcı Nasıl Kullanılır",
     "helpP1": "<b>Nokta Yerleştirme.</b> Pozisyonunuzu (A noktası) ve hedefi (B noktası) işaretleyin — hesaplayıcı mesafe, kerteriz ve yükseklik açısı hesaplayacaktır.",
     "helpP2": "<b>Harita Kullanımı.</b> Sağ tık menüyü açar. Sol tık haritayı kaydırır. Fare tekerleği yakınlaştırır. Dokunmatik ekranlarda: bir parmak kaydırır, iki parmak yakınlaştırır, uzun basma bağlam menüsünü açar.",
-    "helpP3": "<b>Koordinatlar.</b> Y ve X oyun koordinatlarında (0–163.83) girilir — imleç altındakilerle aynı. Değişim adımı: 0,01 (alan içindeki oklar).",
+    "helpP3": "<b>Koordinatlar.</b> Y ve X oyun koordinatlarında (0–160.00) girilir — imleç altındakilerle aynı. Değişim adımı: 0,01 (alan içindeki oklar).",
     "helpP4": "<b>Sonuçlar.</b> Mesafe, kuzeyden kerteriz, namlu açısı mil cinsinden. Hedef menzil dışındaysa — ilgili mesaj.",
     "helpP5": "<b>Kaydetme.</b> Tüm veriler otomatik olarak kaydedilir ve sayfa yenilendikten sonra geri yüklenir.",
     "helpP6": "<b>Hesaplayıcı Hakkında.</b> WARDOGS oyunu için hayran yapımı araç. Resmi olmayan proje, oyun geliştiricileriyle bağlantılı değildir.",

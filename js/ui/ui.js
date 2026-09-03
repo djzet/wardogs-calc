@@ -6,6 +6,7 @@ window.UIPanels = (function (storage) {
     function t(key) {
         return window.LocaleManager ? window.LocaleManager.t(key) : key;
     }
+
     function emit() { if (onChange) onChange(); }
     function init(opts) {
         onChange = opts.onChange || null;
@@ -18,11 +19,13 @@ window.UIPanels = (function (storage) {
         }
         applyThemeClass();
     }
+
     function getTheme() { return theme; }
     function getShowTowers() { return showTowers; }
     function applyThemeClass() {
         document.body.classList.toggle('light', theme === 'light');
     }
+
     function toggleTheme() {
         theme = (theme === 'dark') ? 'light' : 'dark';
         storage.saveTheme(theme);
@@ -30,11 +33,13 @@ window.UIPanels = (function (storage) {
         document.documentElement.setAttribute('data-theme-manual', '');
         emit();
     }
+
     function setShowTowers(v) {
         showTowers = v;
         storage.saveTowers(v);
         emit();
     }
+
     function openDrawer(state) {
         document.getElementById('drawer').classList.toggle('open', state);
         document.getElementById('drawerBackdrop').classList.toggle('hidden', !state);
@@ -43,9 +48,11 @@ window.UIPanels = (function (storage) {
             window.MapInteractions.invalidateCanvasRect();
         }
     }
+
     function openHelp(state) {
         document.getElementById('helpModal').classList.toggle('hidden', !state);
     }
+
     function bind() {
         document.getElementById('drawerToggle').onclick = () => openDrawer(true);
         document.getElementById('drawerClose').onclick = () => openDrawer(false);
@@ -62,83 +69,115 @@ window.UIPanels = (function (storage) {
         });
         document.getElementById('themeToggle').onclick = toggleTheme;
     }
+
     return {
         init, getTheme, getShowTowers, toggleTheme, setShowTowers,
         openDrawer, openHelp
     };
+
 })(window.AppStorage);
+
 window.UIInputs = (function (points, utils) {
     let inputs = null;
     let timer = null;
     let debounceMs = 80;
-    let mapSize = 16000;
+    let worldSize = 160;
     let coordScale = 100;
+    let bounds = null;
+
     function init(opts) {
         inputs = opts.inputs;
         debounceMs = opts.debounceMs || 80;
-        mapSize = opts.mapSize;
+        worldSize = opts.worldSize;
         coordScale = opts.coordScale || 100;
-        const maxGame = String(mapSize / coordScale);
-        Object.values(inputs).forEach(i => {
-            i.min = '0';
-            i.max = maxGame;
-            i.step = '0.01';
-        });
+        bounds = opts.bounds || null;
+        setInputLimits();
         bind();
     }
+
+    function setInputLimits() {
+        if (!inputs) return;
+
+        if (bounds) {
+            const minX = bounds.minX.toFixed(2);
+            const maxX = bounds.maxX.toFixed(2);
+            const minY = bounds.minY.toFixed(2);
+            const maxY = bounds.maxY.toFixed(2);
+            inputs.ax.min = minX; inputs.ax.max = maxX;
+            inputs.ay.min = minY; inputs.ay.max = maxY;
+            inputs.bx.min = minX; inputs.bx.max = maxX;
+            inputs.by.min = minY; inputs.by.max = maxY;
+        } else {
+            const maxVal = worldSize;
+            Object.values(inputs).forEach(i => {
+                i.min = '0';
+                i.max = String(maxVal);
+            });
+        }
+        Object.values(inputs).forEach(i => { i.step = '0.01'; });
+    }
+
     function setField(el, val) {
         if (document.activeElement !== el) el.value = val;
     }
+
     function sync() {
         const A = points.getA(), B = points.getB();
+        const precision = (coordScale || 100) === 100 ? 2 : 0;
         if (A) {
-            setField(inputs.ax, utils.gameCoord(A.x, coordScale));
-            setField(inputs.ay, utils.gameCoord(A.y, coordScale));
+            setField(inputs.ax, A.x.toFixed(precision));
+            setField(inputs.ay, A.y.toFixed(precision));
         } else {
             setField(inputs.ax, ''); setField(inputs.ay, '');
         }
         if (B) {
-            setField(inputs.bx, utils.gameCoord(B.x, coordScale));
-            setField(inputs.by, utils.gameCoord(B.y, coordScale));
+            setField(inputs.bx, B.x.toFixed(precision));
+            setField(inputs.by, B.y.toFixed(precision));
         } else {
             setField(inputs.bx, ''); setField(inputs.by, '');
         }
     }
+
     function onInput() {
         clearTimeout(timer);
         timer = setTimeout(() => {
             points.applyFromInputs(inputs.ax, inputs.ay, inputs.bx, inputs.by);
         }, debounceMs);
     }
+
     function onBlur() {
         clearTimeout(timer);
         points.applyFromInputs(inputs.ax, inputs.ay, inputs.bx, inputs.by);
     }
+
     function bind() {
         Object.values(inputs).forEach(i => i.addEventListener('input', onInput));
         Object.values(inputs).forEach(i => i.addEventListener('blur', onBlur));
     }
-    function setMapSize(size, newCoordScale) {
-        mapSize = size;
-        if (newCoordScale) coordScale = newCoordScale;
-        if (inputs) {
-            const maxGame = String(size / coordScale);
-            Object.values(inputs).forEach(i => { i.max = maxGame; });
-        }
+
+    function setMapSize(worldSizeNew, coordScaleNew, boundsNew) {
+        worldSize = worldSizeNew;
+        if (coordScaleNew) coordScale = coordScaleNew;
+        if (boundsNew) bounds = boundsNew;
+        setInputLimits();
     }
+
     return { init, sync, setMapSize };
 })(window.AppPoints, window.AppUtils);
+
 window.UIContextMenu = (function (utils) {
     let menu = null;
     let menuWorld = null;
     let menuPointKey = null;
     let deps = null;
+
     function init(d) {
         deps = d;
         menu = document.getElementById('ctxMenu');
         if (!menu) return;
         bind();
     }
+
     function openMenuAt(sx, sy) {
         if (!menu) return;
         const view = deps.getView();
@@ -164,6 +203,7 @@ window.UIContextMenu = (function (utils) {
             menu.style.top = top + 'px';
         }
     }
+
     function hideMenu() { if (menu) menu.classList.add('hidden'); }
     function bind() {
         menu.addEventListener('click', e => {
@@ -176,27 +216,34 @@ window.UIContextMenu = (function (utils) {
             hideMenu();
         });
     }
+
     return { init, openMenuAt, hideMenu };
 })(window.AppUtils);
+
 window.UIResults = (function (calc, points, utils) {
-    let out = null, getWeapons = null, getCurrentWeapon = null, STR = null;
+    let out = null, getWeapons = null, getCurrentWeapon = null, STR = null, coordScale = 100;
+
     function replayAnim(el) {
         el.style.animation = 'none';
         el.offsetHeight;
         el.style.animation = '';
     }
+
     function init(opts) {
         out = opts.out;
         getWeapons = opts.getWeapons;
         getCurrentWeapon = opts.getCurrentWeapon;
         STR = opts.STR;
+        coordScale = opts.coordScale || 100;
     }
+
+    function setCoordScale(cs) { coordScale = cs; }
     function update() {
         out.el.classList.remove('oor', 'warn');
         out.dist.classList.remove('oor', 'warn');
         out.az.classList.remove('oor', 'warn');
         const weapon = getWeapons()[getCurrentWeapon()];
-        const r = calc.calculate(points.getA(), points.getB(), weapon);
+        const r = calc.calculate(points.getA(), points.getB(), weapon, coordScale);
         if (r.status === 'noPoints') {
             out.dist.textContent = out.az.textContent = out.el.textContent = '—';
             return;
@@ -225,5 +272,5 @@ window.UIResults = (function (calc, points, utils) {
         }
         replayAnim(out.el);
     }
-    return { init, update };
+    return { init, update, setCoordScale };
 })(window.AppCalculator, window.AppPoints, window.AppUtils);
