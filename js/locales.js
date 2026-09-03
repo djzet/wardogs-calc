@@ -91,7 +91,7 @@ window.LocaleManager = (function () {
     let currentLocale = DEFAULT_LOCALE;
     try {
         currentLocale = localStorage.getItem('wardogs_lang') || DEFAULT_LOCALE;
-    } catch (e) {
+    } catch {
         currentLocale = DEFAULT_LOCALE;
     }
 
@@ -108,7 +108,7 @@ window.LocaleManager = (function () {
             currentLocale = locale;
             document.documentElement.lang = currentLocale;
             loaded = true;
-            try { localStorage.setItem('wardogs_lang', locale); } catch (e) { }
+            try { localStorage.setItem('wardogs_lang', locale); } catch { }
             return translations;
         }
         try {
@@ -119,7 +119,7 @@ window.LocaleManager = (function () {
             currentLocale = locale;
             document.documentElement.lang = currentLocale;
             loaded = true;
-            try { localStorage.setItem('wardogs_lang', locale); } catch (e) { }
+            try { localStorage.setItem('wardogs_lang', locale); } catch { }
             return translations;
         } catch (error) {
             console.warn(`Failed to load locale ${locale}, using fallback:`, error.message);
@@ -134,7 +134,7 @@ window.LocaleManager = (function () {
     function t(key) {
         if (!loaded) {
             const fallback = FALLBACK_TRANSLATIONS[DEFAULT_LOCALE];
-            return getNestedValue(fallback, key) || key;
+            return getNestedValue(fallback, key) ?? key;
         }
         const value = getNestedValue(translations, key);
         return value !== undefined ? value : key;
@@ -172,7 +172,7 @@ window.LocaleManager = (function () {
         const urlLang = urlParams.get('lang');
         if (urlLang && SUPPORTED_LOCALES.includes(urlLang) && urlLang !== currentLocale) {
             currentLocale = urlLang;
-            try { localStorage.setItem('wardogs_lang', urlLang); } catch (e) { }
+            try { localStorage.setItem('wardogs_lang', urlLang); } catch { }
         }
         await loadLocale(currentLocale);
         applyTranslations();

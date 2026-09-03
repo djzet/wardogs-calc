@@ -1,7 +1,7 @@
 window.MapSpatial = (function () {
     let _world = [];
     let _screen = [];
-    let _grid = new Map();
+    const _grid = new Map();
     let _cellSize = 64;
     let _vScale = 0;
     let _vOx = 0;

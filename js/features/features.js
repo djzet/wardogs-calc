@@ -5,7 +5,7 @@ window.AppDraw = (function (utils) {
   let isDrawing = false;
   let localDrawings = [];
   let currentWidth = 1;
-  let mapSize = 16000;
+  let mapSize = 160;
   let STR = null;
   let _toolBtns, _widthBtns;
   let pendingMarker = null;
@@ -110,8 +110,8 @@ window.AppDraw = (function (utils) {
       let hit = false;
       for (const p of st.points || []) {
         const s = utils.worldToScreen(
-          utils.percentToMeters(p.x, mapSize),
-          utils.percentToMeters(p.y, mapSize),
+          utils.percentToWorld(p.x, mapSize),
+          utils.percentToWorld(p.y, mapSize),
           view
         );
         if (Math.hypot(s.x - sx, s.y - sy) <= strokeRadius) {

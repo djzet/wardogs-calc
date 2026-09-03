@@ -97,12 +97,10 @@ window.AppPoints = (function (utils) {
     let pointA = null;
     let pointB = null;
     let worldSize = 160;
-    let coordScale = 100;
     let bounds = null;
     let onChange = null;
     function configure(opts) {
         worldSize = opts.worldSize;
-        coordScale = opts.coordScale || 100;
         bounds = opts.bounds || null;
         onChange = opts.onChange || null;
     }
@@ -111,7 +109,7 @@ window.AppPoints = (function (utils) {
     function getB() { return pointB; }
     function setPoint(key, x, y) {
         let p = null;
-        if (x != null && y != null) {
+        if (x !== null && y !== null) {
             if (bounds) {
                 p = {
                     x: utils.clamp(x, bounds.minX, bounds.maxX),
@@ -253,7 +251,7 @@ window.AppShare = (function (utils) {
         try {
             await navigator.clipboard.writeText(text);
             return true;
-        } catch (e) {
+        } catch {
             const input = document.createElement('input');
             input.value = text;
             input.style.position = 'fixed';

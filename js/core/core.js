@@ -19,13 +19,13 @@ window.AppUtils = (function () {
     function worldToPercent(worldCoord, worldSize) {
         return (worldCoord * 100) / worldSize;
     }
-    function gameToScreen(gameX, gameY, view, coordScale) {
+    function gameToScreen(gameX, gameY, view, _coordScale) {
         return {
             x: gameX * view.scale + view.ox,
             y: -(gameY * view.scale) + view.oy
         };
     }
-    function screenToGame(screenX, screenY, view, coordScale) {
+    function screenToGame(screenX, screenY, view, _coordScale) {
         return {
             x: (screenX - view.ox) / view.scale,
             y: (view.oy - screenY) / view.scale
@@ -100,7 +100,7 @@ window.AppUtils = (function () {
         isValidBounds
     };
 })();
-window.AppCalculator = (function (utils) {
+window.AppCalculator = (function () {
     function distToMils(distMeters, table) {
         if (!table || table.length === 0) return null;
         if (distMeters > table[0].dist) return null;
@@ -159,4 +159,4 @@ window.AppCalculator = (function (utils) {
         };
     }
     return { distToMils, calculate };
-})(window.AppUtils);
+})();

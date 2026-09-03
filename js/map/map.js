@@ -271,7 +271,7 @@ window.MapRenderer = (function (utils, tiles) {
         }
     }
 
-    function drawRuler(ctx, view, worldSize, stroke, STR) {
+    function drawRuler(ctx, view, worldSize, stroke, STR, coordScale) {
         const a = stroke.points[0];
         const b = stroke.points[stroke.points.length - 1];
         const sa = utils.worldToScreen(utils.percentToWorld(a.x, worldSize), utils.percentToWorld(a.y, worldSize), view);
@@ -294,7 +294,7 @@ window.MapRenderer = (function (utils, tiles) {
             const wy0 = utils.percentToWorld(a.y, worldSize);
             const wx1 = utils.percentToWorld(b.x, worldSize);
             const wy1 = utils.percentToWorld(b.y, worldSize);
-            const cs = (view.coordScale || 100);
+            const cs = (coordScale || 100);
             const d = Math.hypot(wx1 - wx0, wy1 - wy0) * cs;
             const label = utils.fmtDist(d, STR);
             const mx = (sa.x + sb.x) / 2;
@@ -333,7 +333,7 @@ window.MapRenderer = (function (utils, tiles) {
         ctx.lineJoin = 'miter';
     }
 
-    function drawSingleStroke(ctx, view, worldSize, stroke, isPreview, STR) {
+    function drawSingleStroke(ctx, view, worldSize, stroke, isPreview, STR, coordScale) {
         if (!stroke.points || stroke.points.length === 0) return;
         if (stroke.tool === 'marker') {
             const p = stroke.points[0];
@@ -342,19 +342,19 @@ window.MapRenderer = (function (utils, tiles) {
             return;
         }
         if (stroke.tool === 'line') {
-            if (stroke.points.length >= 2) drawRuler(ctx, view, worldSize, stroke, STR);
+            if (stroke.points.length >= 2) drawRuler(ctx, view, worldSize, stroke, STR, coordScale);
             return;
         }
         drawPen(ctx, view, worldSize, stroke, isPreview);
     }
 
-    function drawDrawings(ctx, view, worldSize, STR) {
+    function drawDrawings(ctx, view, worldSize, STR, coordScale) {
         const local = window.AppDraw ? window.AppDraw.getLocalDrawings() : [];
         local.forEach(stroke => {
-            drawSingleStroke(ctx, view, worldSize, stroke, false, STR);
+            drawSingleStroke(ctx, view, worldSize, stroke, false, STR, coordScale);
         });
         const current = window.AppDraw ? window.AppDraw.getCurrentStroke() : null;
-        if (current) drawSingleStroke(ctx, view, worldSize, current, true, STR);
+        if (current) drawSingleStroke(ctx, view, worldSize, current, true, STR, coordScale);
     }
 
     function drawMinorGrid(ctx, view, c, w, h, bounds, coordScale) {
@@ -391,7 +391,7 @@ window.MapRenderer = (function (utils, tiles) {
         ctx.restore();
     }
 
-    function drawGrid(ctx, view, c, w, h, bounds, coordScale, STR) {
+    function drawGrid(ctx, view, c, w, h, bounds, coordScale, _STR) {
         const steps = getGridSteps(view.scale, coordScale);
         const step = steps.major;
         const vb = getViewBox(view, w, h, bounds);
@@ -558,7 +558,7 @@ window.MapRenderer = (function (utils, tiles) {
             }
 
             if (showTowers) TOWERS.forEach((p, i) => drawTower(sctx, view, p, towerIcon, selectedTower, STR, c, i));
-            drawDrawings(sctx, view, MAP.worldSize, STR);
+            drawDrawings(sctx, view, MAP.worldSize, STR, coordScale);
 
             if (pointA && pointB) {
                 const sa = utils.worldToScreen(pointA.x, pointA.y, view);
@@ -601,7 +601,7 @@ window.MapRenderer = (function (utils, tiles) {
 window.MapInteractions = (function () {
     const MIN_SCALE = 0.005;
     const MAX_SCALE = 4;
-    let pointers = new Map();
+    const pointers = new Map();
     let pinch = null;
     let longPressTimer = null;
     let longPressFired = false;
@@ -644,10 +644,10 @@ window.MapInteractions = (function () {
     }
 
     function handlePointerDown(e, canvas, opts) {
-        const { view, hitPoint, findTowerAt, openMenuAt, hideMenu, LONG_PRESS_MS, utils, worldSize, renderMap, scheduleRender } = opts;
+        const { view, hitPoint, findTowerAt, openMenuAt, hideMenu, LONG_PRESS_MS, utils, worldSize, renderMap } = opts;
         const p = canvasPos(e, canvas);
         if (e.pointerType !== 'mouse') lastTouchTs = performance.now();
-        try { canvas.setPointerCapture(e.pointerId); } catch (_) { }
+        try { canvas.setPointerCapture(e.pointerId); } catch { }
         pointers.set(e.pointerId, p);
         if (e.button === 1) {
             e.preventDefault();
@@ -721,7 +721,7 @@ window.MapInteractions = (function () {
     }
 
     function handlePointerMove(e, canvas, opts) {
-        const { view, renderMap, scheduleRender, debouncedSaveView, hitPoint, findTowerAt, setPoint, utils, TAP_THRESHOLD, worldSize, coordScale } = opts;
+        const { view, scheduleRender, debouncedSaveView, hitPoint, findTowerAt, setPoint, utils, TAP_THRESHOLD, worldSize, coordScale } = opts;
         const p = canvasPos(e, canvas);
         const tracked = pointers.has(e.pointerId);
         if (tracked) {
@@ -815,10 +815,10 @@ window.MapInteractions = (function () {
     }
 
     function handlePointerUp(e, canvas, opts) {
-        const { view, renderMap, scheduleRender, findTowerAt, selectedTower, setSelectedTower } = opts;
+        const { view, renderMap, findTowerAt, selectedTower, setSelectedTower } = opts;
         if (!pointers.has(e.pointerId)) return;
         pointers.delete(e.pointerId);
-        try { canvas.releasePointerCapture(e.pointerId); } catch (_) { }
+        try { canvas.releasePointerCapture(e.pointerId); } catch { }
         stopLongPress();
         const cc = getCursorCoordsEl();
         if (cc) cc.classList.remove('visible');
@@ -879,7 +879,7 @@ window.MapInteractions = (function () {
     }
 
     function handleWheel(e, canvas, opts) {
-        const { view, renderMap, scheduleRender, debouncedSaveView, utils } = opts;
+        const { view, scheduleRender, debouncedSaveView, utils } = opts;
         e.preventDefault();
         const p = canvasPos(e, canvas);
         const factor = Math.exp(-e.deltaY * 0.0015);
@@ -918,7 +918,6 @@ window.MapViewport = (function () {
     const view = { scale: 0.05, ox: 0, oy: 0 };
     let canvas = null, renderMap = null, saveState = null;
     let worldSize = 160, saveTimer = null;
-    let coordScale = 100;
     let bounds = null;
     let resizeRafId = 0;
 
@@ -927,7 +926,6 @@ window.MapViewport = (function () {
         renderMap = opts.renderMap;
         saveState = opts.saveState;
         worldSize = opts.worldSize;
-        coordScale = opts.coordScale || 100;
         bounds = opts.bounds || null;
         window.addEventListener('resize', resize);
     }
@@ -973,9 +971,8 @@ window.MapViewport = (function () {
         if (v) { view.scale = v.scale; view.ox = v.ox; view.oy = v.oy; }
     }
 
-    function setMap(worldSizeNew, coordScaleNew, boundsNew) {
+    function setMap(worldSizeNew, _coordScaleNew, boundsNew) {
         worldSize = worldSizeNew;
-        if (coordScaleNew) coordScale = coordScaleNew;
         if (boundsNew) bounds = boundsNew;
     }
 

@@ -6,7 +6,6 @@ const TILE_CACHE_MAX = 500;
 const INPUT_DEBOUNCE_MS = CONFIG.timing.inputDebounceMs;
 const TAP_THRESHOLD = CONFIG.timing.tapThreshold;
 const LONG_PRESS_MS = CONFIG.timing.longPressMs;
-const { worldToScreen } = window.AppUtils;
 const STR = new Proxy({}, {
     get: (t, prop) => window.LocaleManager ? window.LocaleManager.t(prop) : prop
 });
@@ -35,7 +34,6 @@ const ctx = canvas.getContext('2d');
 const inputs = { ax: el('ax'), ay: el('ay'), bx: el('bx'), by: el('by') };
 const out = { dist: el('dist'), az: el('azimuth'), el: el('elevation') };
 let selectedTower = null;
-let view;
 const towerIcon = new Image();
 towerIcon.src = window.AppUtils.assetUrl('assets/icons/tower.webp');
 towerIcon.onload = () => renderMap();
@@ -90,11 +88,13 @@ function saveState() {
     AppStorage.saveState(AppPoints.getA(), AppPoints.getB(), view, worldSize);
 }
 
+let _pointsSaveTimer = 0;
 function onPointsChanged() {
     UIInputs.sync();
     UIResults.update();
-    renderMap();
-    saveState();
+    scheduleRender();
+    clearTimeout(_pointsSaveTimer);
+    _pointsSaveTimer = setTimeout(saveState, 200);
 }
 
 function switchMap(mapId) {
@@ -166,7 +166,7 @@ function applySharedParams() {
 }
 
 MapViewport.init({ canvas, renderMap, saveState, worldSize, coordScale: MAP.coordScale, bounds: MAP.bounds });
-view = MapViewport.get();
+const view = MapViewport.get();
 AppPoints.configure({ worldSize, coordScale: MAP.coordScale, bounds: MAP.bounds, onChange: onPointsChanged });
 UIResults.init({ out, getWeapons: () => WEAPONS, getCurrentWeapon: () => AppWeapons.get(), STR, coordScale: MAP.coordScale });
 UIPanels.init({

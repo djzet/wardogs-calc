@@ -2,15 +2,9 @@ window.UIPanels = (function (storage) {
     let theme = storage.loadTheme('dark');
     let showTowers = storage.loadTowers();
     let onChange = null;
-    let renderMap = null;
-    function t(key) {
-        return window.LocaleManager ? window.LocaleManager.t(key) : key;
-    }
-
     function emit() { if (onChange) onChange(); }
     function init(opts) {
         onChange = opts.onChange || null;
-        renderMap = opts.renderMap || null;
         bind();
         if (storage.loadTheme(null)) {
             document.documentElement.setAttribute('data-theme-manual', '');
@@ -77,7 +71,7 @@ window.UIPanels = (function (storage) {
 
 })(window.AppStorage);
 
-window.UIInputs = (function (points, utils) {
+window.UIInputs = (function (points) {
     let inputs = null;
     let timer = null;
     let debounceMs = 80;
@@ -163,7 +157,7 @@ window.UIInputs = (function (points, utils) {
     }
 
     return { init, sync, setMapSize };
-})(window.AppPoints, window.AppUtils);
+})(window.AppPoints);
 
 window.UIContextMenu = (function (utils) {
     let menu = null;
