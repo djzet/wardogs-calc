@@ -16,7 +16,7 @@ en deux clics sur une carte de 16×16 km.
 
 - Carte interactive avec zoom tuilé et pan
 - Calcul de distance, azimut et élévation (mils)
-- Mortier (700 m) et artillerie (>2 km)
+- Mortier (684 m) et artillerie (2679 m)
 - Deux cartes : Bakurani et Ozeti (16×16 km)
 - Outils de dessin : crayon, règle, marqueur, gomme
 - Tours et zone sur la carte Bakurani

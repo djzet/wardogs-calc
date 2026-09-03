@@ -16,7 +16,7 @@ haritada iki tıklamayla.
 
 - Kare zoom ve pan özellikli interaktif harita
 - Mesafe, azimut ve yükselme (mils) hesaplama
-- Havan (700 m) ve topçu (>2 km)
+- Havan (684 m) ve topçu (2679 m)
 - İki harita: Bakurani ve Ozeti (16×16 km)
 - Çizim araçları: kalem, cetvel, işaretleyici, silgi
 - Bakurani haritasında kuleler ve bölge

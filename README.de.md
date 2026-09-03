@@ -16,7 +16,7 @@ auf der 16×16-km-Karte.
 
 - Interaktive Karte mit Kachel-Zoom und Pan
 - Berechnung von Distanz, Azimut und Erhöhung (mils)
-- Mörser (700 m) und Artillerie (>2 km)
+- Mörser (684 m) und Artillerie (2679 m)
 - Zwei Karten: Bakurani und Ozeti (16×16 km)
 - Zeichnungswerkzeuge: Stift, Lineal, Marker, Radiergummi
 - Türme und Zone auf der Bakurani-Karte

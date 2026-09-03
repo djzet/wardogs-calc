@@ -160,7 +160,7 @@
         "name": "Какой максимальный радиус миномёта в WARDOGS?",
         "acceptedAnswer": {
             "@type": "Answer",
-            "text": "Максимальная дальность миномёта в WARDOGS составляет 700 метров. Для целей дальше 700 м используйте артиллерию, которая стреляет на расстояние более 2 км."
+            "text": "Максимальная дальность миномёта в WARDOGS составляет 684 метра. Для целей дальше 684 м используйте артиллерию, которая стреляет на расстояние до 2679 м."
         }
         },
         {
@@ -218,7 +218,7 @@
             <h2 style="color:#e8c35a;">Возможности</h2>
             <ul>
                 <li>Точный расчёт дистанции, азимута и угла возвышения</li>
-                <li>Миномёт (до 700 м) и артиллерия (более 2 км)</li>
+                <li>Миномёт (до 684 м) и артиллерия (до 2679 м)</li>
                 <li>Две карты: Bakurani и Ozeti</li>
                 <li>Инструменты рисования: карандаш, линейка, метка, ластик</li>
                 <li>Вышки и важные объекты на карте</li>
@@ -363,16 +363,16 @@
             <section class="section-point-a">
                 <h2 data-i18n="posA">Огневая позиция (A)</h2>
                 <div class="coord-row">
-                    <label>X <input type="number" id="ax" placeholder="0.00" step="0.01" min="0" max="160"></label>
-                    <label>Y <input type="number" id="ay" placeholder="0.00" step="0.01" min="0" max="160"></label>
+                    <label>Y <input type="number" id="ay" placeholder="0.00" step="0.01" min="0" max="163.83"></label>
+                    <label>X <input type="number" id="ax" placeholder="0.00" step="0.01" min="0" max="163.83"></label>
                     <button class="clear" id="clearA" title="Очистить A" aria-label="Очистить A">×</button>
                 </div>
             </section>
             <section class="section-point-b">
                 <h2 data-i18n="posB">Цель (B)</h2>
                 <div class="coord-row">
-                    <label>X <input type="number" id="bx" placeholder="0.00" step="0.01" min="0" max="160"></label>
-                    <label>Y <input type="number" id="by" placeholder="0.00" step="0.01" min="0" max="160"></label>
+                    <label>Y <input type="number" id="by" placeholder="0.00" step="0.01" min="0" max="163.83"></label>
+                    <label>X <input type="number" id="bx" placeholder="0.00" step="0.01" min="0" max="163.83"></label>
                     <button class="clear" id="clearB" title="Очистить B" aria-label="Очистить B">×</button>
                 </div>
             </section>
@@ -388,11 +388,11 @@
                     <div class="radio-group">
                         <label class="radio-option">
                             <input type="radio" name="weapon" value="mortar" checked>
-                            <span data-i18n="weaponMortar">Миномёт (700 м)</span>
+                            <span data-i18n="weaponMortar">Миномёт (684 м)</span>
                         </label>
                         <label class="radio-option">
                             <input type="radio" name="weapon" value="artillery">
-                            <span data-i18n="weaponArtillery">Артиллерия (>2 км)</span>
+                            <span data-i18n="weaponArtillery">Артиллерия (2679 м)</span>
                         </label>
                     </div>
                 </div>
@@ -579,7 +579,7 @@
                     <p data-i18n="helpP2"><b>Работа с картой.</b> Правый клик по карте открывает меню. Левая кнопка
                         мыши перемещает карту. Колесо мыши изменяет масштаб. На сенсорных экранах: один палец —
                         перемещение, два пальца — масштаб, долгое нажатие — контекстное меню.</p>
-                    <p data-i18n="helpP3"><b>Координаты.</b> X и Y вводятся в игровых координатах (0–160) — тех же, что
+                    <p data-i18n="helpP3"><b>Координаты.</b> Y и X вводятся в игровых координатах (0–163.83) — тех же, что
                         показываются под курсором. Шаг изменения — 0.01 (стрелками в поле ввода).</p>
                     <p data-i18n="helpP4"><b>Результаты.</b> Дистанция, азимут от севера, угол ствола в mils. Если цель
                         вне досягаемости — соответствующее сообщение.</p>
@@ -642,9 +642,9 @@
             </summary>
             <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"
                 style="padding:0 1.2rem 1.2rem;color:#ccc;line-height:1.7;">
-                <p itemprop="text" data-i18n="faq2a">Максимальная дальность <strong>миномёта в WARDOGS</strong> составляет <strong>700
-                        метров</strong>. Для целей дальше 700 м используйте <strong>артиллерию</strong>, которая
-                    стреляет на расстояние <strong>более 2 км</strong>. В настройках калькулятора можно переключиться
+                <p itemprop="text" data-i18n="faq2a">Максимальная дальность <strong>миномёта в WARDOGS</strong> составляет <strong>684
+                        метра</strong>. Для целей дальше 684 м используйте <strong>артиллерию</strong>, которая
+                    стреляет на расстояние <strong>до 2679 м</strong>. В настройках калькулятора можно переключиться
                     между миномётом и артиллерией.</p>
             </div>
         </details>

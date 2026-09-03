@@ -16,7 +16,7 @@ on a 16×16 km map.
 
 - Interactive map with tile zoom and pan
 - Distance, azimuth, and elevation (mils) calculation
-- Mortar (700 m) and artillery (>2 km)
+- Mortar (684 m) and artillery (2679 m)
 - Two maps: Bakurani and Ozeti (16×16 km)
 - Drawing tools: pen, ruler, marker, eraser
 - Towers and zone on Bakurani map

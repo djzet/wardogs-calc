@@ -69,13 +69,14 @@ if (!MAPS[currentMapId]) currentMapId = CONFIG.defaultMap;
 let mapCfg = MAPS[currentMapId];
 
 /** Объекты-обёртки для передачи по ссылке в renderMap */
-let MAP = { size: mapCfg.size };
+let MAP = { size: mapCfg.size, coordScale: mapCfg.coordScale };
 let ZONE = mapCfg.zone;
 let TOWERS = mapCfg.towers;
 let TILES = mapCfg.tiles;
 
 /** Пространственный индекс вышек: предвычисление мировых координат */
 MapSpatial.configure(TOWERS, MAP.size);
+
 
 // ═══════════════════════════════════════════════════════════
 //  Canvas и DOM-элементы
@@ -227,12 +228,13 @@ function switchMap(mapId) {
 
     currentMapId = mapId;
     mapCfg = MAPS[mapId];
-    MAP = { size: mapCfg.size };
+    MAP = { size: mapCfg.size, coordScale: mapCfg.coordScale };
     ZONE = mapCfg.zone;
     TOWERS = mapCfg.towers;
     TILES = mapCfg.tiles;
 
     MapSpatial.configure(TOWERS, MAP.size);
+
 
     selectedTower = null;
     AppStorage.saveMap(mapId);
@@ -247,10 +249,10 @@ function switchMap(mapId) {
         AppDraw.configure(MAP.size, STR);
     }
 
-    MapViewport.setMapSize(MAP.size);
-    AppPoints.configure({ mapSize: MAP.size, onChange: onPointsChanged });
+    MapViewport.setMapSize(MAP.size, MAP.coordScale);
+    AppPoints.configure({ mapSize: MAP.size, coordScale: MAP.coordScale, onChange: onPointsChanged });
     MapViewport.resetView();
-    UIInputs.setMapSize(MAP.size);
+    UIInputs.setMapSize(MAP.size, MAP.coordScale);
     UIInputs.sync();
     UIResults.update();
     renderMap();
@@ -323,11 +325,11 @@ function applySharedParams() {
 // ═══════════════════════════════════════════════════════════
 
 /** Камера: привязка resize, начальная позиция */
-MapViewport.init({ canvas, renderMap, saveState, mapSize: MAP.size });
+MapViewport.init({ canvas, renderMap, saveState, mapSize: MAP.size, coordScale: MAP.coordScale });
 view = MapViewport.get();
 
 /** Точки A/B: размер карты + колбэк обновления */
-AppPoints.configure({ mapSize: MAP.size, onChange: onPointsChanged });
+AppPoints.configure({ mapSize: MAP.size, coordScale: MAP.coordScale, onChange: onPointsChanged });
 
 /** Панель результатов: привязка DOM-элементов и зависимостей */
 UIResults.init({ out, getWeapons: () => WEAPONS, getCurrentWeapon: () => AppWeapons.get(), STR });
@@ -343,7 +345,7 @@ UIPanels.init({
 });
 
 /** Поля ввода координат */
-UIInputs.init({ inputs, debounceMs: INPUT_DEBOUNCE_MS, mapSize: MAP.size });
+UIInputs.init({ inputs, debounceMs: INPUT_DEBOUNCE_MS, mapSize: MAP.size, coordScale: MAP.coordScale });
 
 /** Контекстное меню на карте */
 UIContextMenu.init({
@@ -449,7 +451,7 @@ window.addEventListener('pointermove', e => MapInteractions.handlePointerMove(e,
     renderMap, scheduleRender, debouncedSaveView: () => MapViewport.debouncedSave(),
     hitPoint: (sx, sy) => AppPoints.hitPoint(sx, sy, view), findTowerAt,
     setPoint: (k, x, y) => AppPoints.setPoint(k, x, y),
-    utils: window.AppUtils, TAP_THRESHOLD
+    utils: window.AppUtils, TAP_THRESHOLD, get coordScale() { return MAP.coordScale; }
 }));
 
 /** Pointer down на canvas → pan/draw/point/tower */

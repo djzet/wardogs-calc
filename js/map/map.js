@@ -118,42 +118,54 @@ window.MapTiles = (function () {
     function drawTiles(ctx, canvas, view, mapConfig, tilesConfig, themeColors, onTileLoaded) {
         const w = canvas.clientWidth, h = canvas.clientHeight;
         const utils = window.AppUtils;
+        const tt = mapConfig.tileTransform; /** Трансформация тайлов (null → покрывают всю карту) */
 
         /**
          * Вычисляем уровень зума:
-         * z = log2(scale × mapSize / tileSize)
-         * Ограничиваем в пределах [0, maxZoom]
+         * z = log2(scale × effectiveSize / tileSize)
+         * effectiveSize — extent покрытия тайлов (tileTransform.range или mapSize)
          */
+        const effectiveSize = tt ? tt.range : mapConfig.size;
         const z = Math.max(0, Math.min(tilesConfig.maxZoom,
-            Math.round(Math.log2((view.scale * mapConfig.size) / tilesConfig.size))));
+            Math.round(Math.log2((view.scale * effectiveSize) / tilesConfig.size))));
 
         const tps = 2 ** z; /** Количество тайлов по одной оси (2^z) */
 
-        /**
-         * Масштаб тайлового слоя:
-         * tileScale = (количество тайлов × размер тайла) / размер карты
-         */
-        const tileScale = (tps * tilesConfig.size) / mapConfig.size;
-
-        /** Размер тайла на экране в пикселях */
-        const drawSize = tilesConfig.size * (view.scale / tileScale);
+        /** Размер тайла на экране в пикселях: tileWorldSize × scale */
+        const drawSize = (effectiveSize / tps) * view.scale;
 
         /** Преобразуем видимую область в мировые координаты */
         const a = utils.screenToWorld(0, 0, view);      /** Верхний-левый угол экрана */
         const b = utils.screenToWorld(w, h, view);      /** Нижний-правый угол экрана */
 
         /** Вычисляем диапазон индексов тайлов, попадающих в экран */
-        const x0 = Math.max(0, Math.floor((a.x / mapConfig.size) * tps));
-        const x1 = Math.min(tps - 1, Math.floor((b.x / mapConfig.size) * tps));
-        const y0 = Math.max(0, Math.floor(((mapConfig.size - a.y) / mapConfig.size) * tps));
-        const y1 = Math.min(tps - 1, Math.floor(((mapConfig.size - b.y) / mapConfig.size) * tps));
+        let x0, x1, y0, y1;
+        if (tt) {
+            /** Трансформация: world → tile index через originX/Y и range */
+            x0 = Math.max(0, Math.floor(((a.x - tt.originX) / tt.range) * tps));
+            x1 = Math.min(tps - 1, Math.floor(((b.x - tt.originX) / tt.range) * tps));
+            y0 = Math.max(0, Math.floor(((tt.originY - a.y) / tt.range) * tps));
+            y1 = Math.min(tps - 1, Math.floor(((tt.originY - b.y) / tt.range) * tps));
+        } else {
+            /** Тайлы покрывают всю карту [0..mapSize] */
+            x0 = Math.max(0, Math.floor((a.x / mapConfig.size) * tps));
+            x1 = Math.min(tps - 1, Math.floor((b.x / mapConfig.size) * tps));
+            y0 = Math.max(0, Math.floor(((mapConfig.size - a.y) / mapConfig.size) * tps));
+            y1 = Math.min(tps - 1, Math.floor(((mapConfig.size - b.y) / mapConfig.size) * tps));
+        }
 
         /** Отрисовываем каждый видимый тайл */
         for (let ty = y0; ty <= y1; ty++) {
             for (let tx = x0; tx <= x1; tx++) {
                 /** Мировые координаты верхнего-левого угла тайла */
-                const wx0 = (tx / tps) * mapConfig.size;
-                const wy0 = mapConfig.size - (ty / tps) * mapConfig.size;
+                let wx0, wy0;
+                if (tt) {
+                    wx0 = tt.originX + (tx / tps) * tt.range;
+                    wy0 = tt.originY - (ty / tps) * tt.range;
+                } else {
+                    wx0 = (tx / tps) * mapConfig.size;
+                    wy0 = mapConfig.size - (ty / tps) * mapConfig.size;
+                }
                 const s = utils.worldToScreen(wx0, wy0, view);
 
                 const t = getTile(z, tx, ty, tilesConfig, onTileLoaded);
@@ -1190,7 +1202,7 @@ window.MapInteractions = (function () {
      * Cursor coords: обновляет tooltip координат под курсором.
      */
     function handlePointerMove(e, canvas, opts) {
-        const { view, renderMap, scheduleRender, debouncedSaveView, hitPoint, findTowerAt, setPoint, utils, TAP_THRESHOLD, mapSize } = opts;
+        const { view, renderMap, scheduleRender, debouncedSaveView, hitPoint, findTowerAt, setPoint, utils, TAP_THRESHOLD, mapSize, coordScale } = opts;
         const p = canvasPos(e, canvas);
         const tracked = pointers.has(e.pointerId);
 
@@ -1222,8 +1234,8 @@ window.MapInteractions = (function () {
         if (_cursorCoords) {
             const wpt = utils.screenToWorld(p.x, p.y, view);
             /** Обновляем textContent — не пересоздаём элементы */
-            _cxSpan.textContent = `x${utils.gameCoord(wpt.x)}`;
-            _cySpan.textContent = `y${utils.gameCoord(wpt.y)}`;
+            _cxSpan.textContent = `y${utils.gameCoord(wpt.y, coordScale)}`;
+            _cySpan.textContent = `x${utils.gameCoord(wpt.x, coordScale)}`;
 
             /** Позиционирование tooltip (rect из кеша — без reflow) */
             const wrap = getWrapRect(canvas);
@@ -1467,6 +1479,9 @@ window.MapViewport = (function () {
     /** Размер карты в метрах и таймер debounce */
     let mapSize = 16000, saveTimer = null;
 
+    /** Масштаб координат: метров на 1 игровую единицу */
+    let coordScale = 100;
+
     /** rAF id для debounce resize — предотвращает множественную перерисовку */
     let resizeRafId = 0;
 
@@ -1479,12 +1494,14 @@ window.MapViewport = (function () {
      *   renderMap — функция перерисовки карты
      *   saveState — функция сохранения состояния в localStorage
      *   mapSize — размер карты в метрах
+     *   coordScale — масштаб координат
      */
     function init(opts) {
         canvas = opts.canvas;
         renderMap = opts.renderMap;
         saveState = opts.saveState;
         mapSize = opts.mapSize;
+        coordScale = opts.coordScale || 100;
         window.addEventListener('resize', resize);
     }
 
@@ -1549,9 +1566,11 @@ window.MapViewport = (function () {
     /**
      * Обновляет размер карты (при смене карты).
      * @param {number} size — новый размер карты в метрах
+     * @param {number} [newCoordScale] — новый масштаб координат
      */
-    function setMapSize(size) {
+    function setMapSize(size, newCoordScale) {
         mapSize = size;
+        if (newCoordScale) coordScale = newCoordScale;
     }
 
     return { init, get, resize, resetView, debouncedSave, restore, setMapSize };

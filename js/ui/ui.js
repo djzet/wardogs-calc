@@ -154,7 +154,7 @@ window.UIPanels = (function (storage) {
 /**
  *
  * Управляет 4 числовыми полями ввода координат точек A и B.
- * Координаты отображаются в игровом формате (0–160, шаг 0.01).
+ * Координаты отображаются в игровом формате (0–163.83, шаг 0.01).
  *
  * Функции:
  * - sync: синхронизирует поля с текущими значениями точек
@@ -178,6 +178,9 @@ window.UIInputs = (function (points, utils) {
     /** Размер карты в метрах (для расчёта макс. игровой координаты) */
     let mapSize = 16000;
 
+    /** Масштаб координат: метров на 1 игровую единицу */
+    let coordScale = 100;
+
     /**
      * Инициализирует модуль полей ввода.
      * Устанавливает min/max/step для всех полей и привязывает обработчики.
@@ -186,14 +189,16 @@ window.UIInputs = (function (points, utils) {
      *   inputs — {ax, ay, bx, by} DOM-элементы
      *   debounceMs — задержка debounce
      *   mapSize — размер карты в метрах
+     *   coordScale — масштаб координат
      */
     function init(opts) {
         inputs = opts.inputs;
         debounceMs = opts.debounceMs || 80;
         mapSize = opts.mapSize;
+        coordScale = opts.coordScale || 100;
 
         /** Устанавливаем ограничения на числовые поля */
-        const maxGame = String(mapSize / 100); /** "160" для 16км карты */
+        const maxGame = String(mapSize / coordScale); /** "163.83" для Bakurani */
         Object.values(inputs).forEach(i => {
             i.min = '0';
             i.max = maxGame;
@@ -216,21 +221,21 @@ window.UIInputs = (function (points, utils) {
 
     /**
      * Синхронизирует значения полей ввода с текущими координатами точек.
-     * Конвертирует метры → игровые координаты (÷100, формат "XX.YY").
+     * Конвертирует метры → игровые координаты (÷ coordScale, формат "XX.YY").
      */
     function sync() {
         const A = points.getA(), B = points.getB();
 
         if (A) {
-            setField(inputs.ax, utils.gameCoord(A.x));
-            setField(inputs.ay, utils.gameCoord(A.y));
+            setField(inputs.ax, utils.gameCoord(A.x, coordScale));
+            setField(inputs.ay, utils.gameCoord(A.y, coordScale));
         } else {
             setField(inputs.ax, ''); setField(inputs.ay, '');
         }
 
         if (B) {
-            setField(inputs.bx, utils.gameCoord(B.x));
-            setField(inputs.by, utils.gameCoord(B.y));
+            setField(inputs.bx, utils.gameCoord(B.x, coordScale));
+            setField(inputs.by, utils.gameCoord(B.y, coordScale));
         } else {
             setField(inputs.bx, ''); setField(inputs.by, '');
         }
@@ -267,11 +272,13 @@ window.UIInputs = (function (points, utils) {
      * Пересчитывает max-значение для полей ввода.
      *
      * @param {number} size — новый размер карты в метрах
+     * @param {number} [newCoordScale] — новый масштаб координат
      */
-    function setMapSize(size) {
+    function setMapSize(size, newCoordScale) {
         mapSize = size;
+        if (newCoordScale) coordScale = newCoordScale;
         if (inputs) {
-            const maxGame = String(size / 100);
+            const maxGame = String(size / coordScale);
             Object.values(inputs).forEach(i => { i.max = maxGame; });
         }
     }

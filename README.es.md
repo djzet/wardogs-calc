@@ -16,7 +16,7 @@ en dos clics sobre un mapa de 16×16 km.
 
 - Mapa interactivo con zoom de mosaicos y pan
 - Cálculo de distancia, azimut y elevación (mils)
-- Mortero (700 m) y artillería (>2 km)
+- Mortero (684 m) y artillería (2679 m)
 - Dos mapas: Bakurani y Ozeti (16×16 km)
 - Herramientas de dibujo: lápiz, regla, marcador, borrador
 - Torres y zona en el mapa Bakurani

@@ -160,6 +160,9 @@ window.AppPoints = (function (utils) {
     /** Размер карты в метрах (для ограничения координат) */
     let mapSize = 16000;
 
+    /** Масштаб координат: метров на 1 игровую единицу (по умолчанию 100) */
+    let coordScale = 100;
+
     /** Колбэк, вызываемый при любом изменении точек */
     let onChange = null;
 
@@ -167,10 +170,11 @@ window.AppPoints = (function (utils) {
      * Инициализирует модуль: устанавливает размер карты и колбэк изменения.
      * Вызывается при загрузке и при смене карты.
      *
-     * @param {{mapSize: number, onChange?: Function}} opts — параметры конфигурации
+     * @param {{mapSize: number, coordScale?: number, onChange?: Function}} opts — параметры конфигурации
      */
     function configure(opts) {
         mapSize = opts.mapSize;
+        coordScale = opts.coordScale || 100;
         onChange = opts.onChange || null;
     }
 
@@ -216,21 +220,48 @@ window.AppPoints = (function (utils) {
 
     /**
      * Считывает координаты точки из полей ввода.
-     * Ввод — в игровых координатах (0–160), конвертирует в метры (* 100).
-     * Запятая заменяется на точку для совместимости с европейской раскладкой.
+     * Ввод — в игровых координатах (0–163.83), конвертирует в метры (* coordScale).
+     * Запятая и точка одинаково Accepted как разделитель дробной части.
+     * Если одно поле пусто, берёт значение из existingPoint (если задан).
      *
      * @param {HTMLInputElement} ix — поле X
      * @param {HTMLInputElement} iy — поле Y
+     * @param {{x: number, y: number}|null} existingPoint — текущая точка для fallback
      * @returns {{x: number, y: number}|null} точка в метрах или null при ошибке
      */
-    function readPoint(ix, iy) {
-        const gx = parseFloat(String(ix.value).replace(',', '.'));
-        const gy = parseFloat(String(iy.value).replace(',', '.'));
-        if (isNaN(gx) || isNaN(gy)) return null;
-        const maxGame = mapSize / 100; /** Макс. игровая координата (160) */
+    function readPoint(ix, iy, existingPoint) {
+        const rawX = String(ix.value).replace(',', '.');
+        const rawY = String(iy.value).replace(',', '.');
+        const hasX = rawX !== '';
+        const hasY = rawY !== '';
+
+        /** Оба поля пусты — удаляем точку */
+        if (!hasX && !hasY) return null;
+
+        const maxGame = mapSize / coordScale; /** Макс. игровая координата (163.83) */
+        let gx, gy;
+
+        if (hasX) {
+            gx = parseFloat(rawX);
+            if (isNaN(gx)) return null;
+        } else {
+            /** Поле X пусто — берём значение из существующей точки */
+            gx = existingPoint ? existingPoint.x / coordScale : NaN;
+            if (isNaN(gx)) return null;
+        }
+
+        if (hasY) {
+            gy = parseFloat(rawY);
+            if (isNaN(gy)) return null;
+        } else {
+            /** Поле Y пусто — берём значение из существующей точки */
+            gy = existingPoint ? existingPoint.y / coordScale : NaN;
+            if (isNaN(gy)) return null;
+        }
+
         return {
-            x: utils.clamp(gx, 0, maxGame) * 100,
-            y: utils.clamp(gy, 0, maxGame) * 100
+            x: utils.clamp(gx, 0, maxGame) * coordScale,
+            y: utils.clamp(gy, 0, maxGame) * coordScale
         };
     }
 
@@ -243,9 +274,22 @@ window.AppPoints = (function (utils) {
      * @param {HTMLInputElement} bx — поле X точки B
      * @param {HTMLInputElement} by — поле Y точки B
      */
+    /** Сравнивает две точки (учитывает null) */
+    function pointEq(a, b) {
+        if (a === b) return true;
+        if (!a || !b) return false;
+        return a.x === b.x && a.y === b.y;
+    }
+
     function applyFromInputs(ax, ay, bx, by) {
-        pointA = readPoint(ax, ay);
-        pointB = readPoint(bx, by);
+        const newA = readPoint(ax, ay, pointA);
+        const newB = readPoint(bx, by, pointB);
+
+        /** Ничего не изменилось — не вызываем emit, чтобы не сбрасывать поля */
+        if (pointEq(pointA, newA) && pointEq(pointB, newB)) return;
+
+        pointA = newA;
+        pointB = newB;
         emit();
     }
 

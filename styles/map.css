@@ -121,10 +121,19 @@ body.light .map-controls {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 32px;
-    min-width: 32px;
+    width: 36px;
+    min-width: 36px;
+    height: 36px;
     padding: 6px 0;
     transition: background var(--transition-fast, 0.15s), transform 0.15s ease;
+}
+
+/* Иконки внутри кнопок темы/справки — фиксированный размер */
+.theme-toggle svg,
+.help-toggle svg {
+    width: 18px;
+    height: 18px;
+    flex-shrink: 0;
 }
 
 .share-btn {
@@ -132,6 +141,8 @@ body.light .map-controls {
     align-items: center;
     justify-content: center;
     gap: 4px;
+    min-width: 36px;
+    min-height: 36px;
 }
 
 .theme-toggle:active,

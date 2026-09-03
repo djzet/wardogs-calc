@@ -16,7 +16,7 @@ w dwa kliknięcia na mapie 16×16 km.
 
 - Interaktywna mapa z zoomem kafelkowym i panowaniem
 - Obliczanie dystansu, azymutu i elewacji (mils)
-- Moździerz (700 m) i artyleria (>2 km)
+- Moździerz (684 m) i artyleria (2679 m)
 - Dwie mapy: Bakurani i Ozeti (16×16 km)
 - Narzędzia rysowania: ołówek, linijka, marker, gumka
 - Wieże i strefa na mapie Bakurani

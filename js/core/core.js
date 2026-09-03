@@ -140,17 +140,18 @@ window.AppUtils = (function () {
     }
 
     /**
-     * Конвертирует метры в игровые координаты (деление на 100).
+     * Конвертирует метры в игровые координаты (деление на coordScale).
      * Формат: "XX.YY" — 2 знака после запятой.
      * Используется для отображения в полях ввода и tooltip.
      *
      * @param {number} meters — координата в метрах
-     * @returns {string} строка с координатой, например "82.40"
+     * @param {number} [coordScale] — масштаб (метров на 1 игровую единицу), по умолчанию 100
+     * @returns {string} строка с координатой, например "82.23"
      */
-    function gameCoord(meters) {
+    function gameCoord(meters, coordScale) {
         /** Обработка negative zero: (-0).toFixed(2) → "0.00", но на некоторых платформах может быть "-0.00" */
         const v = Object.is(meters, -0) ? 0 : meters;
-        return (v / 100).toFixed(2);
+        return (v / (coordScale || 100)).toFixed(2);
     }
 
     /**
