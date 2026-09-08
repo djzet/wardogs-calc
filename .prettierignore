@@ -1,0 +1,11 @@
+node_modules
+dist
+maps
+public
+assets
+*.png
+*.webp
+*.jpg
+*.svg
+*.woff
+*.woff2

@@ -1,0 +1,44 @@
+{
+  "name": "wardogs-calc",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Unofficial interactive mortar & artillery calculator for the tactical shooter WARDOGS",
+  "author": "Egor Silaev <egor.silaev2003@yandex.ru>",
+  "license": "MIT",
+  "homepage": "https://djzet.github.io/wardogs-calc/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/djzet/wardogs-calc.git"
+  },
+  "bugs": {
+    "url": "https://github.com/djzet/wardogs-calc/issues"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "lint": "eslint js/ src/",
+    "lint:fix": "eslint js/ src/ --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "optimize-tiles": "node js/optimize-tiles.js",
+    "convert-mbtiles": "node js/convert-to-mbtiles.js",
+    "migrate-maps": "npm run optimize-tiles && npm run convert-mbtiles"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "@types/sharp": "^0.31.1",
+    "eslint": "^9.0.0",
+    "eslint-config-prettier": "^10.0.0",
+    "prettier": "^3.0.0",
+    "vite": "^6.0.0"
+  },
+  "dependencies": {
+    "better-sqlite3": "^13.0.3",
+    "pmtiles": "^4.5.0",
+    "sharp": "^0.35.4"
+  }
+}
