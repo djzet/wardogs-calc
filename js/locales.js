@@ -112,8 +112,8 @@ window.LocaleManager = (function () {
             return translations;
         }
         try {
-            const base = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.BASE_URL) || './';
-            const response = await fetch(`${base}locales/${locale}.json`);
+            // ИСПРАВЛЕНО: убран import.meta, указан прямой относительный путь к папке с локализациями
+            const response = await fetch(`js/locales/${locale}.json`);
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             translations = await response.json();
             currentLocale = locale;
@@ -191,7 +191,7 @@ window.LocaleManager = (function () {
             });
         }
     }
-    
+
     function setOnLocaleChange(fn) { onLocaleChange = fn; }
     return {
         init,
@@ -201,6 +201,7 @@ window.LocaleManager = (function () {
         setOnLocaleChange
     };
 })();
+
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', () => {
         window.LocaleManager.init();

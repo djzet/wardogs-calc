@@ -213,6 +213,7 @@ document.querySelectorAll('.draw-tool').forEach(btn => {
         window.AppDraw.setTool(tool);
         canvas.style.cursor = tool === 'pan' ? 'grab' : (tool === 'eraser' ? 'cell' : 'crosshair');
         const statusEl = el('toolStatus');
+        // ИСПРАВЛЕНИЕ: toolNamestool заменено на корректный вызов функции toolNames[tool]()
         if (statusEl && toolNames[tool]) statusEl.textContent = toolNames[tool]();
     });
 });

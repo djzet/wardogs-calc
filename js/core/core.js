@@ -66,7 +66,7 @@ window.AppUtils = (function () {
         return (v / (coordScale || 100)).toFixed(2);
     }
     function assetUrl(path) {
-        const base = (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.BASE_URL) || './';
+        const base = './';
         const rel = String(path).replace(/^\//, '');
         return base.endsWith('/') ? base + rel : base + '/' + rel;
     }
@@ -100,6 +100,7 @@ window.AppUtils = (function () {
         isValidBounds
     };
 })();
+
 window.AppCalculator = (function () {
     function distToMils(distMeters, table) {
         if (!table || table.length === 0) return null;
