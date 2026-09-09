@@ -25,7 +25,12 @@ window.CONFIG_APP = {
                 extension: 'webp',
                 cacheMax: 500,
                 usePMTiles: true,
-                path: (z, x, y) => `maps/bakurani/tiles/zoom_${z}/${x}_${y}.webp`,
+                path: (z, x, y) => {
+                    const baseUrl = ['localhost', '127.0.0.1'].includes(location.hostname)
+                        ? 'maps'
+                        : 'https://example.com/tiles';
+                    return `${baseUrl}/bakurani/tiles/zoom_${z}/${x}_${y}.webp`;
+                },
             },
         },
         ozeti: {
@@ -47,7 +52,12 @@ window.CONFIG_APP = {
                 extension: 'webp',
                 cacheMax: 500,
                 usePMTiles: true,
-                path: (z, x, y) => `maps/ozeti/tiles/zoom_${z}/${x}_${y}.webp`,
+                path: (z, x, y) => {
+                    const baseUrl = ['localhost', '127.0.0.1'].includes(location.hostname)
+                        ? 'maps'
+                        : 'https://example.com/tiles';
+                    return `${baseUrl}/ozeti/tiles/zoom_${z}/${x}_${y}.webp`;
+                },
             },
         },
     },

@@ -1,11 +1,11 @@
 import { defineConfig } from 'vite';
-import { createReadStream, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync } from 'node:fs';
+import { cpSync, existsSync, mkdirSync, readFileSync, readdirSync, rmSync, statSync, createReadStream } from 'node:fs';
 import { cp } from 'node:fs/promises';
 import { join, dirname, extname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const root = dirname(fileURLToPath(import.meta.url));
-const mapsSrc = join(root, 'maps');
+const mapsSrc = 'E:\\wardogs-maps\\maps';
 
 const MIME = {
   '.webp': 'image/webp',
@@ -22,6 +22,13 @@ function mapsPlugin() {
 
     configureServer(server) {
       server.middlewares.use('/maps', (req, res, next) => {
+        if (!existsSync(mapsSrc)) {
+          console.log('[mapsPlugin] maps/ not found locally, proxying to remote');
+          res.statusCode = 302;
+          const remoteUrl = `https://djzet.github.io/wardogs-maps${req.url}`;
+          res.setHeader('Location', remoteUrl);
+          return res.end();
+        }
         try {
           const rel = decodeURIComponent((req.url || '/').split('?')[0]).replace(/^\/+/, '');
           const filePath = join(mapsSrc, rel);
@@ -48,11 +55,14 @@ function mapsPlugin() {
     },
 
     async closeBundle() {
+      if (!existsSync(mapsSrc)) {
+        console.log('[wardogs-maps] maps/ not found — using remote tiles, skipping copy');
+        return;
+      }
       const distMaps = join(root, 'dist', 'maps');
       mkdirSync(join(root, 'dist'), { recursive: true });
-      console.log('[wardogs-maps] copying maps/ → dist/maps …');
-      await cp(mapsSrc, distMaps, { recursive: true });
-      console.log('[wardogs-maps] done');
+      cpSync(mapsSrc, distMaps, { recursive: true });
+      console.log('[wardogs-maps] copied maps/ → dist/maps/');
     },
   };
 }
@@ -122,7 +132,7 @@ export default defineConfig({
   server: {
     port: 5173,
     watch: {
-      ignored: ['**/maps/**/*', '**/maps/**']
+      ignored: ['**/maps*', '**/maps/**']
     }
   },
 

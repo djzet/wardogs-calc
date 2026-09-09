@@ -153,7 +153,7 @@ window.MapRenderer = (function (utils, tiles) {
         return Math.max(16, Math.min(30, 22 * scale * 80));
     }
 
-    function getViewBox(view, w, h, bounds) {
+    function _getViewBox(view, w, h, bounds) {
         const a = utils.screenToWorld(0, 0, view);
         const b = utils.screenToWorld(w, h, view);
         return {
@@ -164,12 +164,8 @@ window.MapRenderer = (function (utils, tiles) {
         };
     }
 
-    function getGridSteps(scale, coordScale) {
-        const mpu = coordScale || 100;
-        if (mpu === 100) {
-            return { major: 10, minor: 1 };
-        }
-        return { major: 1, minor: 0.1 };
+    function getGridSteps(_scale, _coordScale) {
+        return { major: 100, minor: 20 };
     }
 
     function drawPoint(ctx, view, p, color, label) {
@@ -385,11 +381,11 @@ window.MapRenderer = (function (utils, tiles) {
         if (current) drawSingleStroke(ctx, view, worldSize, current, true, STR, coordScale);
     }
 
-    function drawMinorGrid(ctx, view, c, w, h, bounds, coordScale) {
+    function _drawMinorGrid(ctx, view, c, w, h, bounds, coordScale) {
         const steps = getGridSteps(view.scale, coordScale);
         const minor = steps.minor;
         if (minor * view.scale < 4) return;
-        const vb = getViewBox(view, w, h, bounds);
+        const vb = { left: bounds.minX, right: bounds.maxX, top: bounds.minY, bottom: bounds.maxY };
         const m0 = utils.worldToScreen(bounds.minX, bounds.minY, view);
         const m1 = utils.worldToScreen(bounds.maxX, bounds.maxY, view);
         const mapL = Math.min(m0.x, m1.x), mapR = Math.max(m0.x, m1.x);
@@ -407,22 +403,22 @@ window.MapRenderer = (function (utils, tiles) {
         ctx.beginPath();
         for (let x = startX; x <= endX; x += minor) {
             const sx = utils.worldToScreen(x, 0, view).x;
-            ctx.moveTo(Math.round(sx) + .5, 0);
-            ctx.lineTo(Math.round(sx) + .5, h);
+            ctx.moveTo(Math.round(sx) + .5, mapT);
+            ctx.lineTo(Math.round(sx) + .5, mapB);
         }
         for (let y = startY; y <= endY; y += minor) {
             const sy = utils.worldToScreen(0, y, view).y;
-            ctx.moveTo(0, Math.round(sy) + .5);
-            ctx.lineTo(w, Math.round(sy) + .5);
+            ctx.moveTo(mapL, Math.round(sy) + .5);
+            ctx.lineTo(mapR, Math.round(sy) + .5);
         }
         ctx.stroke();
         ctx.restore();
     }
 
-    function drawGrid(ctx, view, c, w, h, bounds, coordScale, _STR) {
+    function _drawGrid(ctx, view, c, w, h, bounds, coordScale, _STR) {
         const steps = getGridSteps(view.scale, coordScale);
         const step = steps.major;
-        const vb = getViewBox(view, w, h, bounds);
+        const vb = { left: bounds.minX, right: bounds.maxX, top: bounds.minY, bottom: bounds.maxY };
         const m0 = utils.worldToScreen(bounds.minX, bounds.minY, view);
         const m1 = utils.worldToScreen(bounds.maxX, bounds.maxY, view);
         const mapL = Math.min(m0.x, m1.x), mapR = Math.max(m0.x, m1.x);
@@ -440,13 +436,13 @@ window.MapRenderer = (function (utils, tiles) {
         ctx.beginPath();
         for (let x = startX; x <= endX; x += step) {
             const sx = utils.worldToScreen(x, 0, view).x;
-            ctx.moveTo(Math.round(sx) + .5, 0);
-            ctx.lineTo(Math.round(sx) + .5, h);
+            ctx.moveTo(Math.round(sx) + .5, mapT);
+            ctx.lineTo(Math.round(sx) + .5, mapB);
         }
         for (let y = startY; y <= endY; y += step) {
             const sy = utils.worldToScreen(0, y, view).y;
-            ctx.moveTo(0, Math.round(sy) + .5);
-            ctx.lineTo(w, Math.round(sy) + .5);
+            ctx.moveTo(mapL, Math.round(sy) + .5);
+            ctx.lineTo(mapR, Math.round(sy) + .5);
         }
         ctx.stroke();
         ctx.restore();
@@ -546,8 +542,8 @@ window.MapRenderer = (function (utils, tiles) {
         if (ovStale) {
             const sctx = _staticCtx;
             sctx.clearRect(0, 0, w, h);
-            drawMinorGrid(sctx, view, c, w, h, bounds, coordScale);
-            drawGrid(sctx, view, c, w, h, bounds, coordScale, STR);
+
+
             sctx.strokeStyle = c.axes;
             sctx.beginPath();
             const zero = utils.worldToScreen(0, 0, view);
