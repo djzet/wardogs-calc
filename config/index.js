@@ -28,7 +28,7 @@ window.CONFIG_APP = {
                         return `maps/bakurani/tiles/zoom_${z}/${x}_${y}.webp`;
                     }
                     // Для GitHub Pages: прямой абсолютный URL на ваш репозиторий с картами
-                    return `https://djzet.github.io/wardogs-maps/bakurani/tiles/zoom_${z}/${x}_${y}.webp`;
+                    return `https://djzet.github.io/wardogs-maps/maps/bakurani/tiles/zoom_${z}/${x}_${y}.webp`;
                 },
             },
         },
@@ -52,7 +52,7 @@ window.CONFIG_APP = {
                     if (isLocal) {
                         return `maps/ozeti/tiles/zoom_${z}/${x}_${y}.webp`;
                     }
-                    return `https://djzet.github.io/wardogs-maps/ozeti/tiles/zoom_${z}/${x}_${y}.webp`;
+                    return `https://djzet.github.io/wardogs-maps/maps/ozeti/tiles/zoom_${z}/${x}_${y}.webp`;
                 },
             },
         },
