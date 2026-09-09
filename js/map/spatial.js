@@ -83,3 +83,4 @@ window.MapSpatial = (function () {
     }
     return { configure, rebuild, findTowerAt, getTowerScreenPos };
 })();
+

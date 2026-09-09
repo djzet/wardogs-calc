@@ -988,3 +988,4 @@ window.MapViewport = (function () {
 
     return { init, get, resize, resetView, debouncedSave, restore, setMap };
 })();
+

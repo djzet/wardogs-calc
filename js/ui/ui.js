@@ -268,3 +268,4 @@ window.UIResults = (function (calc, points, utils) {
     }
     return { init, update, setCoordScale };
 })(window.AppCalculator, window.AppPoints, window.AppUtils);
+

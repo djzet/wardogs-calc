@@ -112,7 +112,7 @@ window.LocaleManager = (function () {
             return translations;
         }
         try {
-            // ИСПРАВЛЕНО: убран import.meta, указан прямой относительный путь к папке с локализациями
+
             const response = await fetch(`js/locales/${locale}.json`);
             if (!response.ok) throw new Error(`HTTP ${response.status}`);
             translations = await response.json();

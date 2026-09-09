@@ -30,3 +30,4 @@ const init = () => {
     });
 };
 window.AppAnalytics = { init };
+

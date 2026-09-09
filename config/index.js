@@ -3,8 +3,8 @@ window.CONFIG_APP = {
         bakurani: {
             id: 'bakurani',
             coordScale: 100,
-            bounds: { minX: 23.35, maxX: 133.6, minY: 19.34, maxY: 129.65 },
-            tileBounds: { minX: -0.03, maxX: 163.81, minY: -0.01, maxY: 163.83 },
+            bounds: { minX: 0, maxX: 163.81, minY: 0, maxY: 163.83 },
+            tileBounds: { minX: 0, maxX: 163.81, minY: 0, maxY: 163.83 },
             zone: { cx: 82.40, cy: 73.30, r: 0 },
             towers: [
                 { x: 80.50, y: 69.86, name: 'tower1' },
@@ -20,14 +20,14 @@ window.CONFIG_APP = {
                 tileSize: 256,
                 extension: 'webp',
                 cacheMax: 500,
-                usePMTiles: false, // Изменено на false, так как мы используем обычные webp файлы
+                usePMTiles: false,
                 path: (z, x, y) => {
                     const isLocal = ['localhost', '127.0.0.1'].includes(location.hostname) || location.protocol === 'file:';
                     if (isLocal) {
-                        // Для локальной разработки (папка maps должна лежать рядом с index.html)
+
                         return `maps/bakurani/tiles/zoom_${z}/${x}_${y}.webp`;
                     }
-                    // Для GitHub Pages: прямой абсолютный URL на ваш репозиторий с картами
+
                     return `https://djzet.github.io/wardogs-maps/maps/bakurani/tiles/zoom_${z}/${x}_${y}.webp`;
                 },
             },
@@ -35,8 +35,8 @@ window.CONFIG_APP = {
         ozeti: {
             id: 'ozeti',
             coordScale: 100,
-            bounds: { minX: 57.58, maxX: 143.07, minY: 21.81, maxY: 99.56 },
-            tileBounds: { minX: -0.03, maxX: 163.81, minY: -0.01, maxY: 163.83 },
+            bounds: { minX: 0, maxX: 163.81, minY: 0, maxY: 163.83 },
+            tileBounds: { minX: 0, maxX: 163.81, minY: 0, maxY: 163.83 },
             zone: { cx: 80.00, cy: 80.00, r: 0 },
             towers: [],
             tiles: {

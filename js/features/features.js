@@ -198,3 +198,4 @@ window.AppDraw = (function (utils) {
     eraseAt, clearDrawings, showMarkerModal, hideMarkerModal
   };
 })(window.AppUtils);
+
