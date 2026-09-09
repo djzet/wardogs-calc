@@ -1,0 +1,185 @@
+.drawer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    height: 100dvh;
+    width: var(--drawer-width);
+    background: var(--panel);
+    border-right: 1px solid var(--border);
+    box-shadow: 8px 0 24px rgba(0, 0, 0, .25);
+    z-index: 30;
+    transform: translateX(-100%);
+    will-change: transform;
+    transition: transform var(--transition-normal, 0.25s) ease;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+}
+.drawer.open {
+    transform: translateX(0);
+}
+@media (max-width: 800px) {
+    .drawer.open {
+        transform: translateY(0);
+    }
+}
+.drawer-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+.drawer-header h2 {
+    margin-bottom: 0;
+}
+.drawer-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .35);
+    z-index: 25;
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+}
+.switch-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    cursor: pointer;
+    font-size: 14px;
+    color: var(--text);
+}
+.switch-row input {
+    display: none;
+}
+.switch {
+    width: 42px;
+    height: 22px;
+    min-width: 42px;
+    flex-shrink: 0;
+    background: var(--border);
+    border-radius: 11px;
+    position: relative;
+    transition: var(--transition-fast, 0.2s);
+}
+.switch::after {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: var(--text);
+    transition: .2s;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+}
+.switch-row input:checked+.switch {
+    background: var(--accent);
+}
+.switch-row input:checked+.switch::after {
+    left: 22px;
+    background: #fff;
+}
+.modal-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, .5);
+    z-index: 40;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    backdrop-filter: blur(3px);
+    -webkit-backdrop-filter: blur(3px);
+}
+.modal-backdrop.hidden {
+    display: none !important;
+}
+.modal {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 16px 48px rgba(0, 0, 0, .4);
+    width: 100%;
+    max-width: 560px;
+    max-height: 80vh;
+    max-height: 80dvh;
+    display: flex;
+    flex-direction: column;
+    margin: auto;
+}
+.modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+    padding: 14px 16px;
+    border-bottom: 1px solid var(--border);
+}
+.modal-header h2 {
+    margin-bottom: 0;
+}
+.modal-body {
+    padding: 16px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    font-size: 13px;
+    color: var(--dim);
+    line-height: 1.6;
+}
+.modal-body b {
+    color: var(--muted);
+}
+.modal-sm {
+    max-width: 340px;
+}
+.modal-input {
+    width: 100%;
+    background: var(--field);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 10px 12px;
+    border-radius: var(--radius-sm);
+    font-size: 15px;
+    box-sizing: border-box;
+    outline: none;
+    transition: border-color .15s;
+}
+.modal-input:focus {
+    border-color: var(--accent);
+}
+.modal-actions {
+    display: flex;
+    gap: 8px;
+    justify-content: flex-end;
+    margin-top: 4px;
+}
+.modal-btn {
+    background: var(--field);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 18px;
+    border-radius: var(--radius-sm);
+    font-size: 14px;
+    cursor: pointer;
+    transition: background .15s, border-color .15s;
+}
+.modal-btn:hover {
+    background: var(--hover);
+    border-color: var(--muted);
+}
+.modal-btn-accent {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: #fff;
+}
+.modal-btn-accent:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+}

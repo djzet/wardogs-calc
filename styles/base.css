@@ -1,0 +1,159 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+html {
+    height: 100%;
+    overscroll-behavior: none;
+}
+body {
+    overscroll-behavior: none;
+}
+body {
+    font-family: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+    font-size: var(--font-body, 15px);
+    line-height: 1.5;
+    background: var(--bg);
+    color: var(--text);
+    -webkit-tap-highlight-color: transparent;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+}
+.app {
+    display: flex;
+    height: 100vh;
+    height: 100dvh;
+}
+h1 {
+    font-size: var(--font-h1, 18px);
+    font-weight: 600;
+    color: var(--accent);
+    line-height: 1.3;
+}
+h2 {
+    font-size: var(--font-h2, 12px);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: .06em;
+    color: var(--muted);
+    margin-bottom: 8px;
+    font-feature-settings: "tnum";
+}
+body.modal-open {
+    overflow: hidden;
+}
+.hidden {
+    display: none !important;
+}
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+button:focus:not(:focus-visible),
+input:focus:not(:focus-visible),
+select:focus:not(:focus-visible) {
+    outline: none;
+}
+svg {
+    vertical-align: middle;
+}
+.draw-tool svg {
+    width: 16px;
+    height: 16px;
+}
+.view-reset svg {
+    margin-right: 4px;
+}
+@media (pointer: coarse) {
+    .clear {
+        min-width: var(--touch-min, 44px);
+        min-height: var(--touch-min, 44px);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .draw-tool {
+        min-height: var(--touch-min, 44px);
+        min-width: var(--touch-min, 44px);
+    }
+    .width-opt {
+        min-height: 40px;
+    }
+    .menu-toggle {
+        min-width: var(--touch-min, 44px);
+        min-height: var(--touch-min, 44px);
+    }
+    .theme-toggle,
+    .help-toggle {
+        min-width: var(--touch-min, 44px);
+        min-height: var(--touch-min, 44px);
+    }
+    .radio-option {
+        min-height: var(--touch-min, 44px);
+        padding: 4px 0;
+    }
+    .radio-option input[type="radio"] {
+        width: 20px;
+        height: 20px;
+    }
+}
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+}
+::-webkit-scrollbar-track {
+    background: transparent;
+}
+::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+    background: var(--dim);
+}
+* {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+}
+body.light .panel {
+    box-shadow: 2px 0 16px rgba(0, 0, 0, 0.06);
+}
+body.light .result {
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+body.light .controls-section {
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.03);
+}
+body.light .section-point-a {
+    border-left-color: var(--point-a);
+    background: var(--point-a-bg);
+}
+body.light .section-point-b {
+    border-left-color: var(--point-b);
+    background: var(--point-b-bg);
+}
+@media print {
+    .map-controls,
+    .drawer,
+    .drawer-backdrop,
+    .modal-backdrop,
+    .menu-toggle,
+    .translate-widget {
+        display: none !important;
+    }
+}

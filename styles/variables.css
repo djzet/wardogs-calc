@@ -1,0 +1,110 @@
+:root {
+    color-scheme: dark;
+    --bg: #12151a;
+    --panel: #1a1f27;
+    --field: #0f1319;
+    --border: #2c3440;
+    --text: #e6e6e6;
+    --muted: #8a94a3;
+    --dim: #5c6875;
+    --accent: #9fd356;
+    --accent-hover: #b8e877;
+    --danger: #e05656;
+    --danger-hover: #ff6b6b;
+    --warn: #e8c35a;
+    --menu: #1e242e;
+    --menu-border: #39424f;
+    --hover: #2c3440;
+    --btn-bg: rgba(30, 36, 46, .85);
+    --btn-text: #cfd6df;
+    --discord: #5865F2;
+    --discord-hover: #4752C4;
+    --radius-sm: 6px;
+    --radius-md: 8px;
+    --radius-lg: 10px;
+    --panel-width: 400px;
+    --drawer-width: 260px;
+    --font-h1: clamp(16px, 2vw, 20px);
+    --font-h2: clamp(11px, 1.2vw, 13px);
+    --font-body: clamp(13px, 1.4vw, 15px);
+    --font-small: clamp(11px, 1.1vw, 12px);
+    --font-result: clamp(13px, 1.5vw, 16px);
+    --gap-panel: clamp(12px, 1.5vw, 20px);
+    --pad-panel: clamp(14px, 2vw, 24px);
+    --pad-section: clamp(10px, 1.2vw, 14px);
+    --touch-min: 44px;
+    --point-a: #9fd356;
+    --point-a-bg: rgba(159, 211, 86, 0.06);
+    --point-a-border: rgba(159, 211, 86, 0.25);
+    --point-b: #e8c35a;
+    --point-b-bg: rgba(232, 195, 90, 0.06);
+    --point-b-border: rgba(232, 195, 90, 0.25);
+    --canvas-bg: #10151b;
+    --canvas-map-bg: #161d25;
+    --canvas-grid-minor: rgba(255, 255, 255, 0.10);
+    --canvas-grid-major: rgba(255, 255, 255, 0.28);
+    --canvas-axes: rgba(255, 255, 255, 0.35);
+    --canvas-dim: rgba(6, 8, 12, 0.55);
+    --canvas-border: #46536b;
+    --canvas-labels: #5c6875;
+    --canvas-line: #e8c35a;
+    --transition-fast: 0.15s ease;
+    --transition-normal: 0.25s ease;
+}
+body.light {
+    color-scheme: light;
+    --bg: #eef1f5;
+    --panel: #ffffff;
+    --field: #f6f8fa;
+    --border: #d7dde5;
+    --text: #1d2530;
+    --muted: #5c6875;
+    --dim: #6b7684;
+    --accent: #4e8f1d;
+    --accent-hover: #3f7517;
+    --danger: #c23b3b;
+    --danger-hover: #e04444;
+    --menu: #ffffff;
+    --menu-border: #c9d1db;
+    --hover: #e8edf3;
+    --btn-bg: rgba(255, 255, 255, .92);
+    --btn-text: #333c47;
+    --discord: #5865F2;
+    --discord-hover: #4752C4;
+    --warn: #8a6d00;
+    --canvas-bg: #dfe5ec;
+    --canvas-map-bg: #f2f5f8;
+    --canvas-grid-minor: rgba(15, 25, 40, 0.12);
+    --canvas-grid-major: rgba(15, 25, 40, 0.30);
+    --canvas-axes: rgba(15, 25, 40, 0.40);
+    --canvas-dim: rgba(255, 255, 255, 0.6);
+    --canvas-border: #7d8896;
+    --canvas-labels: #5c6875;
+    --canvas-line: #8a6d00;
+    --point-a: #3d8c0f;
+    --point-a-bg: rgba(61, 140, 15, 0.06);
+    --point-a-border: rgba(61, 140, 15, 0.2);
+    --point-b: #7a5c00;
+    --point-b-bg: rgba(122, 92, 0, 0.06);
+    --point-b-border: rgba(122, 92, 0, 0.2);
+}
+@media (prefers-color-scheme: light) {
+    :root:not([data-theme-manual]) {
+        color-scheme: light;
+    }
+}
+@media (max-width: 1024px) {
+    :root {
+        --panel-width: 340px;
+    }
+}
+@media (min-width: 1600px) {
+    :root {
+        --panel-width: 440px;
+    }
+}
+@media (min-width: 2000px) {
+    :root {
+        --panel-width: 480px;
+    }
+}

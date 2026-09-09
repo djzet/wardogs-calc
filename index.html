@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="ru">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="yandex-verification" content="60d42cc4a5829208" />
+    <meta name="google-site-verification" content="eLUkt4ZGLPy8nqABEciogXldGDTLMdS-mFYlpXLf2eY" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
+    <link rel="preconnect" href="https://mc.yandex.ru">
+    <meta name="theme-color" content="#1a1f27" media="(prefers-color-scheme: dark)">
+    <meta name="theme-color" content="#1a1f27" media="(prefers-color-scheme: light)">
+
+    <title>WARDOGS — миномётный и артиллерийский калькулятор</title>
+    <meta name="title" content="WARDOGS — миномётный и артиллерийский калькулятор">
+    <meta name="description"
+        content="Онлайн-калькулятор для WARDOGS: дистанция, азимут, угол возвышения (mils) миномёта и артиллерии. Интерактивная карта 16×16 км, 9 языков.">
+    <meta name="keywords"
+        content="wardogs, wardogs калькулятор, миномет wardogs, артиллерия wardogs, wardogs map, wardogs азимут, wardogs mortar calculator, wardogs artillery, wardogs карта, wardogs calculator, wardogs mils, wardogs tools">
+    <meta name="author" content="Egor Silaev">
+    <link rel="canonical" href="https://djzet.github.io/wardogs-calc/">
+    <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large, max-video-preview:-1">
+
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="WARDOGS Mortar Calculator — интерактивная карта с миномётным расчётом">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://djzet.github.io/wardogs-calc/">
+    <meta property="og:title" content="WARDOGS — миномётный и артиллерийский калькулятор">
+    <meta property="og:description"
+        content="Точный расчет дистанции, азимута, угла возвышения. Интерактивная карта 16x16 км.">
+    <meta property="og:image" content="https://djzet.github.io/wardogs-calc/assets/preview.png">
+    <meta property="og:locale" content="ru_RU">
+    <meta property="og:site_name" content="WARDOGS Calculator">
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://djzet.github.io/wardogs-calc/">
+    <meta property="twitter:title" content="WARDOGS — миномётный и артиллерийский калькулятор">
+    <meta property="twitter:description" content="Точный расчет дистанции, азимута, угла возвышения.">
+    <meta property="twitter:image" content="https://djzet.github.io/wardogs-calc/assets/preview.png">
+    <meta property="twitter:image:alt"
+        content="WARDOGS Mortar Calculator — интерактивная карта с расчётом миномётного и артиллерийского огня">
+    <link rel="alternate" hreflang="ru" href="https://djzet.github.io/wardogs-calc/">
+    <link rel="alternate" hreflang="en" href="https://djzet.github.io/wardogs-calc/?lang=en">
+    <link rel="alternate" hreflang="de" href="https://djzet.github.io/wardogs-calc/?lang=de">
+    <link rel="alternate" hreflang="fr" href="https://djzet.github.io/wardogs-calc/?lang=fr">
+    <link rel="alternate" hreflang="es" href="https://djzet.github.io/wardogs-calc/?lang=es">
+    <link rel="alternate" hreflang="pl" href="https://djzet.github.io/wardogs-calc/?lang=pl">
+    <link rel="alternate" hreflang="uk" href="https://djzet.github.io/wardogs-calc/?lang=uk">
+    <link rel="alternate" hreflang="tr" href="https://djzet.github.io/wardogs-calc/?lang=tr">
+    <link rel="alternate" hreflang="zh" href="https://djzet.github.io/wardogs-calc/?lang=zh">
+    <link rel="alternate" hreflang="x-default" href="https://djzet.github.io/wardogs-calc/">
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'
+        viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%231a1f27'/>
+        <circle cx='32' cy='32' r='22' fill='none' stroke='%239fd356' stroke-width='3'/>
+        <circle cx='32' cy='32' r='3' fill='%239fd356'/><line x1='32' y1='4' x2='32' y2='18'
+        stroke='%239fd356' stroke-width='3' stroke-linecap='round'/><line x1='32' y1='46' x2='32' y2='60'
+        stroke='%239fd356' stroke-width='3' stroke-linecap='round'/><line x1='4' y1='32' x2='18' y2='32'
+        stroke='%239fd356' stroke-width='3' stroke-linecap='round'/><line x1='46' y1='32' x2='60' y2='32'
+        stroke='%239fd356' stroke-width='3' stroke-linecap='round'/><path d='M20 44 L44 20' stroke='%23e8c35a'
+        stroke-width='2.5' stroke-linecap='round'/>
+    </svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'
+        viewBox='0 0 64 64'><rect width='64' height='64' rx='12' fill='%231a1f27'/>
+        <circle cx='32' cy='32' r='22' fill='none' stroke='%239fd356' stroke-width='3'/>
+    </svg>">
+    <script type="text/javascript">
+        (function (m, e, t, r, i, k, a) {
+            m[i] = m[i] || function () { (m[i].a = m[i].a || []).push(arguments) };
+            m[i].l = 1 * new Date();
+            for (var j = 0; j < document.scripts.length; j++) { if (document.scripts[j].src === r) { return; } }
+            k = e.createElement(t), a = e.getElementsByTagName(t)[0], k.async = 1, k.src = r, a.parentNode.insertBefore(k, a)
+        })(window, document, 'script', 'https://mc.yandex.ru/metrika/tag.js?id=111625912', 'ym');
+
+        ym(111625912, 'init', { ssr: true, webvisor: true, clickmap: true, ecommerce: "dataLayer", referrer: document.referrer, url: location.href, accurateTrackBounce: true, trackLinks: true });
+    </script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-GBQ6J5K0DN"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        const gtag = (...args) => dataLayer.push(args);
+        gtag('js', new Date());
+        gtag('config', 'G-GBQ6J5K0DN');
+    </script>
+    <script type="application/ld+json">
+    {
+    "@context": "https://schema.org",
+    "@graph": [
+        {
+        "@type": "WebSite",
+        "@id": "https://djzet.github.io/wardogs-calc/#website",
+        "url": "https://djzet.github.io/wardogs-calc/",
+        "name": "WARDOGS — Mortar & Artillery Calculator",
+        "description": "Онлайн калькулятор для игры WARDOGS: расчет дистанции, азимута, угла возвышения (mils) для миномета и артиллерии. Интерактивная карта 16×16 км с поддержкой 9 языков.",
+        "inLanguage": ["ru", "en", "de", "fr", "es", "pl", "uk", "tr", "zh"],
+        "publisher": {
+            "@type": "Person",
+            "name": "Egor Silaev",
+            "email": "mailto:egor.silaev2003@yandex.ru"
+        }
+        },
+        {
+        "@type": "WebApplication",
+        "@id": "https://djzet.github.io/wardogs-calc/#app",
+        "name": "WARDOGS — Mortar & Artillery Calculator",
+        "url": "https://djzet.github.io/wardogs-calc/",
+        "applicationCategory": "GameApplication",
+        "operatingSystem": "Any",
+        "browserRequirements": "Requires JavaScript",
+        "isAccessibleForFree": true,
+        "offers": { 
+            "@type": "Offer", 
+            "price": "0",
+            "availability": "https://schema.org/InStock"
+        },
+        "author": {
+            "@type": "Person",
+            "name": "Egor Silaev",
+            "email": "mailto:egor.silaev2003@yandex.ru"
+        },
+        "inLanguage": ["ru", "en", "de", "fr", "es", "pl", "uk", "tr", "zh"],
+        "screenshot": "https://djzet.github.io/wardogs-calc/assets/preview.png",
+        "featureList": [
+            "Расчет дистанции",
+            "Расчет азимута",
+            "Угол возвышения в mils",
+            "Поддержка миномета и артиллерии",
+            "Интерактивная карта 16×16 км",
+            "9 языков интерфейса"
+        ]
+        }
+    ]
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+        {
+        "@type": "Question",
+        "name": "Как рассчитать миномёт в WARDOGS?",
+        "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Откройте калькулятор WARDOGS, введите координаты огневой позиции (точка A) и цели (точка B) на интерактивной карте или через поля ввода. Калькулятор автоматически рассчитает дистанцию, азимут и угол возвышения в mils."
+        }
+        },
+        {
+        "@type": "Question",
+        "name": "Какой максимальный радиус миномёта в WARDOGS?",
+        "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Максимальная дальность миномёта в WARDOGS составляет 684 метра. Для целей дальше 684 м используйте артиллерию, которая стреляет на расстояние до 2679 м."
+        }
+        },
+        {
+        "@type": "Question",
+        "name": "Какие карты поддерживаются в калькуляторе WARDOGS?",
+        "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Калькулятор поддерживает две карты: Bakurani и Ozeti. Обе карты размером 16×16 км с интерактивным тайловым зумом и панорамированием."
+        }
+        },
+        {
+        "@type": "Question",
+        "name": "Как рассчитать азимут и угол возвышения миномёта?",
+        "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Азимут — это направление от огневой позиции до цели, измеренное от севера по часовой стрелке. Угол возвышения (mils) — угол наклона ствола миномёта для попадания в цель. Калькулятор WARDOGS рассчитывает оба значения автоматически."
+        }
+        },
+        {
+        "@type": "Question",
+        "name": "Сколько mils в градусе в WARDOGS?",
+        "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "В системе измерения, используемой в WARDOGS и военном деле, один полный круг равен 6400 mils (мин). 1 градус ≈ 17.78 mils. Калькулятор автоматически конвертирует значения."
+        }
+        },
+        {
+        "@type": "Question",
+        "name": "Миномётный калькулятор WARDOGS — как пользоваться онлайн?",
+        "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Калькулятор полностью бесплатный и работает онлайн в браузере. Установите точку A (позиция миномёта) и точку B (цель) на карте правым кликом или введите координаты вручную. Результаты отображаются мгновенно в левой панели."
+        }
+        }
+    ]
+    }
+    </script>
+</head>
+
+<body>
+    <noscript>
+        <div><img src="https://mc.yandex.ru/watch/111625912" style="position:absolute; left:-9999px;" alt="" /></div>
+    </noscript>
+    <noscript>
+        <div
+            style="max-width:800px;margin:0 auto;padding:2rem;font-family:sans-serif;color:#e0e0e0;background:#1a1f27;min-height:100vh;">
+            <h1 style="color:#9fd356;">WARDOGS — Миномётный и артиллерийский калькулятор</h1>
+            <p>Бесплатный онлайн-калькулятор для тактического шутера <strong>WARDOGS</strong>. Мгновенный расчёт
+                дистанции, азимута и угла возвышения (mils) для миномёта и артиллерии на интерактивной карте 16×16 км.
+            </p>
+            <h2 style="color:#e8c35a;">Возможности</h2>
+            <ul>
+                <li>Точный расчёт дистанции, азимута и угла возвышения</li>
+                <li>Миномёт (до 684 м) и артиллерия (до 2679 м)</li>
+                <li>Две карты: Bakurani и Ozeti</li>
+                <li>Инструменты рисования: карандаш, линейка, метка, ластик</li>
+                <li>Вышки и важные объекты на карте</li>
+                <li>Share-ссылки для передачи координат</li>
+                <li>Автосохранение настроек</li>
+                <li>Тёмная и светлая тема</li>
+                <li>Адаптивный дизайн для мобильных</li>
+            </ul>
+            <h2 style="color:#e8c35a;">Языки</h2>
+            <p>Калькулятор доступен на 9 языках:</p>
+            <p>
+                <a href="?lang=ru" style="color:#9fd356;">Русский</a> ·
+                <a href="?lang=en" style="color:#9fd356;">English</a> ·
+                <a href="?lang=de" style="color:#9fd356;">Deutsch</a> ·
+                <a href="?lang=fr" style="color:#9fd356;">Français</a> ·
+                <a href="?lang=es" style="color:#9fd356;">Español</a> ·
+                <a href="?lang=pl" style="color:#9fd356;">Polski</a> ·
+                <a href="?lang=uk" style="color:#9fd356;">Українська</a> ·
+                <a href="?lang=tr" style="color:#9fd356;">Türkçe</a> ·
+                <a href="?lang=zh" style="color:#9fd356;">中文</a>
+            </p>
+            <p style="color:#888;margin-top:2rem;">⚠️ Для работы калькулятора необходимо включить JavaScript в браузере.
+            </p>
+        </div>
+    </noscript>
+    <svg xmlns="http://www.w3.org/2000/svg" style="display:none">
+        <symbol id="icon-pen" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 19l7-7 3 3-7 7-3-3z" />
+            <path d="M18 13l-1.5-7.5L2 2l3.5 14.5L13 18l5-5z" />
+            <path d="M2 2l7.586 7.586" />
+            <circle cx="11" cy="11" r="2" />
+        </symbol>
+        <symbol id="icon-line" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round">
+            <line x1="5" y1="19" x2="19" y2="5" />
+            <circle cx="5" cy="19" r="1.5" fill="currentColor" />
+            <circle cx="19" cy="5" r="1.5" fill="currentColor" />
+        </symbol>
+        <symbol id="icon-marker" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+            <circle cx="12" cy="10" r="3" />
+        </symbol>
+        <symbol id="icon-eraser" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="m7 21-4.3-4.3c-1-1-1-2.5 0-3.4l9.6-9.6c1-1 2.5-1 3.4 0l5.6 5.6c1 1 1 2.5 0 3.4L13 21" />
+            <path d="M22 21H7" />
+            <path d="m5 11 9 9" />
+        </symbol>
+        <symbol id="icon-pan" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M18 11V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v0" />
+            <path d="M14 10V4a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v2" />
+            <path d="M10 10.5V6a2 2 0 0 0-2-2v0a2 2 0 0 0-2 2v8" />
+            <path
+                d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.86-5.99-2.34l-3.6-3.6a2 2 0 0 1 2.83-2.82L7 15" />
+        </symbol>
+        <symbol id="icon-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+        </symbol>
+        <symbol id="icon-mail" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+            <polyline points="22,6 12,13 2,6" />
+        </symbol>
+        <symbol id="icon-menu" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round">
+            <line x1="4" y1="7" x2="20" y2="7" />
+            <line x1="4" y1="12" x2="20" y2="12" />
+            <line x1="4" y1="17" x2="20" y2="17" />
+        </symbol>
+        <symbol id="icon-share" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="18" cy="5" r="3" />
+            <circle cx="6" cy="12" r="3" />
+            <circle cx="18" cy="19" r="3" />
+            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+        </symbol>
+        <symbol id="icon-help" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10" />
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+        </symbol>
+        <symbol id="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round">
+            <circle cx="12" cy="12" r="4" />
+            <line x1="12" y1="2" x2="12" y2="5" />
+            <line x1="12" y1="19" x2="12" y2="22" />
+            <line x1="2" y1="12" x2="5" y2="12" />
+            <line x1="19" y1="12" x2="22" y2="12" />
+            <line x1="4.9" y1="4.9" x2="7" y2="7" />
+            <line x1="17" y1="17" x2="19.1" y2="19.1" />
+            <line x1="4.9" y1="19.1" x2="7" y2="17" />
+            <line x1="17" y1="7" x2="19.1" y2="4.9" />
+        </symbol>
+        <symbol id="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z" />
+        </symbol>
+    </svg>
+
+    <div class="app">
+        <aside class="panel">
+            <div class="panel-header">
+                <div class="header-text">
+                    <h1 data-i18n="title">Миномётный калькулятор</h1>
+                    <span class="map-badge" id="mapBadge">Bakurani</span>
+                </div>
+                <button class="menu-toggle" id="drawerToggle" title="Дополнительно" aria-label="Дополнительно">
+                    <svg width="16" height="16">
+                        <use href="#icon-menu" />
+                    </svg>
+                </button>
+            </div>
+            <section class="section-point-a">
+                <h2 data-i18n="posA">Огневая позиция (A)</h2>
+                <div class="coord-row">
+                    <label>Y <input type="number" id="ay" placeholder="0.00" step="0.01" min="0" max="160.00"></label>
+                    <label>X <input type="number" id="ax" placeholder="0.00" step="0.01" min="0" max="160.00"></label>
+                    <button class="clear" id="clearA" title="Очистить A" aria-label="Очистить A">×</button>
+                </div>
+            </section>
+            <section class="section-point-b">
+                <h2 data-i18n="posB">Цель (B)</h2>
+                <div class="coord-row">
+                    <label>Y <input type="number" id="by" placeholder="0.00" step="0.01" min="0" max="160.00"></label>
+                    <label>X <input type="number" id="bx" placeholder="0.00" step="0.01" min="0" max="160.00"></label>
+                    <button class="clear" id="clearB" title="Очистить B" aria-label="Очистить B">×</button>
+                </div>
+            </section>
+            <section class="result">
+                <div><span data-i18n="dist">Дистанция</span><b id="dist">—</b></div>
+                <div><span data-i18n="az">Азимут</span><b id="azimuth">—</b></div>
+                <div><span data-i18n="el">Угол возвышения</span><b id="elevation">—</b></div>
+            </section>
+            <section class="controls-section" id="settingsSection">
+                <h2 data-i18n="controlsTitle">Настройки</h2>
+                <div class="control-group">
+                    <label class="control-label" data-i18n="weaponType">Тип орудия</label>
+                    <div class="radio-group">
+                        <label class="radio-option">
+                            <input type="radio" name="weapon" value="mortar" checked>
+                            <span data-i18n="weaponMortar">Миномёт (684 м)</span>
+                        </label>
+                        <label class="radio-option">
+                            <input type="radio" name="weapon" value="artillery">
+                            <span data-i18n="weaponArtillery">Артиллерия (2679 м)</span>
+                        </label>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <label class="control-label" for="mapSelect" data-i18n="mapLabel">Карта</label>
+                    <select id="mapSelect" class="map-select">
+                        <option value="bakurani">Bakurani</option>
+                        <option value="ozeti">Ozeti</option>
+                    </select>
+                </div>
+            </section>
+            <section class="controls-section" id="drawToolsSection">
+                <h2 data-i18n="drawTools">Рисование</h2>
+                <div class="control-group">
+                    <div class="tool-grid">
+                        <button class="draw-tool" data-tool="pen" title="Карандаш" data-i18n-title="toolPen">
+                            <svg width="16" height="16">
+                                <use href="#icon-pen" />
+                            </svg>
+                        </button>
+                        <button class="draw-tool" data-tool="line" title="Линейка" data-i18n-title="toolLine">
+                            <svg width="16" height="16">
+                                <use href="#icon-line" />
+                            </svg>
+                        </button>
+                        <button class="draw-tool" data-tool="marker" title="Метка" data-i18n-title="toolMarker">
+                            <svg width="16" height="16">
+                                <use href="#icon-marker" />
+                            </svg>
+                        </button>
+                        <button class="draw-tool" data-tool="eraser" title="Ластик" data-i18n-title="toolEraser">
+                            <svg width="16" height="16">
+                                <use href="#icon-eraser" />
+                            </svg>
+                        </button>
+                        <button class="draw-tool active" data-tool="pan" title="Перемещение" data-i18n-title="toolPan">
+                            <svg width="16" height="16">
+                                <use href="#icon-pan" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                <div class="tool-status" id="toolStatus"></div>
+                <div class="control-group">
+                    <label class="control-label" data-i18n="lineWidth">Толщина линии</label>
+                    <div class="width-grid">
+                        <button class="width-opt active" data-width="1" title="1 px"><span class="w1"></span></button>
+                        <button class="width-opt" data-width="2" title="2 px"><span class="w2"></span></button>
+                        <button class="width-opt" data-width="3" title="3 px"><span class="w3"></span></button>
+                        <button class="width-opt" data-width="4" title="4 px"><span class="w4"></span></button>
+                    </div>
+                </div>
+                <div class="control-group">
+                    <button class="clear-drawings-btn" id="clearDrawingsBtn" data-i18n="clearDrawings">
+                        Очистить рисунки
+                    </button>
+                </div>
+            </section>
+            <p class="hint hint-desktop" data-i18n="hint">
+                ПКМ по карте — поставить или удалить точку.<br>
+                ЛКМ — двигать карту (или саму точку).<br>
+                Колесо мыши — масштаб.
+            </p>
+            <p class="hint hint-touch hidden" data-i18n="hintTouch">
+                Долгое нажатие — поставить или удалить точку.<br>
+                Один палец — двигать карту.<br>
+                Два пальца — масштаб.
+            </p>
+            <div class="contact">
+                <span class="contact-label">
+                    <svg width="14" height="14" style="margin-right:4px;vertical-align:middle">
+                        <use href="#icon-mail" />
+                    </svg>
+                    <span data-i18n="contactLabel">Связь</span>
+                </span>
+                <a href="mailto:egor.silaev2003@yandex.ru" class="contact-email">egor.silaev2003@yandex.ru</a>
+            </div>
+            <section class="discord-block">
+                <h2 data-i18n="discordTitle">Wardogs СНГ / CIS</h2>
+                <a class="discord-qr" id="discordQr" href="https://discord.gg/kwxrTCJxre" target="_blank" rel="noopener"
+                    title="Discord">
+                    <img src="assets/icons/discord-qr.png" alt="QR: Discord" width="200" height="200" loading="lazy">
+                    <span data-i18n="discord">Wardogs СНГ / CIS</span>
+                </a>
+                <a class="discord-btn" id="discordBtn" href="https://discord.gg/kwxrTCJxre" target="_blank"
+                    rel="noopener">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+                        <path
+                            d="M19.27 5.33C17.94 4.71 16.5 4.26 15 4a.09.09 0 0 0-.07.03c-.18.33-.39.76-.53 1.09a16.09 16.09 0 0 0-4.8 0c-.14-.34-.35-.76-.54-1.09-.01-.02-.04-.03-.07-.03-1.5.26-2.93.71-4.27 1.33-.01 0-.02.01-.03.02-2.72 4.07-3.47 8.03-3.1 11.95 0 .02.01.04.03.05 1.8 1.32 3.53 2.12 5.24 2.65.03.01.06 0 .07-.02.4-.55.76-1.13 1.07-1.74.02-.04 0-.08-.04-.09-.57-.22-1.11-.48-1.64-.78-.04-.02-.04-.08-.01-.11.11-.08.22-.17.33-.25.02-.02.05-.02.07-.01 3.44 1.57 7.15 1.57 10.55 0 .02-.01.05-.01.07.01.11.09.22.17.33.26.04.03.04.09-.01.11-.52.31-1.07.56-1.64.78-.04.01-.05.06-.04.09.32.61.68 1.19 1.07 1.74.03.01.06.02.09.01 1.72-.53 3.45-1.33 5.24-2.65.02-.01.03-.03.03-.05.44-4.53-.73-8.46-3.1-11.95-.01-.01-.02-.02-.04-.02zM8.52 14.51c-.92 0-1.69-.85-1.69-1.89s.75-1.89 1.69-1.89c.94 0 1.7.86 1.69 1.89 0 1.04-.75 1.89-1.69 1.89zm6.98 0c-.92 0-1.69-.85-1.69-1.89s.75-1.89 1.69-1.89c.94 0 1.7.86 1.69 1.89 0 1.04-.75 1.89-1.69 1.89z" />
+                    </svg>
+                    <span data-i18n="discordBtn">Перейти в Discord</span>
+                </a>
+            </section>
+            <div class="translate-widget">
+                <label for="langSelect" data-i18n="langLabel">Язык интерфейса</label>
+                <select id="langSelect">
+                    <option value="ru">Русский</option>
+                    <option value="en">English</option>
+                    <option value="de">Deutsch</option>
+                    <option value="fr">Français</option>
+                    <option value="es">Español</option>
+                    <option value="pl">Polski</option>
+                    <option value="uk">Українська</option>
+                    <option value="tr">Türkçe</option>
+                    <option value="zh">中文</option>
+                </select>
+            </div>
+        </aside>
+        <main class="map-wrap">
+            <div id="cursorCoords" class="cursor-coords"></div>
+            <canvas id="map"></canvas>
+            <div class="map-controls">
+                <button class="view-reset share-btn" id="shareBtn" title="Поделиться координатами"
+                    aria-label="Поделиться">
+                    <svg width="16" height="16">
+                        <use href="#icon-share" />
+                    </svg>
+                </button>
+                <button class="view-reset help-toggle" id="helpToggle" title="Справка" aria-label="Справка">
+                    <svg width="16" height="16">
+                        <use href="#icon-help" />
+                    </svg>
+                </button>
+                <button class="view-reset theme-toggle" id="themeToggle" title="Тема" aria-label="Переключить тему">
+                    <svg class="icon-sun" width="16" height="16">
+                        <use href="#icon-sun" />
+                    </svg>
+                    <svg class="icon-moon" width="16" height="16">
+                        <use href="#icon-moon" />
+                    </svg>
+                </button>
+                <button class="view-reset" id="resetView" data-i18n="reset">
+                    Сбросить вид
+                </button>
+            </div>
+            <div id="ctxMenu" class="ctx-menu hidden">
+                <button data-action="setA" data-i18n="menuA">
+                    Позиция миномёта (A)
+                </button>
+                <button data-action="setB" data-i18n="menuB">
+                    Цель (B)
+                </button>
+                <button data-action="delete" id="menuDelete" class="danger hidden" data-i18n="menuDel">
+                    Удалить точку
+                </button>
+            </div>
+        </main>
+        <aside class="drawer" id="drawer">
+            <div class="drawer-header">
+                <h2 data-i18n="extra">Дополнительно</h2>
+                <button class="clear" id="drawerClose" title="Закрыть" aria-label="Закрыть">
+                    <svg width="14" height="14">
+                        <use href="#icon-x" />
+                    </svg>
+                </button>
+            </div>
+            <label class="switch-row">
+                <span data-i18n="towers">Иконки вышек</span>
+                <input type="checkbox" id="towersToggle" checked>
+                <span class="switch"></span>
+            </label>
+        </aside>
+        <div class="drawer-backdrop hidden" id="drawerBackdrop"></div>
+        <div class="modal-backdrop hidden" id="helpModal">
+            <div class="modal" role="dialog" aria-labelledby="helpTitle">
+                <div class="modal-header">
+                    <h2 id="helpTitle" data-i18n="helpTitle">Как пользоваться калькулятором</h2>
+                    <button class="clear" id="helpClose" title="Закрыть" aria-label="Закрыть">
+                        <svg width="14" height="14">
+                            <use href="#icon-x" />
+                        </svg>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <p data-i18n="helpP1"><b>Установка точек.</b> Укажите свою позицию (точка A) и цель (точка B) —
+                        калькулятор рассчитает дистанцию, азимут и угол возвышения.</p>
+                    <p data-i18n="helpP2"><b>Работа с картой.</b> Правый клик по карте открывает меню. Левая кнопка
+                        мыши перемещает карту. Колесо мыши изменяет масштаб. На сенсорных экранах: один палец —
+                        перемещение, два пальца — масштаб, долгое нажатие — контекстное меню.</p>
+                    <p data-i18n="helpP3"><b>Координаты.</b> Y и X вводятся в игровых координатах (0–160.00) — тех же,
+                        что
+                        показываются под курсором. Шаг изменения — 0.01 (стрелками в поле ввода).</p>
+                    <p data-i18n="helpP4"><b>Результаты.</b> Дистанция, азимут от севера, угол ствола в mils. Если цель
+                        вне досягаемости — соответствующее сообщение.</p>
+                    <p data-i18n="helpP5"><b>Сохранение.</b> Все данные автоматически сохраняются и восстанавливаются
+                        после перезагрузки страницы.</p>
+                    <p data-i18n="helpP6"><b>О калькуляторе.</b> Фан-инструмент для игры WARDOGS. Неофициальный
+                        проект, не аффилирован с разработчиками игры.</p>
+                </div>
+            </div>
+        </div>
+        <div class="modal-backdrop hidden" id="markerModal">
+            <div class="modal modal-sm" role="dialog" aria-labelledby="markerModalTitle">
+                <div class="modal-header">
+                    <h2 id="markerModalTitle" data-i18n="markerPrompt">Название метки:</h2>
+                </div>
+                <div class="modal-body">
+                    <input type="text" id="markerInput" class="modal-input" maxlength="40" autocomplete="off"
+                        placeholder="Метка" />
+                    <div class="modal-actions">
+                        <button class="modal-btn" id="markerCancel" data-i18n="cancel">Отмена</button>
+                        <button class="modal-btn modal-btn-accent" id="markerOk">OK</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <section class="seo-content" id="faq" itemscope itemtype="https://schema.org/FAQPage"
+        style="max-width:960px;margin:0 auto;padding:2rem 1.5rem;color:#e0e0e0;">
+        <h2 data-i18n="faqTitle" style="color:#9fd356;font-size:1.6rem;margin-bottom:1.5rem;">Часто задаваемые вопросы о
+            WARDOGS</h2>
+
+        <details itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"
+            style="margin-bottom:1rem;background:#232830;border-radius:8px;overflow:hidden;">
+            <summary itemprop="name"
+                style="cursor:pointer;padding:1rem 1.2rem;font-weight:600;font-size:1.05rem;color:#e8c35a;list-style:none;display:flex;justify-content:space-between;align-items:center;">
+                <span data-i18n="faq1q">Как рассчитать миномёт в WARDOGS?</span>
+                <span style="font-size:1.2rem;color:#9fd356;">▾</span>
+            </summary>
+            <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"
+                style="padding:0 1.2rem 1.2rem;color:#ccc;line-height:1.7;">
+                <p itemprop="text" data-i18n="faq1a">Откройте <strong>калькулятор WARDOGS</strong>, введите координаты
+                    огневой позиции
+                    (точка A) и цели (точка B) на интерактивной карте или через поля ввода. Калькулятор автоматически
+                    рассчитает <strong>дистанцию</strong>, <strong>азимут</strong> и <strong>угол возвышения в
+                        mils</strong>. Просто правый клик по карте — поставьте миномёт, снова правый клик — поставьте
+                    цель.</p>
+            </div>
+        </details>
+        <details itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"
+            style="margin-bottom:1rem;background:#232830;border-radius:8px;overflow:hidden;">
+            <summary itemprop="name"
+                style="cursor:pointer;padding:1rem 1.2rem;font-weight:600;font-size:1.05rem;color:#e8c35a;list-style:none;display:flex;justify-content:space-between;align-items:center;">
+                <span data-i18n="faq2q">Какой максимальный радиус миномёта в WARDOGS?</span>
+                <span style="font-size:1.2rem;color:#9fd356;">▾</span>
+            </summary>
+            <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"
+                style="padding:0 1.2rem 1.2rem;color:#ccc;line-height:1.7;">
+                <p itemprop="text" data-i18n="faq2a">Максимальная дальность <strong>миномёта в WARDOGS</strong>
+                    составляет <strong>684
+                        метра</strong>. Для целей дальше 684 м используйте <strong>артиллерию</strong>, которая
+                    стреляет на расстояние <strong>до 2679 м</strong>. В настройках калькулятора можно переключиться
+                    между миномётом и артиллерией.</p>
+            </div>
+        </details>
+        <details itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"
+            style="margin-bottom:1rem;background:#232830;border-radius:8px;overflow:hidden;">
+            <summary itemprop="name"
+                style="cursor:pointer;padding:1rem 1.2rem;font-weight:600;font-size:1.05rem;color:#e8c35a;list-style:none;display:flex;justify-content:space-between;align-items:center;">
+                <span data-i18n="faq3q">Какие карты поддерживаются в калькуляторе?</span>
+                <span style="font-size:1.2rem;color:#9fd356;">▾</span>
+            </summary>
+            <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"
+                style="padding:0 1.2rem 1.2rem;color:#ccc;line-height:1.7;">
+                <p itemprop="text" data-i18n="faq3a">Калькулятор поддерживает две карты: <strong>Bakurani</strong> и
+                    <strong>Ozeti</strong>. Обе карты размером <strong>16×16 км</strong> с интерактивным тайловым зумом
+                    и панорамированием. На карте Bakurani дополнительно отображаются вышки и важные объекты.
+                </p>
+            </div>
+        </details>
+        <details itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"
+            style="margin-bottom:1rem;background:#232830;border-radius:8px;overflow:hidden;">
+            <summary itemprop="name"
+                style="cursor:pointer;padding:1rem 1.2rem;font-weight:600;font-size:1.05rem;color:#e8c35a;list-style:none;display:flex;justify-content:space-between;align-items:center;">
+                <span data-i18n="faq4q">Как рассчитать азимут и угол возвышения миномёта?</span>
+                <span style="font-size:1.2rem;color:#9fd356;">▾</span>
+            </summary>
+            <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"
+                style="padding:0 1.2rem 1.2rem;color:#ccc;line-height:1.7;">
+                <p itemprop="text" data-i18n="faq4a"><strong>Азимут</strong> — это направление от огневой позиции до
+                    цели, измеренное от
+                    севера по часовой стрелке. <strong>Угол возвышения (mils)</strong> — угол наклона ствола миномёта
+                    для попадания в цель. Калькулятор WARDOGS рассчитывает оба значения автоматически на основе
+                    координат точек A и B.</p>
+            </div>
+        </details>
+        <details itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"
+            style="margin-bottom:1rem;background:#232830;border-radius:8px;overflow:hidden;">
+            <summary itemprop="name"
+                style="cursor:pointer;padding:1rem 1.2rem;font-weight:600;font-size:1.05rem;color:#e8c35a;list-style:none;display:flex;justify-content:space-between;align-items:center;">
+                <span data-i18n="faq5q">Сколько mils в градусе в WARDOGS?</span>
+                <span style="font-size:1.2rem;color:#9fd356;">▾</span>
+            </summary>
+            <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"
+                style="padding:0 1.2rem 1.2rem;color:#ccc;line-height:1.7;">
+                <p itemprop="text" data-i18n="faq5a">В системе измерения, используемой в WARDOGS и военном деле, один
+                    полный круг равен
+                    <strong>6400 mils (мин)</strong>. 1 градус ≈ 17.78 mils. Калькулятор автоматически конвертирует
+                    значения и показывает угол возвышения именно в mils, как в игре.
+                </p>
+            </div>
+        </details>
+        <details itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"
+            style="margin-bottom:1rem;background:#232830;border-radius:8px;overflow:hidden;">
+            <summary itemprop="name"
+                style="cursor:pointer;padding:1rem 1.2rem;font-weight:600;font-size:1.05rem;color:#e8c35a;list-style:none;display:flex;justify-content:space-between;align-items:center;">
+                <span data-i18n="faq6q">Миномётный калькулятор WARDOGS — как пользоваться онлайн?</span>
+                <span style="font-size:1.2rem;color:#9fd356;">▾</span>
+            </summary>
+            <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"
+                style="padding:0 1.2rem 1.2rem;color:#ccc;line-height:1.7;">
+                <p itemprop="text" data-i18n="faq6a"><strong>Калькулятор WARDOGS</strong> полностью бесплатный и
+                    работает онлайн в
+                    браузере — установка не требуется. Установите точку A (позиция миномёта) и точку B (цель) на
+                    интерактивной карте правым кликом или введите координаты вручную. Координаты отображаются под
+                    курсором (от 0 до 160). Результаты — дистанция, азимут и угол возвышения — отображаются мгновенно в
+                    левой панели.</p>
+            </div>
+        </details>
+        <details itemscope itemprop="mainEntity" itemtype="https://schema.org/Question"
+            style="margin-bottom:1rem;background:#232830;border-radius:8px;overflow:hidden;">
+            <summary itemprop="name"
+                style="cursor:pointer;padding:1rem 1.2rem;font-weight:600;font-size:1.05rem;color:#e8c35a;list-style:none;display:flex;justify-content:space-between;align-items:center;">
+                <span data-i18n="faq7q">Можно ли сохранить координаты и поделиться с друзьями?</span>
+                <span style="font-size:1.2rem;color:#9fd356;">▾</span>
+            </summary>
+            <div itemscope itemprop="acceptedAnswer" itemtype="https://schema.org/Answer"
+                style="padding:0 1.2rem 1.2rem;color:#ccc;line-height:1.7;">
+                <p itemprop="text" data-i18n="faq7a">Да! Калькулятор автоматически сохраняет все точки и настройки в
+                    <strong>localStorage</strong> браузера. Кроме того, можно нажать кнопку «Поделиться» для получения
+                    <strong>ссылки с координатами</strong>, которую удобно отправлять союзникам в Discord или другом
+                    чате.
+                </p>
+            </div>
+        </details>
+    </section>
+    <section class="seo-content"
+        style="max-width:960px;margin:0 auto;padding:0 1.5rem 2rem;color:#aaa;line-height:1.7;font-size:0.95rem;">
+        <h2 data-i18n="seoAboutTitle" style="color:#9fd356;font-size:1.3rem;margin-bottom:1rem;">О калькуляторе WARDOGS
+        </h2>
+        <p data-i18n="seoAboutP1"><strong>WARDOGS Mortar Calculator</strong> — неофициальный бесплатный
+            онлайн-инструмент для расчёта
+            миномётного и артиллерийского огня в тактическом шутере WARDOGS. Позволяет мгновенно определить расстояние,
+            направление (азимут) и угол ствола (в mils) для точного поражения целей.</p>
+        <p data-i18n="seoAboutP2">Калькулятор работает на интерактивной карте размером 16×16 км с поддержкой двух карт:
+            <strong>Bakurani</strong> и <strong>Ozeti</strong>. Инструменты рисования позволяют отмечать позиции,
+            строить линии и метки прямо на карте. Все данные автоматически сохраняются и доступны через share-ссылки.
+        </p>
+        <p data-i18n="seoAboutP3">Интерфейс доступен на <strong>9 языках</strong>: русском, английском, немецком,
+            французском, испанском,
+            польском, украинском, турецком и китайском. Калькулятор адаптирован для мобильных устройств и работает в
+            любом современном браузере без установки.</p>
+    </section>
+    <footer
+        style="max-width:960px;margin:0 auto;padding:2rem 1.5rem;border-top:1px solid #333;color:#888;font-size:0.85rem;line-height:1.8;">
+        <div style="display:flex;flex-wrap:wrap;gap:2rem;justify-content:space-between;align-items:flex-start;">
+            <div>
+                <h2 style="color:#9fd356;font-size:1.1rem;margin:0 0 0.5rem;">WARDOGS Calculator</h2>
+                <p style="margin:0;" data-i18n="footerDesc">Неофициальный миномётный и артиллерийский калькулятор<br>для
+                    игры WARDOGS.
+                    Бесплатно, онлайн, 9 языков.</p>
+            </div>
+            <div>
+                <h3 style="color:#e8c35a;font-size:0.95rem;margin:0 0 0.5rem;" data-i18n="footerProject">Проект</h3>
+                <p style="margin:0;">
+                    <a href="https://github.com/djzet/wardogs-calc" target="_blank" rel="noopener"
+                        style="color:#9fd356;text-decoration:none;">GitHub</a> ·
+                    <a href="https://discord.gg/kwxrTCJxre" target="_blank" rel="noopener"
+                        style="color:#9fd356;text-decoration:none;">Discord</a> ·
+                    <a href="mailto:egor.silaev2003@yandex.ru" style="color:#9fd356;text-decoration:none;">Email</a>
+                </p>
+            </div>
+            <div>
+                <h3 style="color:#e8c35a;font-size:0.95rem;margin:0 0 0.5rem;" data-i18n="footerLangs">Языки</h3>
+                <p style="margin:0;">
+                    <a href="?lang=ru" style="color:#9fd356;text-decoration:none;">Русский</a> ·
+                    <a href="?lang=en" style="color:#9fd356;text-decoration:none;">English</a> ·
+                    <a href="?lang=de" style="color:#9fd356;text-decoration:none;">Deutsch</a> ·
+                    <a href="?lang=fr" style="color:#9fd356;text-decoration:none;">Français</a> ·
+                    <a href="?lang=es" style="color:#9fd356;text-decoration:none;">Español</a> ·
+                    <a href="?lang=pl" style="color:#9fd356;text-decoration:none;">Polski</a> ·
+                    <a href="?lang=uk" style="color:#9fd356;text-decoration:none;">Українська</a> ·
+                    <a href="?lang=tr" style="color:#9fd356;text-decoration:none;">Türkçe</a> ·
+                    <a href="?lang=zh" style="color:#9fd356;text-decoration:none;">中文</a>
+                </p>
+            </div>
+        </div>
+        <p style="text-align:center;margin:1.5rem 0 0;color:#555;">© 2026 Egor Silaev · MIT License · <a
+                href="https://djzet.github.io/wardogs-calc/"
+                style="color:#666;text-decoration:none;">djzet.github.io/wardogs-calc</a></p>
+    </footer>
+    <script type="module" src="src/main.js"></script>
+     <script src="https://unpkg.com/pmtiles@3.0.6/dist/pmtiles.js"></script>
+</body>
+
+</html>
