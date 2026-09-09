@@ -66,6 +66,9 @@ window.AppUtils = (function () {
         return (v / (coordScale || 100)).toFixed(2);
     }
     function assetUrl(path) {
+        if (typeof path === 'string' && (path.startsWith('http://') || path.startsWith('https://'))) {
+            return path;
+        }
         const base = './';
         const rel = String(path).replace(/^\//, '');
         return base.endsWith('/') ? base + rel : base + '/' + rel;
